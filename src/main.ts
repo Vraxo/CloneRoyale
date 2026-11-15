@@ -30,7 +30,6 @@ let accumulator = 0;
 let lastHudUpdate = 0;
 let previousGameOver = false;
 let selectedCard: CardId | null = null;
-let handSignature = "";
 let placementMessage = "Choose a card, then deploy on your side.";
 
 await renderer.initialize(host);
@@ -42,8 +41,6 @@ const musicButton = element<HTMLButtonElement>("music");
 const soundEffectsButton = element<HTMLButtonElement>("sound-effects");
 const statusLabel = element<HTMLSpanElement>("match-status");
 const clockLabel = element<HTMLSpanElement>("match-clock");
-const cardHand = element<HTMLDivElement>("card-hand");
-const placementHint = element<HTMLParagraphElement>("placement-hint");
 const matchResult = element<HTMLDivElement>("match-result");
 
 function phaseLabel(state: GameState): string {
@@ -80,7 +77,6 @@ function startNewBattle(): void {
   soundEffects.stopAll();
   game = createGame((Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0);
   selectedCard = null;
-  handSignature = "";
   placementMessage = "Choose a card, then deploy on your side.";
   renderer.setPlacementPreview(null);
   accumulator = 0;
@@ -124,48 +120,6 @@ function selectCard(cardId: CardId): void {
 
   renderer.setPlacementPreview(null);
   updateHud();
-}
-
-function renderHand(): void {
-  const blue = game.sides.blue;
-  const signature = blue.hand.join("|");
-
-  if (signature !== handSignature) {
-    cardHand.replaceChildren(...blue.hand.map((cardId) => {
-      const card = cardById(cardId);
-      const button = document.createElement("button");
-      const name = document.createElement("span");
-      const cost = document.createElement("span");
-
-      button.type = "button";
-      button.className = "hand-card";
-      button.dataset.cardId = cardId;
-      button.setAttribute("aria-label", `${card.name}, ${card.cost} elixir`);
-      name.className = "hand-card-name";
-      name.textContent = card.name;
-      cost.className = "hand-card-cost";
-      cost.textContent = card.cost.toString();
-      button.append(name, cost);
-      button.addEventListener("click", () => selectCard(cardId));
-      return button;
-    }));
-
-    handSignature = signature;
-  }
-
-  for (const button of cardHand.querySelectorAll<HTMLButtonElement>(".hand-card")) {
-    const cardId = button.dataset.cardId as CardId;
-    const card = cardById(cardId);
-    button.disabled = paused || game.gameOver || blue.elixir < card.cost;
-    button.classList.toggle("is-selected", selectedCard === cardId);
-    button.setAttribute("aria-pressed", (selectedCard === cardId).toString());
-  }
-
-  const nextCardId = blue.drawPile[blue.drawIndex % blue.drawPile.length];
-  element<HTMLSpanElement>("next-card").textContent = cardById(nextCardId).name;
-  placementHint.textContent = game.gameOver
-    ? "The match is over."
-    : paused ? "Resume the match to deploy cards." : placementMessage;
 }
 
 function updateHud(): void {
@@ -219,7 +173,9 @@ function updateHud(): void {
     matchResult.hidden = true;
   }
 
-  renderHand();
+  renderer.updateBattleHud(game, selectedCard, game.gameOver
+    ? "Match complete."
+    : paused ? "Resume to continue playing." : placementMessage);
 }
 
 function playSelectedCardAt(clientX: number, clientY: number): void {
@@ -394,6 +350,14 @@ canvas.addEventListener("pointermove", updatePlacementPreview);
 canvas.addEventListener("pointerleave", () => renderer.setPlacementPreview(null));
 canvas.addEventListener("pointerdown", (event: PointerEvent) => {
   if (event.button !== 0) return;
+
+  const handIndex = renderer.handCardAt(event.clientX, event.clientY);
+  if (handIndex !== null) {
+    const cardId = game.sides.blue.hand[handIndex];
+    if (cardId) selectCard(cardId);
+    return;
+  }
+
   playSelectedCardAt(event.clientX, event.clientY);
 });
 
