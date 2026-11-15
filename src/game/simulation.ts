@@ -68,7 +68,8 @@ export function createGame(seed = 20261115): GameState {
     },
     nextId: 1,
     seed: safeSeed === 0 ? 1 : safeSeed,
-    events: ["Both commanders are ready."]
+    events: ["Both commanders are ready."],
+    audioEvents: []
   };
 
   addTower(state, "red", "princess", "left", LANE_X.left, 150);

@@ -1,4 +1,5 @@
 import { createBattleMusic } from "./audio/battleMusic";
+import { createSoundEffects } from "./audio/soundEffects";
 import { ArenaRenderer } from "./render/arenaRenderer";
 import { createGame, SIMULATION_STEP, stepGame } from "./game/simulation";
 import { MATCH_RULES } from "./game/matchRules";
@@ -15,6 +16,9 @@ function element<T extends HTMLElement>(id: string): T {
 const host = element<HTMLDivElement>("game");
 const renderer = new ArenaRenderer();
 const music = createBattleMusic();
+const soundEffects = createSoundEffects();
+document.addEventListener("pointerdown", () => soundEffects.unlock(), { capture: true, once: true });
+document.addEventListener("keydown", () => soundEffects.unlock(), { capture: true, once: true });
 let game: GameState = createGame(Date.now() >>> 0);
 const history = createGameHistory(game);
 let paused = false;
@@ -29,6 +33,7 @@ const pauseButton = element<HTMLButtonElement>("pause");
 const speedButton = element<HTMLButtonElement>("speed");
 const stepBackButton = element<HTMLButtonElement>("step-back");
 const musicButton = element<HTMLButtonElement>("music");
+const soundEffectsButton = element<HTMLButtonElement>("sound-effects");
 const statusLabel = element<HTMLSpanElement>("match-status");
 const clockLabel = element<HTMLSpanElement>("match-clock");
 
@@ -130,6 +135,7 @@ function advanceOneStep(): void {
   stepGame(game, SIMULATION_STEP);
   if (game.time === previousTime) return;
 
+  for (const event of game.audioEvents) soundEffects.play(event);
   history.record(game);
 
   if (game.gameOver) {
@@ -227,6 +233,14 @@ speedButton.addEventListener("click", () => {
   speed = speeds[(currentIndex + 1) % speeds.length];
   speedButton.textContent = `${speed}×`;
   music.setSpeed(speed);
+  soundEffects.setSpeed(speed);
+});
+soundEffectsButton.addEventListener("click", () => {
+  soundEffects.unlock();
+  const enabled = soundEffectsButton.getAttribute("aria-pressed") !== "true";
+  soundEffectsButton.setAttribute("aria-pressed", enabled.toString());
+  soundEffectsButton.textContent = enabled ? "On" : "Off";
+  soundEffects.setEnabled(enabled);
 });
 musicButton.addEventListener("click", () => {
   const enabled = musicButton.getAttribute("aria-pressed") !== "true";
