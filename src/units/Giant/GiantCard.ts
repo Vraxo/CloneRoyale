@@ -5,6 +5,7 @@ export const GIANT_CARD: TroopCardDefinition = {
   id: "giant",
   name: "Giant",
   cost: 5,
+  deployTime: 1,
   category: "troop",
   count: 1,
   unit: GIANT

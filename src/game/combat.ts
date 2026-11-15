@@ -14,6 +14,7 @@ function findEnemyUnit(
 
   for (const candidate of state.units) {
     if (candidate.side === unit.side || candidate.hp <= 0) continue;
+    if ((candidate.deploymentRemaining ?? 0) > 0) continue;
     if (buildingsOnly && candidate.kind !== "building") continue;
     if (!unit.canTargetAir && candidate.isAir) continue;
 
@@ -78,6 +79,11 @@ export function updateUnits(state: GameState, dt: number): void {
   for (const unit of state.units) {
     if (unit.hp <= 0) continue;
 
+    if ((unit.deploymentRemaining ?? 0) > 0) {
+      unit.deploymentRemaining = Math.max(0, unit.deploymentRemaining - dt);
+      continue;
+    }
+
     unit.age += dt;
     unit.attackCooldown = Math.max(0, unit.attackCooldown - dt);
     unit.attackAnim = Math.max(0, unit.attackAnim - dt);
@@ -130,6 +136,7 @@ export function updateTowers(state: GameState, dt: number): void {
 
     for (const unit of state.units) {
       if (unit.side === tower.side || unit.hp <= 0) continue;
+      if ((unit.deploymentRemaining ?? 0) > 0) continue;
 
       const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y);
       if (distance < nearestDistance) {

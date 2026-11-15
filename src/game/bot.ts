@@ -52,9 +52,9 @@ function chooseLane(state: GameState, side: Side): Lane {
 export function chooseBotAction(state: GameState, side: Side): BotDecision | null {
   const own = state.sides[side];
   const enemySide = otherSide(side);
-  const enemies = state.units.filter((unit) => unit.side === enemySide && unit.kind === "troop");
+  const enemies = state.units.filter((unit) => unit.side === enemySide && unit.kind === "troop" && (unit.deploymentRemaining ?? 0) <= 0);
   const threats = enemies.filter((unit) => isOnOwnHalf(unit, side));
-  const ownTroops = state.units.filter((unit) => unit.side === side && unit.kind === "troop");
+  const ownTroops = state.units.filter((unit) => unit.side === side && unit.kind === "troop" && (unit.deploymentRemaining ?? 0) <= 0);
   const affordable = new Set<CardId>(
     own.hand.filter((cardId) => cardById(cardId).cost <= own.elixir)
   );

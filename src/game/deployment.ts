@@ -19,6 +19,9 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
   const centerX = LANE_X[lane];
   const baseY = card.category === "building" ? (side === "blue" ? 690 : 270) : (side === "blue" ? 748 : 212);
 
+  const baseDeployTime = card.deployTime ?? 1;
+  const staggerInterval = card.count > 1 ? Math.min(0.05, 0.45 / (card.count - 1)) : 0;
+
   for (let index = 0; index < card.count; index += 1) {
     const column = index % 5;
     const row = Math.floor(index / 5);
@@ -26,6 +29,7 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
     const offsetY = card.count === 1 ? 0 : row * direction * 11;
     const x = centerX + offsetX;
     const y = baseY + offsetY;
+    const deploymentDuration = baseDeployTime + index * staggerInterval;
 
     state.units.push({
       id: state.nextId++,
@@ -51,6 +55,8 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
       targetsBuildingsOnly: definition.targetsBuildingsOnly,
       lifetime: definition.lifetime,
       age: 0,
+      deploymentDuration,
+      deploymentRemaining: deploymentDuration,
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
       animationOffset: nextRandom(state) * Math.PI * 2,
       attackAnim: 0
@@ -61,7 +67,7 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
       x,
       y,
       age: 0,
-      lifetime: 0.58,
+      lifetime: 0.62,
       radius: Math.max(22, definition.radius * 2.2),
       style: "deployment",
       side

@@ -5,6 +5,7 @@ export const SKELETON_ARMY_CARD: TroopCardDefinition = {
   id: "skeleton-army",
   name: "Skeleton Army",
   cost: 3,
+  deployTime: 1,
   category: "troop",
   count: 15,
   unit: SKELETON

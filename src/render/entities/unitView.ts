@@ -25,6 +25,16 @@ export abstract class UnitView {
   protected updateCommon(unit: Unit): void {
     this.container.position.set(unit.x, unit.y);
 
+    const remaining = unit.deploymentRemaining ?? 0;
+    const duration = unit.deploymentDuration ?? 0;
+    const progress = duration > 0 ? Math.max(0, Math.min(1, 1 - remaining / duration)) : 1;
+    const easedProgress = 1 - Math.pow(1 - progress, 3);
+    const lift = Math.pow(1 - easedProgress, 2) * 76;
+    this.body.y = -lift;
+    this.body.alpha = 0.72 + progress * 0.28;
+    this.shadow.scale.set(1 + (1 - progress) * 0.65, 1 + (1 - progress) * 0.4);
+    this.shadow.alpha = 0.35 + progress * 0.65;
+
     const ratio = Math.max(0, Math.min(1, unit.hp / unit.maxHp));
     this.healthBar.clear();
 

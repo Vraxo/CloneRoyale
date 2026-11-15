@@ -5,6 +5,7 @@ export const CANNON_CARD: BuildingCardDefinition = {
   id: "cannon",
   name: "Cannon",
   cost: 3,
+  deployTime: 1,
   category: "building",
   count: 1,
   unit: CANNON

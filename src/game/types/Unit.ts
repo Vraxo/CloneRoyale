@@ -35,6 +35,8 @@ export interface Unit {
   targetsBuildingsOnly: boolean;
   lifetime: number;
   age: number;
+  deploymentDuration?: number;
+  deploymentRemaining?: number;
   facing: number;
   animationOffset: number;
   attackAnim: number;
