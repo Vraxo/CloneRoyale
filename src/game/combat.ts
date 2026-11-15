@@ -1,7 +1,7 @@
 import type { GameState, Side, Tower, Unit } from "./types";
 import { addProjectile } from "./projectiles";
 import { damageTarget } from "./effects";
-import { FIELD_HEIGHT, FIELD_WIDTH, otherSide } from "./state";
+import { FIELD_HEIGHT, FIELD_WIDTH, LANE_X, otherSide } from "./state";
 
 function findEnemyUnit(
   state: GameState,
@@ -38,17 +38,66 @@ function enemyTowerFor(state: GameState, unit: Unit): Tower | null {
   return state.towers.find((tower) => tower.side === enemySide && tower.kind === "king" && tower.hp > 0) ?? null;
 }
 
-function moveToward(unit: Unit, x: number, y: number, dt: number): void {
-  const dx = x - unit.x;
-  const dy = y - unit.y;
-  const distance = Math.hypot(dx, dy);
-  if (distance < 0.001 || unit.speed <= 0) return;
+const RIVER_TOP = 448;
+const RIVER_BOTTOM = 512;
+const BRIDGE_HALF_WIDTH = 44;
 
-  unit.facing = Math.atan2(dy, dx);
-  unit.isMoving = true;
-  const amount = Math.min(distance, unit.speed * dt);
-  unit.x += (dx / distance) * amount;
-  unit.y += (dy / distance) * amount;
+function riverBank(y: number): -1 | 0 | 1 {
+  if (y < RIVER_TOP) return -1;
+  if (y > RIVER_BOTTOM) return 1;
+  return 0;
+}
+
+function movementTarget(unit: Unit, targetX: number, targetY: number): { x: number; y: number } {
+  if (unit.isAir) return { x: targetX, y: targetY };
+
+  const currentBank = riverBank(unit.y);
+  const targetBank = riverBank(targetY);
+  const bridgeX = LANE_X[unit.lane];
+
+  if (currentBank === targetBank && currentBank !== 0) {
+    return { x: targetX, y: targetY };
+  }
+
+  if (currentBank === 0) {
+    if (targetBank === 0) {
+      const targetFitsBridge = Math.abs(targetX - bridgeX) <= BRIDGE_HALF_WIDTH - unit.radius;
+      return {
+        x: targetFitsBridge ? targetX : bridgeX,
+        y: targetY
+      };
+    }
+
+    return {
+      x: bridgeX,
+      y: targetBank < 0 ? RIVER_TOP - 1 : RIVER_BOTTOM + 1
+    };
+  }
+
+  if (targetBank === 0) {
+    return { x: bridgeX, y: targetY };
+  }
+
+  return {
+    x: bridgeX,
+    y: currentBank < 0 ? RIVER_TOP : RIVER_BOTTOM
+  };
+}
+
+function moveTowardTarget(unit: Unit, x: number, y: number, dt: number): void {
+  const target = movementTarget(unit, x, y);
+  moveToward(unit, target.x, target.y, dt);
+}
+
+function keepGroundUnitsOnBridges(units: Unit[]): void {
+  for (const unit of units) {
+    if (unit.hp <= 0 || unit.isAir) continue;
+    if (unit.y < RIVER_TOP || unit.y > RIVER_BOTTOM) continue;
+
+    const bridgeX = LANE_X[unit.lane];
+    const halfWidth = Math.max(0, BRIDGE_HALF_WIDTH - unit.radius);
+    unit.x = clamp(unit.x, bridgeX - halfWidth, bridgeX + halfWidth);
+  }
 }
 
 function separateUnits(units: Unit[]): void {
@@ -179,7 +228,7 @@ export function updateUnits(state: GameState, dt: number): void {
       if (distance <= unit.range + enemy.radius) {
         if (unit.attackCooldown <= 0) attackUnit(state, unit, enemy);
       } else {
-        moveToward(unit, enemy.x, enemy.y, dt);
+        moveTowardTarget(unit, enemy.x, enemy.y, dt);
       }
       continue;
     }
@@ -191,7 +240,7 @@ export function updateUnits(state: GameState, dt: number): void {
     if (towerDistance <= unit.range + tower.radius) {
       if (unit.attackCooldown <= 0) attackUnit(state, unit, tower);
     } else {
-      moveToward(unit, tower.x, tower.y, dt);
+      moveTowardTarget(unit, tower.x, tower.y, dt);
     }
   }
 
@@ -210,6 +259,7 @@ export function updateUnits(state: GameState, dt: number): void {
   }
 
   separateUnits(state.units);
+  keepGroundUnitsOnBridges(state.units);
 }
 
 export function updateTowers(state: GameState, dt: number): void {
