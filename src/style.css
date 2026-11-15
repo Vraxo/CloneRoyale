@@ -303,10 +303,15 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
 }
 
 
-/* Player match */
+
+/* Player battle layout */
 .workspace {
   grid-template-columns: minmax(420px, 1fr) 320px;
   gap: 24px;
+}
+
+.arena-frame {
+  height: min(100svh, 1040px);
 }
 
 .match-control-section .control-row {
@@ -351,105 +356,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
 
 .player-section {
   padding-top: 16px;
-}
-
-.card-hand {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 13px;
-}
-
-.hand-card {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  min-height: 62px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 10px 9px;
-  border: 1px solid #47564a;
-  border-radius: 9px;
-  background: linear-gradient(145deg, #354238, #29342d);
-  color: #e8e7d8;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color .12s ease, background .12s ease, opacity .12s ease, transform .12s ease;
-}
-
-.hand-card:hover:not(:disabled) {
-  border-color: #8d9b78;
-  background: linear-gradient(145deg, #3d4b3d, #303c33);
-}
-
-.hand-card:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.hand-card.is-selected {
-  border-color: #dfc17c;
-  background: linear-gradient(145deg, #4a4937, #383b30);
-  box-shadow: inset 0 0 0 1px rgba(223,193,124,.22), 0 0 0 2px rgba(223,193,124,.08);
-}
-
-.hand-card:disabled {
-  opacity: .4;
-  cursor: not-allowed;
-}
-
-.hand-card-name {
-  min-width: 0;
-  font-size: 11px;
-  font-weight: 750;
-  line-height: 1.25;
-}
-
-.hand-card-cost {
-  display: inline-flex;
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #8c78ae;
-  border-radius: 50%;
-  background: #655384;
-  color: #f1eaff;
-  font-size: 11px;
-  font-weight: 850;
-  font-variant-numeric: tabular-nums;
-}
-
-.next-card-line {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 10px;
-  color: var(--soft);
-  font-size: 9px;
-}
-
-.next-card-line strong {
-  color: #c8cabb;
-  font-size: 9px;
-  font-weight: 700;
-}
-
-.placement-hint {
-  min-height: 28px;
-  margin: 10px 0 0;
-  color: #b9b89f;
-  font-size: 9px;
-  line-height: 1.45;
-}
-
-.player-section .team-stats {
-  margin-top: 10px;
-}
-
-.opponent-section .team-stats {
-  margin-top: 11px;
 }
 
 .match-result {
@@ -504,16 +410,13 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
     align-items: stretch;
   }
 
+  .arena-frame {
+    height: min(88svh, 780px);
+  }
+
   .control-panel {
+    display: grid;
     grid-template-columns: 1fr 1fr;
-  }
-
-  .player-section {
-    border-right: 1px solid rgba(112,129,112,.17);
-  }
-
-  .opponent-section {
-    border-bottom: 1px solid rgba(112,129,112,.17);
   }
 
   .match-control-section {
@@ -524,19 +427,18 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
     grid-column: 1 / -1;
   }
 
+  .team-section {
+    border-right: 1px solid rgba(112,129,112,.17);
+  }
+
   .match-summary {
     white-space: nowrap;
   }
 }
 
 @media (max-width: 390px) {
-  .hand-card {
-    min-height: 56px;
-    padding: 8px 7px;
-  }
-
-  .hand-card-name {
-    font-size: 10px;
+  .arena-frame {
+    height: min(86svh, 740px);
   }
 
   .sound-controls {
