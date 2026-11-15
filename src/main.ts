@@ -93,6 +93,11 @@ function towerHealth(state: GameState, side: Side): number {
 }
 
 function crownCount(state: GameState, side: Side): number {
+  const enemyKing = state.towers.find((tower) =>
+    tower.side !== side && tower.kind === "king"
+  );
+  if (enemyKing && enemyKing.hp <= 0) return 3;
+
   return state.towers.filter((tower) =>
     tower.side !== side && tower.kind === "princess" && tower.hp <= 0
   ).length;
