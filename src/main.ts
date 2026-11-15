@@ -1,6 +1,7 @@
 import { createBattleMusic } from "./audio/battleMusic";
 import { ArenaRenderer } from "./render/arenaRenderer";
 import { createGame, SIMULATION_STEP, stepGame } from "./game/simulation";
+import { createGameHistory } from "./game/history";
 import type { GameState, Side } from "./game/types";
 import "./style.css";
 
@@ -14,6 +15,7 @@ const host = element<HTMLDivElement>("game");
 const renderer = new ArenaRenderer();
 const music = createBattleMusic();
 let game: GameState = createGame(Date.now() >>> 0);
+const history = createGameHistory(game);
 let paused = false;
 let speed = 1;
 let accumulator = 0;
@@ -24,6 +26,7 @@ await renderer.initialize(host);
 
 const pauseButton = element<HTMLButtonElement>("pause");
 const speedButton = element<HTMLButtonElement>("speed");
+const stepBackButton = element<HTMLButtonElement>("step-back");
 const musicButton = element<HTMLButtonElement>("music");
 const statusLabel = element<HTMLSpanElement>("match-status");
 
@@ -37,6 +40,7 @@ function setPaused(value: boolean): void {
 function startNewBattle(): void {
   game = createGame((Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0);
   accumulator = 0;
+  history.reset(game);
   previousGameOver = false;
   setPaused(false);
   music.start(game.time);
@@ -48,6 +52,8 @@ function towerHealth(state: GameState, side: Side): number {
 }
 
 function updateHud(): void {
+  stepBackButton.disabled = !history.canStepBack();
+
   const blue = game.sides.blue;
   const red = game.sides.red;
   const clock = Math.floor(game.time);
@@ -84,13 +90,40 @@ function updateHud(): void {
 
 element<HTMLButtonElement>("new-battle").addEventListener("click", startNewBattle);
 pauseButton.addEventListener("click", () => setPaused(!paused));
-element<HTMLButtonElement>("step").addEventListener("click", () => {
-  if (!game.gameOver) {
-    stepGame(game, SIMULATION_STEP);
-    if (game.gameOver) music.stop();
-    renderer.render(game);
-    updateHud();
+function advanceOneStep(): void {
+  if (game.gameOver) return;
+
+  const previousTime = game.time;
+  stepGame(game, SIMULATION_STEP);
+  if (game.time === previousTime) return;
+
+  history.record(game);
+
+  if (game.gameOver) {
+    music.stop();
+    previousGameOver = true;
+    accumulator = 0;
   }
+}
+
+element<HTMLButtonElement>("step").addEventListener("click", () => {
+  advanceOneStep();
+  renderer.render(game);
+  updateHud();
+});
+
+stepBackButton.addEventListener("click", () => {
+  const previousState = history.stepBack();
+  if (!previousState) return;
+
+  game = previousState;
+  accumulator = 0;
+  setPaused(true);
+  previousGameOver = game.gameOver;
+  music.seek(game.time);
+  music.setPaused(true);
+  renderer.render(game);
+  updateHud();
 });
 speedButton.addEventListener("click", () => {
   const speeds = [0.5, 1, 2, 4, 8];
@@ -112,8 +145,9 @@ renderer.app.ticker.add((ticker) => {
   if (!paused && !game.gameOver) {
     accumulator += elapsed * speed;
     while (accumulator >= SIMULATION_STEP) {
-      stepGame(game, SIMULATION_STEP);
+      advanceOneStep();
       accumulator -= SIMULATION_STEP;
+      if (game.gameOver) break;
     }
   }
 

@@ -3,6 +3,7 @@ export interface BattleMusic {
   setEnabled(enabled: boolean): void;
   setPaused(paused: boolean): void;
   setSpeed(speed: number): void;
+  seek(gameTime: number): void;
   stop(): void;
 }
 
@@ -74,6 +75,10 @@ export function createBattleMusic(): BattleMusic {
       speed = value;
       playBlocked = false;
       synchronize();
+    },
+
+    seek(gameTime: number): void {
+      setPosition(gameTime);
     },
 
     stop(): void {
