@@ -197,7 +197,7 @@ function elixirInterval(state: GameState): number {
   return state.time >= MATCH_RULES.doubleElixirStartsAt ? 2.8 / 2 : 2.8;
 }
 
-export function stepGame(state: GameState, dt: number): void {
+export function stepGame(state: GameState, dt: number, botSide: Side | null = null): void {
   if (state.gameOver) return;
 
   state.audioEvents = [];
@@ -213,6 +213,8 @@ export function stepGame(state: GameState, dt: number): void {
   for (const side of ["blue", "red"] as const) {
     const runtime = state.sides[side];
     runtime.elixir = Math.min(MAX_ELIXIR, runtime.elixir + dt / regenerationInterval);
+    if (botSide !== null && side !== botSide) continue;
+
     runtime.thinkIn -= dt;
 
     if (runtime.thinkIn <= 0) {

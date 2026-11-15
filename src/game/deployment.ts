@@ -1,6 +1,6 @@
 import { cardById } from "./cards";
 import type { CardId, GameState, Lane, Side, UnitCardDefinition } from "./types";
-import { addEvent, directionFor, FIELD_HEIGHT, LANE_X, nextRandom } from "./state";
+import { addEvent, directionFor, FIELD_HEIGHT, FIELD_WIDTH, LANE_X, nextRandom } from "./state";
 import { addProjectile } from "./projectiles";
 
 function rotateCard(state: GameState, side: Side, cardId: CardId): void {
@@ -13,11 +13,18 @@ function rotateCard(state: GameState, side: Side, cardId: CardId): void {
   runtime.cardsPlayed += 1;
 }
 
-function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane: Lane): void {
+function spawnCard(
+  state: GameState,
+  side: Side,
+  card: UnitCardDefinition,
+  lane: Lane,
+  placement?: { x: number; y: number }
+): void {
   const definition = card.unit;
   const direction = directionFor(side);
-  const centerX = LANE_X[lane];
-  const baseY = card.category === "building" ? (side === "blue" ? 690 : 270) : (side === "blue" ? 748 : 212);
+  const centerX = placement?.x ?? LANE_X[lane];
+  const baseY = placement?.y
+    ?? (card.category === "building" ? (side === "blue" ? 690 : 270) : (side === "blue" ? 748 : 212));
 
   const baseDeployTime = card.deployTime ?? 1;
   const staggerInterval = card.count > 1 ? Math.min(0.05, 0.45 / (card.count - 1)) : 0;
@@ -80,7 +87,41 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
   }
 }
 
-export function playCard(state: GameState, side: Side, cardId: CardId, lane: Lane, targetX?: number, targetY?: number): boolean {
+export function canPlaceCard(
+  state: GameState,
+  side: Side,
+  cardId: CardId,
+  x: number,
+  y: number
+): boolean {
+  const card = cardById(cardId);
+  const runtime = state.sides[side];
+  if (!runtime.hand.includes(cardId) || runtime.elixir < card.cost) return false;
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+
+  if (card.category === "spell") {
+    return x >= 12 && x <= FIELD_WIDTH - 12 && y >= 12 && y <= FIELD_HEIGHT - 12;
+  }
+
+  const radius = card.unit.radius;
+  if (x < radius + 12 || x > FIELD_WIDTH - radius - 12) return false;
+
+  if (side === "blue") {
+    return y >= 512 + radius + 8 && y <= FIELD_HEIGHT - radius - 12;
+  }
+
+  return y >= radius + 12 && y <= 448 - radius - 8;
+}
+
+export function playCard(
+  state: GameState,
+  side: Side,
+  cardId: CardId,
+  lane: Lane,
+  targetX?: number,
+  targetY?: number,
+  placement?: { x: number; y: number }
+): boolean {
   const card = cardById(cardId);
   const runtime = state.sides[side];
   if (!runtime.hand.includes(cardId) || runtime.elixir < card.cost) return false;
@@ -109,7 +150,7 @@ export function playCard(state: GameState, side: Side, cardId: CardId, lane: Lan
       projectile.duration
     );
   } else {
-    spawnCard(state, side, card, lane);
+    spawnCard(state, side, card, lane, placement);
   }
 
   addEvent(state, `${side === "blue" ? "Blue" : "Red"} played ${card.name}.`);

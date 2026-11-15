@@ -77,6 +77,7 @@ export class ArenaRenderer {
   private readonly world = new Container();
   private readonly arena = new Graphics();
   private readonly entities = new Container();
+  private readonly placementOverlay = new Graphics();
   private readonly unitViews = new Map<number, UnitView>();
   private readonly towerViews = new Map<number, TowerView>();
   private readonly projectileViews = new Map<number, ProjectileView>();
@@ -96,11 +97,48 @@ export class ArenaRenderer {
 
     host.replaceChildren(this.app.canvas);
     this.entities.sortableChildren = true;
-    this.world.addChild(this.arena, this.entities);
+    this.world.addChild(this.arena, this.entities, this.placementOverlay);
     this.app.stage.addChild(this.world);
     this.drawArena();
     this.initialized = true;
     this.fitWorld();
+  }
+
+  public screenToWorld(clientX: number, clientY: number): { x: number; y: number } | null {
+    if (!this.initialized) return null;
+    this.fitWorld();
+
+    const rect = this.app.canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+
+    const screenX = (clientX - rect.left) * (this.app.screen.width / rect.width);
+    const screenY = (clientY - rect.top) * (this.app.screen.height / rect.height);
+    const scale = this.world.scale.x;
+    const x = (screenX - this.world.position.x) / scale;
+    const y = (screenY - this.world.position.y) / scale;
+
+    if (x < 0 || x > WORLD_WIDTH || y < 0 || y > WORLD_HEIGHT) return null;
+    return { x, y };
+  }
+
+  public setPlacementPreview(
+    point: { x: number; y: number } | null,
+    valid = false,
+    radius = 22
+  ): void {
+    this.placementOverlay.clear();
+    if (!point) return;
+
+    const color = valid ? 0x9ecb79 : 0xd56f68;
+    this.placementOverlay
+      .circle(point.x, point.y, radius)
+      .fill({ color, alpha: 0.2 });
+    this.placementOverlay
+      .circle(point.x, point.y, radius)
+      .stroke({ color, alpha: 0.92, width: 2 });
+    this.placementOverlay
+      .circle(point.x, point.y, 3)
+      .fill({ color, alpha: 0.95 });
   }
 
   public render(state: GameState): void {
