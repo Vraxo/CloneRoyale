@@ -7,9 +7,13 @@ export const GIANT: UnitDefinition = {
   speed: 31,
   range: 27,
   attackInterval: 1.55,
+  attack: {
+    type: "melee"
+  },
   radius: 22,
   splashRadius: 0,
   isAir: false,
+  canTargetAir: true,
   targetsBuildingsOnly: true,
   lifetime: 0
 };

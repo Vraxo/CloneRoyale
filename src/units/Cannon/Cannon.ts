@@ -7,9 +7,15 @@ export const CANNON: UnitDefinition = {
   speed: 0,
   range: 185,
   attackInterval: 1.05,
+  attack: {
+    type: "projectile",
+    style: "cannon",
+    speed: 430
+  },
   radius: 15,
   splashRadius: 0,
   isAir: false,
+  canTargetAir: false,
   targetsBuildingsOnly: false,
   lifetime: 32
 };

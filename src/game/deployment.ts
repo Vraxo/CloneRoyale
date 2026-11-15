@@ -25,16 +25,32 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
     const offsetX = card.count === 1 ? 0 : (column - 2) * Math.min(11, definition.radius * 0.85);
     const offsetY = card.count === 1 ? 0 : row * direction * 11;
     state.units.push({
-      id: state.nextId++, side, cardId: card.id, type: definition.type,
-      kind: card.category === "building" ? "building" : "troop", lane,
-      x: centerX + offsetX, y: baseY + offsetY,
-      hp: definition.hp, maxHp: definition.hp, radius: definition.radius, damage: definition.damage,
-      speed: definition.speed, range: definition.range, attackInterval: definition.attackInterval,
-      attackCooldown: 0.25 + nextRandom(state) * 0.35, splashRadius: definition.splashRadius,
-      isAir: definition.isAir, targetsBuildingsOnly: definition.targetsBuildingsOnly,
-      lifetime: definition.lifetime, age: 0,
+      id: state.nextId++,
+      side,
+      cardId: card.id,
+      type: definition.type,
+      kind: card.category === "building" ? "building" : "troop",
+      lane,
+      x: centerX + offsetX,
+      y: baseY + offsetY,
+      hp: definition.hp,
+      maxHp: definition.hp,
+      radius: definition.radius,
+      damage: definition.damage,
+      speed: definition.speed,
+      range: definition.range,
+      attackInterval: definition.attackInterval,
+      attackCooldown: 0.25 + nextRandom(state) * 0.35,
+      attack: definition.attack,
+      splashRadius: definition.splashRadius,
+      isAir: definition.isAir,
+      canTargetAir: definition.canTargetAir,
+      targetsBuildingsOnly: definition.targetsBuildingsOnly,
+      lifetime: definition.lifetime,
+      age: 0,
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
-      animationOffset: nextRandom(state) * Math.PI * 2, attackAnim: 0
+      animationOffset: nextRandom(state) * Math.PI * 2,
+      attackAnim: 0
     });
   }
 }

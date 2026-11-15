@@ -7,9 +7,13 @@ export const MINI_PEKKA: UnitDefinition = {
   speed: 55,
   range: 27,
   attackInterval: 1.45,
+  attack: {
+    type: "melee"
+  },
   radius: 14,
   splashRadius: 0,
   isAir: false,
+  canTargetAir: true,
   targetsBuildingsOnly: false,
   lifetime: 0
 };

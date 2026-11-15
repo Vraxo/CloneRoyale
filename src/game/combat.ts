@@ -15,7 +15,7 @@ function findEnemyUnit(
   for (const candidate of state.units) {
     if (candidate.side === unit.side || candidate.hp <= 0) continue;
     if (buildingsOnly && candidate.kind !== "building") continue;
-    if (unit.type === "cannon" && candidate.isAir) continue;
+    if (!unit.canTargetAir && candidate.isAir) continue;
 
     const distance = Math.hypot(candidate.x - unit.x, candidate.y - unit.y);
     if (distance < nearestDistance) {
@@ -53,33 +53,25 @@ function attackUnit(state: GameState, unit: Unit, target: Unit | Tower): void {
   unit.attackCooldown = unit.attackInterval;
   unit.attackAnim = 0.32;
 
-  const targetX = target.x;
-  const targetY = target.y;
-  const distance = Math.hypot(targetX - unit.x, targetY - unit.y);
-
-  if (unit.range > 42 || unit.splashRadius > 0) {
-    const style = unit.type === "baby-dragon"
-      ? "fire"
-      : unit.type === "cannon"
-        ? "cannon"
-        : "arrow";
-
-    addProjectile(
-      state,
-      unit.side,
-      unit.x,
-      unit.y,
-      target.id,
-      targetX,
-      targetY,
-      unit.damage,
-      unit.splashRadius,
-      style,
-      distance / (unit.type === "baby-dragon" ? 290 : 430)
-    );
-  } else {
+  if (unit.attack.type === "melee") {
     damageTarget(state, target.id, unit.damage);
+    return;
   }
+
+  const distance = Math.hypot(target.x - unit.x, target.y - unit.y);
+  addProjectile(
+    state,
+    unit.side,
+    unit.x,
+    unit.y,
+    target.id,
+    target.x,
+    target.y,
+    unit.damage,
+    unit.splashRadius,
+    unit.attack.style,
+    distance / unit.attack.speed
+  );
 }
 
 export function updateUnits(state: GameState, dt: number): void {

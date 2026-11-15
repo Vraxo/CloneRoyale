@@ -9,6 +9,7 @@ export type {
   UnitCardDefinition
 } from "./Card";
 export type { UnitType, Unit } from "./Unit";
+export type { UnitAttack, ProjectileAttackStyle } from "./UnitAttack";
 export type { UnitDefinition } from "./UnitDefinition";
 export type { Tower } from "./Tower";
 export type { Projectile } from "./Projectile";

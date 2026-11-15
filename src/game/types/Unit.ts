@@ -1,6 +1,7 @@
 import type { CardId } from "./Card";
 import type { Lane } from "./Lane";
 import type { Side } from "./Side";
+import type { UnitAttack } from "./UnitAttack";
 
 export type UnitType =
   | "giant"
@@ -27,8 +28,10 @@ export interface Unit {
   range: number;
   attackInterval: number;
   attackCooldown: number;
+  attack: UnitAttack;
   splashRadius: number;
   isAir: boolean;
+  canTargetAir: boolean;
   targetsBuildingsOnly: boolean;
   lifetime: number;
   age: number;

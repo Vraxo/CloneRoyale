@@ -7,9 +7,15 @@ export const ARCHER: UnitDefinition = {
   speed: 48,
   range: 155,
   attackInterval: 1.15,
+  attack: {
+    type: "projectile",
+    style: "arrow",
+    speed: 430
+  },
   radius: 10,
   splashRadius: 0,
   isAir: false,
+  canTargetAir: true,
   targetsBuildingsOnly: false,
   lifetime: 0
 };

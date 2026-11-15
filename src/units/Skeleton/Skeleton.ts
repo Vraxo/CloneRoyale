@@ -7,9 +7,13 @@ export const SKELETON: UnitDefinition = {
   speed: 67,
   range: 21,
   attackInterval: 1.05,
+  attack: {
+    type: "melee"
+  },
   radius: 7,
   splashRadius: 0,
   isAir: false,
+  canTargetAir: true,
   targetsBuildingsOnly: false,
   lifetime: 0
 };
