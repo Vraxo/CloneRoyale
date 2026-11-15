@@ -16,23 +16,29 @@ interface EntityView<T> {
   destroy(): void;
 }
 
-function drawLaneConnector(
+function drawLanePath(
   graphics: Graphics,
-  startX: number,
-  endX: number,
-  centerY: number
+  points: { x: number; y: number }[]
 ): void {
-  const left = Math.min(startX, endX);
-  const width = Math.abs(endX - startX);
-  const top = centerY - 16;
+  const drawLayer = (width: number, color: number, alpha: number): void => {
+    graphics.moveTo(points[0].x, points[0].y);
+    for (let index = 1; index < points.length; index += 1) {
+      graphics.lineTo(points[index].x, points[index].y);
+    }
+    graphics.stroke({
+      color,
+      alpha,
+      width,
+      cap: "butt",
+      join: "miter"
+    });
+  };
 
-  graphics.rect(left, top, width, 32)
-    .fill({ color: 0x786f4e, alpha: 0.72 });
-  graphics.rect(left, top + 3, width, 26)
-    .fill({ color: 0x9a8b63, alpha: 0.78 });
-  graphics.rect(left, top + 5, width, 22)
-    .fill({ color: 0xa2946c, alpha: 0.38 });
+  drawLayer(24, 0x786f4e, 0.72);
+  drawLayer(18, 0x9a8b63, 0.78);
+  drawLayer(14, 0xa2946c, 0.38);
 }
+
 function synchronizeViews<T extends { id: number }, V extends EntityView<T>>(
   entities: T[],
   views: Map<number, V>,
@@ -188,29 +194,38 @@ export class ArenaRenderer {
       ];
 
       for (const segment of laneSegments) {
-        g.rect(laneX - 16, segment.top, 32, segment.height)
-          .fill({ color: 0x786f4e, alpha: 0.72 });
-        g.rect(laneX - 13, segment.top, 26, segment.height)
-          .fill({ color: 0x9a8b63, alpha: 0.78 });
-        g.rect(laneX - 11, segment.top, 22, segment.height)
-          .fill({ color: 0xa2946c, alpha: 0.38 });
-
         const markCount = Math.floor(segment.height / 32);
         for (let mark = 0; mark < markCount; mark += 1) {
           const y = segment.top + 18 + mark * 32;
           const offset = mark % 2 === 0 ? 0 : 7;
-          g.circle(laneX - 8 + offset, y, 1.2)
+          g.circle(laneX - 7 + offset, y, 1.1)
             .fill({ color: 0x6e674b, alpha: 0.32 });
-          g.circle(laneX + 8 - offset, y + 12, 1)
+          g.circle(laneX + 7 - offset, y + 12, 0.9)
             .fill({ color: 0xd0bd8b, alpha: 0.3 });
         }
       }
     }
 
-    drawLaneConnector(g, 205, 360, 78);
-    drawLaneConnector(g, 515, 360, 78);
-    drawLaneConnector(g, 205, 360, 882);
-    drawLaneConnector(g, 515, 360, 882);
+    drawLanePath(g, [
+      { x: 205, y: 448 },
+      { x: 205, y: 78 },
+      { x: 360, y: 78 }
+    ]);
+    drawLanePath(g, [
+      { x: 515, y: 448 },
+      { x: 515, y: 78 },
+      { x: 360, y: 78 }
+    ]);
+    drawLanePath(g, [
+      { x: 205, y: 512 },
+      { x: 205, y: 882 },
+      { x: 360, y: 882 }
+    ]);
+    drawLanePath(g, [
+      { x: 515, y: 512 },
+      { x: 515, y: 882 },
+      { x: 360, y: 882 }
+    ]);
 
     g.rect(24, 448, 672, 64).fill(0x4b94a0);
     g.rect(24, 455, 672, 50).fill(0x5ba8ad);
