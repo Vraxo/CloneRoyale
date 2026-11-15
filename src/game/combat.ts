@@ -51,6 +51,56 @@ function moveToward(unit: Unit, x: number, y: number, dt: number): void {
   unit.y += (dy / distance) * amount;
 }
 
+function separateUnits(units: Unit[]): void {
+  for (let iteration = 0; iteration < 3; iteration += 1) {
+    for (let firstIndex = 0; firstIndex < units.length; firstIndex += 1) {
+      const first = units[firstIndex];
+      if (first.hp <= 0 || (first.deploymentRemaining ?? 0) > 0) continue;
+
+      for (let secondIndex = firstIndex + 1; secondIndex < units.length; secondIndex += 1) {
+        const second = units[secondIndex];
+        if (second.hp <= 0 || (second.deploymentRemaining ?? 0) > 0) continue;
+        if (first.isAir !== second.isAir) continue;
+
+        const firstCanMove = first.kind !== "building" && first.speed > 0;
+        const secondCanMove = second.kind !== "building" && second.speed > 0;
+        if (!firstCanMove && !secondCanMove) continue;
+
+        const dx = second.x - first.x;
+        const dy = second.y - first.y;
+        const distanceSquared = dx * dx + dy * dy;
+        const minimumDistance = first.radius + second.radius + 2;
+        if (distanceSquared >= minimumDistance * minimumDistance) continue;
+
+        const distance = Math.sqrt(distanceSquared);
+        const directionX = distance > 0.001
+          ? dx / distance
+          : first.id < second.id ? 1 : -1;
+        const directionY = distance > 0.001 ? dy / distance : 0;
+        const overlap = minimumDistance - distance;
+
+        if (firstCanMove && secondCanMove) {
+          const displacement = overlap * 0.5;
+          first.x -= directionX * displacement;
+          first.y -= directionY * displacement;
+          second.x += directionX * displacement;
+          second.y += directionY * displacement;
+          first.isMoving = true;
+          second.isMoving = true;
+        } else if (firstCanMove) {
+          first.x -= directionX * overlap;
+          first.y -= directionY * overlap;
+          first.isMoving = true;
+        } else {
+          second.x += directionX * overlap;
+          second.y += directionY * overlap;
+          second.isMoving = true;
+        }
+      }
+    }
+  }
+}
+
 function attackUnit(state: GameState, unit: Unit, target: Unit | Tower): void {
   unit.attackCooldown = unit.attackInterval;
   unit.attackAnim = 0.32;
@@ -125,6 +175,8 @@ export function updateUnits(state: GameState, dt: number): void {
       moveToward(unit, tower.x, tower.y, dt);
     }
   }
+
+  separateUnits(state.units);
 }
 
 export function updateTowers(state: GameState, dt: number): void {
