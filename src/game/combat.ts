@@ -88,8 +88,11 @@ function separateUnits(units: Unit[]): void {
         } else if (secondDeploying && !firstDeploying) {
           firstDisplacement = firstCanMove ? overlap : 0;
         } else if (firstCanMove && secondCanMove) {
-          firstDisplacement = overlap * 0.5;
-          secondDisplacement = overlap * 0.5;
+          const firstMass = first.collisionMass ?? 1;
+          const secondMass = second.collisionMass ?? 1;
+          const totalMass = firstMass + secondMass;
+          firstDisplacement = overlap * secondMass / totalMass;
+          secondDisplacement = overlap * firstMass / totalMass;
         } else if (firstCanMove) {
           firstDisplacement = overlap;
         } else if (secondCanMove) {

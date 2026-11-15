@@ -11,6 +11,7 @@ export const GIANT: UnitDefinition = {
     type: "melee"
   },
   radius: 22,
+  collisionMass: 100,
   splashRadius: 0,
   isAir: false,
   canTargetAir: false,

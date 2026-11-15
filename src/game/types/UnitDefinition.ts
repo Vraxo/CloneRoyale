@@ -10,6 +10,7 @@ export interface UnitDefinition {
   attackInterval: number;
   attack: UnitAttack;
   radius: number;
+  collisionMass?: number;
   splashRadius: number;
   isAir: boolean;
   canTargetAir: boolean;

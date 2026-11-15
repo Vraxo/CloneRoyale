@@ -43,6 +43,7 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
       hp: definition.hp,
       maxHp: definition.hp,
       radius: definition.radius,
+      collisionMass: definition.collisionMass ?? 1,
       damage: definition.damage,
       speed: definition.speed,
       range: definition.range,

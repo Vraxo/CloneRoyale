@@ -11,6 +11,7 @@ export const SKELETON: UnitDefinition = {
     type: "melee"
   },
   radius: 7,
+  collisionMass: 0.5,
   splashRadius: 0,
   isAir: false,
   canTargetAir: false,

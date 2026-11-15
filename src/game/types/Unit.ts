@@ -23,6 +23,7 @@ export interface Unit {
   hp: number;
   maxHp: number;
   radius: number;
+  collisionMass?: number;
   damage: number;
   speed: number;
   range: number;
