@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#151918" />
-    <meta name="description" content="A small, top-down real-time strategy battle lab." />
-    <title>Clone Royale — Battle Lab</title>
+    <meta name="description" content="A small, playable real-time strategy battle prototype." />
+    <title>Clone Royale — Player vs AI</title>
   </head>
   <body>
     <div class="app-shell">
@@ -14,12 +14,12 @@
           <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
           <span class="brand-copy">
             <strong>Clone Royale</strong>
-            <small>Battle Lab <i></i> AI vs AI</small>
+            <small>Player vs AI <i></i> Live match</small>
           </span>
         </a>
         <div class="match-summary" aria-live="polite">
           <span class="live-dot"></span>
-          <span id="match-status">Preparing arena</span>
+          <span id="match-status">Regulation</span>
           <span class="summary-divider"></span>
           <strong id="match-clock">03:00</strong>
         </div>
@@ -30,63 +30,81 @@
           <div class="arena-frame">
             <div id="game" class="game-surface"></div>
             <div class="arena-caption">
-              <span><i class="team-dot blue"></i> BLUE</span>
-              <span class="caption-center">SPECTATOR MODE</span>
-              <span>RED <i class="team-dot red"></i></span>
+              <span><i class="team-dot blue"></i> YOU</span>
+              <span class="caption-center">SELECT A CARD · PLACE ON THE ARENA</span>
+              <span>AI <i class="team-dot red"></i></span>
+            </div>
+            <div id="match-result" class="match-result" hidden>
+              <div class="match-result-panel">
+                <span class="eyebrow">MATCH COMPLETE</span>
+                <h2 id="result-title">Victory</h2>
+                <p id="result-summary">Crowns 1 – 0</p>
+                <button id="play-again" class="primary-button" type="button">Play again</button>
+              </div>
             </div>
           </div>
-          <p class="mobile-hint">The battlefield scales to your screen. Rotate your device for a taller view.</p>
+          <p class="mobile-hint">Choose a card, then tap a valid position on the battlefield to deploy it.</p>
         </section>
 
         <aside class="control-panel">
-          <section class="panel-section">
+          <section class="panel-section match-control-section">
             <div class="section-heading">
-              <span class="eyebrow">MATCH CONTROL</span>
-              <span class="status-tag">LOCAL SIMULATION</span>
+              <span class="eyebrow">MATCH</span>
+              <span class="status-tag">PLAYER VS AI</span>
             </div>
             <button id="new-battle" class="primary-button" type="button">
-              <span aria-hidden="true">↻</span> New battle
+              <span aria-hidden="true">↻</span> New match
             </button>
             <div class="control-row">
               <button id="pause" class="secondary-button" type="button">Ⅱ &nbsp; Pause</button>
-              <button id="step-back" class="secondary-button icon-button hold-step-button" type="button" aria-label="Step back one simulation step" title="Step back one simulation step" disabled>|◂</button>
-              <button id="step" class="secondary-button icon-button hold-step-button" type="button" aria-label="Advance one simulation step" title="Advance one simulation step">▸|</button>
             </div>
-            <div class="speed-row">
-              <span>Simulation speed</span>
-              <button id="speed" class="speed-button" type="button">1×</button>
+            <div class="sound-controls">
+              <div class="speed-row">
+                <span>Sound effects</span>
+                <button id="sound-effects" class="speed-button" type="button" aria-pressed="true">On</button>
+              </div>
+              <div class="speed-row">
+                <span>Battle music</span>
+                <button id="music" class="speed-button" type="button" aria-pressed="true">On</button>
+              </div>
             </div>
-            <div class="speed-row">
-              <span>Sound effects</span>
-              <button id="sound-effects" class="speed-button" type="button" aria-pressed="true">On</button>
-            </div>
-            <div class="speed-row">
-              <span>Battle music</span>
-              <button id="music" class="speed-button" type="button" aria-pressed="true">On</button>
-            </div>
+            <details class="debug-controls">
+              <summary>Simulation tools</summary>
+              <div class="control-row debug-step-row">
+                <button id="step-back" class="secondary-button icon-button hold-step-button" type="button" aria-label="Step back one simulation step" title="Step back one simulation step" disabled>|◂</button>
+                <button id="step" class="secondary-button icon-button hold-step-button" type="button" aria-label="Advance one simulation step" title="Advance one simulation step">▸|</button>
+                <button id="speed" class="speed-button" type="button">1×</button>
+              </div>
+            </details>
           </section>
 
-          <section class="panel-section team-section">
+          <section class="panel-section team-section player-section">
             <div class="section-heading">
-              <span class="eyebrow">BLUE TEAM</span>
-              <span class="team-label blue-text">SOUTH</span>
+              <span class="eyebrow">YOUR HAND</span>
+              <span class="team-label blue-text">BLUE · SOUTH</span>
             </div>
             <div class="elixir-line">
               <strong id="blue-elixir">5.0</strong>
               <span>ELIXIR</span>
               <div class="elixir-track"><i id="blue-elixir-bar"></i></div>
             </div>
+            <div id="card-hand" class="card-hand" aria-label="Cards in hand"></div>
+            <div class="next-card-line">
+              <span>Next card</span>
+              <strong id="next-card">Mini P.E.K.K.A</strong>
+            </div>
+            <p id="placement-hint" class="placement-hint" role="status">Choose a card, then deploy on your side.</p>
             <div class="team-stats">
               <div><strong id="blue-units">0</strong><span>UNITS</span></div>
               <div><strong id="blue-towers">3</strong><span>TOWERS</span></div>
-              <div><strong id="blue-played">0</strong><span>CARDS</span></div>
+              <div><strong id="blue-played">0</strong><span>PLAYED</span></div>
             </div>
           </section>
 
-          <section class="panel-section team-section">
+          <section class="panel-section team-section opponent-section">
             <div class="section-heading">
-              <span class="eyebrow">RED TEAM</span>
-              <span class="team-label red-text">NORTH</span>
+              <span class="eyebrow">OPPONENT</span>
+              <span class="team-label red-text">RED · NORTH</span>
             </div>
             <div class="elixir-line">
               <strong id="red-elixir">5.0</strong>
@@ -96,7 +114,7 @@
             <div class="team-stats">
               <div><strong id="red-units">0</strong><span>UNITS</span></div>
               <div><strong id="red-towers">3</strong><span>TOWERS</span></div>
-              <div><strong id="red-played">0</strong><span>CARDS</span></div>
+              <div><strong id="red-played">0</strong><span>PLAYED</span></div>
             </div>
           </section>
 
@@ -111,8 +129,8 @@
           </section>
 
           <footer class="panel-footer">
-            <span>PROTOTYPE 0.1</span>
-            <span>DETERMINISTIC SIMULATION</span>
+            <span>PROTOTYPE 0.2</span>
+            <span>LOCAL PLAYER MATCH</span>
           </footer>
         </aside>
       </main>
