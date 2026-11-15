@@ -6,6 +6,7 @@ export function damageTarget(state: GameState, targetId: number, damage: number)
   if (unit) {
     unit.hp -= damage;
     unit.attackAnim = Math.max(unit.attackAnim, 0.09);
+    if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-hit");
     state.effects.push({
       id: state.nextId++,
       x: unit.x,

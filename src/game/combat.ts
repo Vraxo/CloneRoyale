@@ -120,6 +120,7 @@ function clamp(value: number, minimum: number, maximum: number): number {
 function attackUnit(state: GameState, unit: Unit, target: Unit | Tower): void {
   unit.attackCooldown = unit.attackInterval;
   unit.attackAnim = 0.32;
+  if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-attack");
 
   if (unit.attack.type === "melee") {
     damageTarget(state, target.id, unit.damage);
@@ -148,7 +149,11 @@ export function updateUnits(state: GameState, dt: number): void {
 
     const deploymentRemaining = unit.deploymentRemaining ?? 0;
     if (deploymentRemaining > 0) {
-      unit.deploymentRemaining = Math.max(0, deploymentRemaining - dt);
+      const remaining = Math.max(0, deploymentRemaining - dt);
+      unit.deploymentRemaining = remaining;
+      if (remaining === 0 && unit.type === "mini-pekka") {
+        state.audioEvents.push("mini-pekka-deploy");
+      }
       continue;
     }
 
@@ -189,6 +194,20 @@ export function updateUnits(state: GameState, dt: number): void {
       if (unit.attackCooldown <= 0) attackUnit(state, unit, tower);
     } else {
       moveToward(unit, tower.x, tower.y, dt);
+    }
+  }
+
+  for (const unit of state.units) {
+    if (unit.type !== "mini-pekka" || unit.hp <= 0) continue;
+
+    if (unit.isMoving) {
+      unit.footstepCooldown = (unit.footstepCooldown ?? 0) - dt;
+      if (unit.footstepCooldown <= 0) {
+        state.audioEvents.push("mini-pekka-step");
+        unit.footstepCooldown = 0.42;
+      }
+    } else {
+      unit.footstepCooldown = Math.min(unit.footstepCooldown ?? 0.12, 0.12);
     }
   }
 

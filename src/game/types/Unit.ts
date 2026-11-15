@@ -42,4 +42,5 @@ export interface Unit {
   facing: number;
   animationOffset: number;
   attackAnim: number;
+  footstepCooldown?: number;
 }

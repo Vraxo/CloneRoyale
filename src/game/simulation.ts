@@ -199,6 +199,7 @@ function elixirInterval(state: GameState): number {
 export function stepGame(state: GameState, dt: number): void {
   if (state.gameOver) return;
 
+  state.audioEvents = [];
   state.time += dt;
 
   if (state.phase === "tiebreaker") {

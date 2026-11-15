@@ -62,6 +62,7 @@ function setPaused(value: boolean): void {
 }
 
 function startNewBattle(): void {
+  soundEffects.stopAll();
   game = createGame((Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0);
   accumulator = 0;
   history.reset(game);
@@ -149,6 +150,7 @@ function stepBackward(): void {
   if (!previousState) return;
 
   game = previousState;
+  soundEffects.stopAll();
   accumulator = 0;
   setPaused(true);
   previousGameOver = game.gameOver;

@@ -1,3 +1,4 @@
+export type { AudioEvent } from "./AudioEvent";
 export type { Side } from "./Side";
 export type { Lane } from "./Lane";
 export type { CardId } from "./CardId";
