@@ -79,8 +79,9 @@ export function updateUnits(state: GameState, dt: number): void {
   for (const unit of state.units) {
     if (unit.hp <= 0) continue;
 
-    if ((unit.deploymentRemaining ?? 0) > 0) {
-      unit.deploymentRemaining = Math.max(0, unit.deploymentRemaining - dt);
+    const deploymentRemaining = unit.deploymentRemaining ?? 0;
+    if (deploymentRemaining > 0) {
+      unit.deploymentRemaining = Math.max(0, deploymentRemaining - dt);
       continue;
     }
 
