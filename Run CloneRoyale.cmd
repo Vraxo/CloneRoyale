@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 
-if not exist "node_modules\\" (
+if not exist "node_modules\" (
     echo Installing project dependencies...
     call npm install
     if errorlevel 1 (
