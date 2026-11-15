@@ -1,4 +1,4 @@
-import type { UnitType } from "./Unit";
+import type { UnitDefinition } from "./UnitDefinition";
 
 export type CardId =
   | "giant"
@@ -16,7 +16,9 @@ export interface CardDefinition {
   cost: number;
   category: "troop" | "building" | "spell";
   count: number;
-  unitType?: UnitType;
+  unit?: UnitDefinition;
   spellDamage?: number;
   spellRadius?: number;
+  projectileStyle?: "fireball" | "arrows";
+  projectileDuration?: number;
 }

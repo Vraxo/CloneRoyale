@@ -1,14 +1,23 @@
 import type { CardDefinition, CardId } from "./types";
-import { ARCHERS_CARD } from "./cards/archers";
-import { ARROWS_CARD } from "./cards/arrows";
-import { BABY_DRAGON_CARD } from "./cards/babyDragon";
-import { CANNON_CARD } from "./cards/cannon";
-import { FIREBALL_CARD } from "./cards/fireball";
-import { GIANT_CARD } from "./cards/giant";
-import { MINI_PEKKA_CARD } from "./cards/miniPekka";
-import { SKELETON_ARMY_CARD } from "./cards/skeletonArmy";
+import { ARCHERS_CARD } from "../units/Archer/ArcherCard";
+import { ARROWS_CARD } from "../cards/Arrows/ArrowsCard";
+import { BABY_DRAGON_CARD } from "../units/BabyDragon/BabyDragonCard";
+import { CANNON_CARD } from "../units/Cannon/CannonCard";
+import { FIREBALL_CARD } from "../cards/Fireball/FireballCard";
+import { GIANT_CARD } from "../units/Giant/GiantCard";
+import { MINI_PEKKA_CARD } from "../units/MiniPekka/MiniPekkaCard";
+import { SKELETON_ARMY_CARD } from "../units/Skeleton/SkeletonArmyCard";
 
-export const STARTER_DECK: CardId[] = ["giant", "archers", "mini-pekka", "baby-dragon", "skeleton-army", "cannon", "fireball", "arrows"];
+export const STARTER_DECK: CardId[] = [
+  "giant",
+  "archers",
+  "mini-pekka",
+  "baby-dragon",
+  "skeleton-army",
+  "cannon",
+  "fireball",
+  "arrows"
+];
 
 export const CARDS: Record<CardId, CardDefinition> = {
   giant: GIANT_CARD,

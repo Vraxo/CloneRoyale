@@ -1,6 +1,5 @@
 import { cardById } from "./cards";
-import { unitDefinition } from "./units/definitions";
-import type { CardId, GameState, Lane, Projectile, Side } from "./types";
+import type { CardId, GameState, Lane, Side } from "./types";
 import { addEvent, directionFor, FIELD_HEIGHT, LANE_X, nextRandom } from "./state";
 import { addProjectile } from "./projectiles";
 
@@ -16,8 +15,9 @@ function rotateCard(state: GameState, side: Side, cardId: CardId): void {
 
 function spawnCard(state: GameState, side: Side, cardId: CardId, lane: Lane): void {
   const card = cardById(cardId);
-  if (!card.unitType) return;
-  const definition = unitDefinition(card.unitType);
+  const definition = card.unit;
+  if (!definition) return;
+
   const direction = directionFor(side);
   const centerX = LANE_X[lane];
   const baseY = card.category === "building" ? (side === "blue" ? 690 : 270) : (side === "blue" ? 748 : 212);
@@ -55,9 +55,10 @@ export function playCard(state: GameState, side: Side, cardId: CardId, lane: Lan
       ?? enemyTowers.find((tower) => tower.kind === "king");
     const x = targetX ?? defaultTower?.x ?? LANE_X[lane];
     const y = targetY ?? defaultTower?.y ?? (side === "blue" ? 180 : 780);
-    const style: Projectile["style"] = cardId === "fireball" ? "fireball" : "arrows";
-    addProjectile(state, side, x, side === "blue" ? FIELD_HEIGHT - 50 : 50, null, x, y,
-      card.spellDamage ?? 0, card.spellRadius ?? 0, style, cardId === "fireball" ? 0.55 : 0.36);
+    if (card.projectileStyle) {
+      addProjectile(state, side, x, side === "blue" ? FIELD_HEIGHT - 50 : 50, null, x, y,
+        card.spellDamage ?? 0, card.spellRadius ?? 0, card.projectileStyle, card.projectileDuration ?? 0.4);
+    }
   } else {
     spawnCard(state, side, cardId, lane);
   }

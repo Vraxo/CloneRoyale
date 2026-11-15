@@ -1,9 +1,11 @@
-import type { CardDefinition } from "../types";
+import type { CardDefinition } from "../../game/types";
+import { MINI_PEKKA } from "./MiniPekka";
+
 export const MINI_PEKKA_CARD: CardDefinition = {
   id: "mini-pekka",
   name: "Mini P.E.K.K.A",
   cost: 4,
   category: "troop",
   count: 1,
-  unitType: "mini-pekka"
+  unit: MINI_PEKKA
 };
