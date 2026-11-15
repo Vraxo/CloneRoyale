@@ -107,13 +107,8 @@ export class SkeletalRig {
     const attackProgress = unit.attackAnim > 0 ? 1 - unit.attackAnim / 0.32 : 0;
     const attackSwing = unit.attackAnim > 0 ? Math.sin(attackProgress * Math.PI) : 0;
 
-    const remaining = unit.deploymentRemaining ?? 0;
-    const duration = unit.deploymentDuration ?? 0;
-    const progress = duration > 0 ? Math.max(0, Math.min(1, 1 - remaining / duration)) : 1;
-    const easedProgress = 1 - Math.pow(1 - progress, 3);
-    const lift = Math.pow(1 - easedProgress, 2) * 76;
     const idleBob = moving ? Math.abs(Math.sin(phase * 2)) * -0.65 : Math.sin(time * 2 + unit.animationOffset) * -0.35;
-    this.container.position.set(0, idleBob - lift);
+    this.container.position.set(0, idleBob);
     this.container.rotation = unit.facing + Math.PI / 2;
 
     this.leftLeg.root.rotation = -0.92 + stride;
