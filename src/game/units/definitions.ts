@@ -1,10 +1,11 @@
 import type { UnitDefinition, UnitType } from "../types";
-import { ARCHER } from "../../units/archer/definition";
-import { BABY_DRAGON } from "../../units/babyDragon/definition";
-import { CANNON } from "../../units/cannon/definition";
-import { GIANT } from "../../units/giant/definition";
-import { MINI_PEKKA } from "../../units/miniPekka/definition";
-import { SKELETON } from "../../units/skeleton/definition";
+import { ARCHER } from "../../units/Archer/Archer";
+import { BABY_DRAGON } from "../../units/BabyDragon/BabyDragon";
+import { CANNON } from "../../units/Cannon/Cannon";
+import { GIANT } from "../../units/Giant/Giant";
+import { MINI_PEKKA } from "../../units/MiniPekka/MiniPekka";
+import { SKELETON } from "../../units/Skeleton/Skeleton";
+
 export const UNIT_DEFINITIONS: Record<UnitType, UnitDefinition> = {
   giant: GIANT,
   archer: ARCHER,
@@ -13,6 +14,7 @@ export const UNIT_DEFINITIONS: Record<UnitType, UnitDefinition> = {
   skeleton: SKELETON,
   cannon: CANNON
 };
+
 export function unitDefinition(type: UnitType): UnitDefinition {
   return UNIT_DEFINITIONS[type];
 }
