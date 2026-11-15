@@ -93,7 +93,7 @@ element<HTMLButtonElement>("step").addEventListener("click", () => {
   }
 });
 speedButton.addEventListener("click", () => {
-  const speeds = [1, 2, 4, 8];
+  const speeds = [0.5, 1, 2, 4, 8];
   const currentIndex = speeds.indexOf(speed);
   speed = speeds[(currentIndex + 1) % speeds.length];
   speedButton.textContent = `${speed}×`;
