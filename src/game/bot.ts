@@ -1,5 +1,12 @@
 import { cardById } from "./cards";
-import type { BotDecision, CardId, GameState, Lane, Side, Unit } from "./types";
+import type { CardId, GameState, Lane, Side, Unit } from "./types";
+
+export interface BotDecision {
+  cardId: CardId;
+  lane: Lane;
+  targetX?: number;
+  targetY?: number;
+}
 
 const LANE_X: Record<Lane, number> = { left: 205, right: 515 };
 
