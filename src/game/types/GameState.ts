@@ -5,8 +5,12 @@ import type { SideState } from "./SideState";
 import type { Tower } from "./Tower";
 import type { Unit } from "./Unit";
 
+export type MatchPhase = "regulation" | "overtime" | "tiebreaker" | "finished";
+
 export interface GameState {
   time: number;
+  phase: MatchPhase;
+  overtimeStartCrowns: Record<Side, number> | null;
   gameOver: boolean;
   winner: Side | "draw" | null;
   units: Unit[];

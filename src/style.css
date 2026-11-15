@@ -293,7 +293,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
   .event-feed { gap: 5px; }
   .event-feed li { font-size: 9px; }
   .panel-footer { grid-column: 1 / -1; }
-  .mobile-hint { display: block; margin: 0 3px; color: var(--soft); font-size: 9px; text-align: center; }
 }
 
 @media (max-width: 390px) {

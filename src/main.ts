@@ -1,6 +1,7 @@
 import { createBattleMusic } from "./audio/battleMusic";
 import { ArenaRenderer } from "./render/arenaRenderer";
 import { createGame, SIMULATION_STEP, stepGame } from "./game/simulation";
+import { MATCH_RULES } from "./game/matchRules";
 import { createGameHistory } from "./game/history";
 import type { GameState, Side } from "./game/types";
 import "./style.css";
@@ -29,11 +30,34 @@ const speedButton = element<HTMLButtonElement>("speed");
 const stepBackButton = element<HTMLButtonElement>("step-back");
 const musicButton = element<HTMLButtonElement>("music");
 const statusLabel = element<HTMLSpanElement>("match-status");
+const clockLabel = element<HTMLSpanElement>("match-clock");
+
+function phaseLabel(state: GameState): string {
+  switch (state.phase) {
+    case "regulation":
+      return "Regulation";
+    case "overtime":
+      return "Overtime";
+    case "tiebreaker":
+      return "Tiebreaker";
+    case "finished":
+      return "Battle complete";
+  }
+}
+
+function formatClock(seconds: number): string {
+  const remaining = Math.max(0, Math.ceil(seconds));
+  const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
+  const rest = (remaining % 60).toString().padStart(2, "0");
+  return `${minutes}:${rest}`;
+}
 
 function setPaused(value: boolean): void {
   paused = value;
   pauseButton.innerHTML = paused ? "▶ &nbsp; Resume" : "Ⅱ &nbsp; Pause";
-  statusLabel.textContent = game.gameOver ? "Battle complete" : paused ? "Paused" : "Live simulation";
+  statusLabel.textContent = game.gameOver
+    ? phaseLabel(game)
+    : paused ? "Paused" : phaseLabel(game);
   music.setPaused(paused || game.gameOver);
 }
 
@@ -56,11 +80,19 @@ function updateHud(): void {
 
   const blue = game.sides.blue;
   const red = game.sides.red;
-  const clock = Math.floor(game.time);
-  const minutes = Math.floor(clock / 60).toString().padStart(2, "0");
-  const seconds = (clock % 60).toString().padStart(2, "0");
 
-  element<HTMLSpanElement>("match-clock").textContent = `${minutes}:${seconds}`;
+  if (game.phase === "regulation") {
+    clockLabel.textContent = formatClock(MATCH_RULES.regulationSeconds - game.time);
+  } else if (game.phase === "overtime") {
+    clockLabel.textContent = formatClock(
+      MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeSeconds - game.time
+    );
+  } else if (game.phase === "tiebreaker") {
+    clockLabel.textContent = "TIE";
+  } else {
+    clockLabel.textContent = "00:00";
+  }
+
   element<HTMLSpanElement>("blue-elixir").textContent = blue.elixir.toFixed(1);
   element<HTMLSpanElement>("red-elixir").textContent = red.elixir.toFixed(1);
   element<HTMLElement>("blue-elixir-bar").style.width = `${blue.elixir * 10}%`;
@@ -84,7 +116,7 @@ function updateHud(): void {
       ? "Draw"
       : `${game.winner === "blue" ? "Blue" : "Red"} wins`;
   } else if (!paused) {
-    statusLabel.textContent = "Live simulation";
+    statusLabel.textContent = phaseLabel(game);
   }
 }
 
