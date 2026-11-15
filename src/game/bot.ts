@@ -115,7 +115,7 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
   if (!cardId) return null;
 
   const cluster = cardId === "fireball" || cardId === "arrows"
-    ? bestEnemyCluster(threats, cardById(cardId).splashRadius)
+    ? bestEnemyCluster(threats, cardById(cardId).spellRadius ?? 0)
     : null;
 
   return {
