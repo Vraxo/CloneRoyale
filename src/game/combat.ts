@@ -1,7 +1,7 @@
 import type { GameState, Side, Tower, Unit } from "./types";
 import { addProjectile } from "./projectiles";
 import { damageTarget } from "./effects";
-import { otherSide } from "./state";
+import { FIELD_HEIGHT, FIELD_WIDTH, otherSide } from "./state";
 
 function findEnemyUnit(
   state: GameState,
@@ -55,13 +55,14 @@ function separateUnits(units: Unit[]): void {
   for (let iteration = 0; iteration < 3; iteration += 1) {
     for (let firstIndex = 0; firstIndex < units.length; firstIndex += 1) {
       const first = units[firstIndex];
-      if (first.hp <= 0 || (first.deploymentRemaining ?? 0) > 0) continue;
+      if (first.hp <= 0) continue;
 
       for (let secondIndex = firstIndex + 1; secondIndex < units.length; secondIndex += 1) {
         const second = units[secondIndex];
-        if (second.hp <= 0 || (second.deploymentRemaining ?? 0) > 0) continue;
-        if (first.isAir !== second.isAir) continue;
+        if (second.hp <= 0 || first.isAir !== second.isAir) continue;
 
+        const firstDeploying = (first.deploymentRemaining ?? 0) > 0;
+        const secondDeploying = (second.deploymentRemaining ?? 0) > 0;
         const firstCanMove = first.kind !== "building" && first.speed > 0;
         const secondCanMove = second.kind !== "building" && second.speed > 0;
         if (!firstCanMove && !secondCanMove) continue;
@@ -79,26 +80,40 @@ function separateUnits(units: Unit[]): void {
         const directionY = distance > 0.001 ? dy / distance : 0;
         const overlap = minimumDistance - distance;
 
-        if (firstCanMove && secondCanMove) {
-          const displacement = overlap * 0.5;
-          first.x -= directionX * displacement;
-          first.y -= directionY * displacement;
-          second.x += directionX * displacement;
-          second.y += directionY * displacement;
-          first.isMoving = true;
-          second.isMoving = true;
+        let firstDisplacement = 0;
+        let secondDisplacement = 0;
+
+        if (firstDeploying && !secondDeploying) {
+          secondDisplacement = secondCanMove ? overlap : 0;
+        } else if (secondDeploying && !firstDeploying) {
+          firstDisplacement = firstCanMove ? overlap : 0;
+        } else if (firstCanMove && secondCanMove) {
+          firstDisplacement = overlap * 0.5;
+          secondDisplacement = overlap * 0.5;
         } else if (firstCanMove) {
-          first.x -= directionX * overlap;
-          first.y -= directionY * overlap;
-          first.isMoving = true;
-        } else {
-          second.x += directionX * overlap;
-          second.y += directionY * overlap;
-          second.isMoving = true;
+          firstDisplacement = overlap;
+        } else if (secondCanMove) {
+          secondDisplacement = overlap;
+        }
+
+        if (firstDisplacement > 0) {
+          first.x = clamp(first.x - directionX * firstDisplacement, first.radius, FIELD_WIDTH - first.radius);
+          first.y = clamp(first.y - directionY * firstDisplacement, first.radius, FIELD_HEIGHT - first.radius);
+          if (!firstDeploying) first.isMoving = true;
+        }
+
+        if (secondDisplacement > 0) {
+          second.x = clamp(second.x + directionX * secondDisplacement, second.radius, FIELD_WIDTH - second.radius);
+          second.y = clamp(second.y + directionY * secondDisplacement, second.radius, FIELD_HEIGHT - second.radius);
+          if (!secondDeploying) second.isMoving = true;
         }
       }
     }
   }
+}
+
+function clamp(value: number, minimum: number, maximum: number): number {
+  return Math.max(minimum, Math.min(maximum, value));
 }
 
 function attackUnit(state: GameState, unit: Unit, target: Unit | Tower): void {
