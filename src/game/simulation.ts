@@ -84,7 +84,7 @@ export function createGame(seed = 20261115): GameState {
 
 function crownCount(state: GameState, side: Side): number {
   return state.towers.filter((tower) =>
-    tower.side === side && tower.kind === "princess" && tower.hp <= 0
+    tower.side !== side && tower.kind === "princess" && tower.hp <= 0
   ).length;
 }
 
@@ -143,8 +143,8 @@ function checkGameEnd(state: GameState): void {
   if (state.phase === "overtime") {
     const startCrowns = state.overtimeStartCrowns;
     if (startCrowns) {
-      const blueTookTower = crownCount(state, "red") > startCrowns.red;
-      const redTookTower = crownCount(state, "blue") > startCrowns.blue;
+      const blueTookTower = crownCount(state, "blue") > startCrowns.blue;
+      const redTookTower = crownCount(state, "red") > startCrowns.red;
 
       if (blueTookTower !== redTookTower) {
         const winner = blueTookTower ? "blue" : "red";
