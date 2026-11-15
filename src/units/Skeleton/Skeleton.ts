@@ -13,7 +13,7 @@ export const SKELETON: UnitDefinition = {
   radius: 7,
   splashRadius: 0,
   isAir: false,
-  canTargetAir: true,
+  canTargetAir: false,
   targetsBuildingsOnly: false,
   lifetime: 0
 };
