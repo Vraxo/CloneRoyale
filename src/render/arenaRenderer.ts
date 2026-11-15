@@ -114,6 +114,7 @@ export class ArenaRenderer {
   private readonly cardGlyphs = Array.from({ length: 4 }, () => createHudText(25, 0xf0dfb6));
   private readonly cardNames = Array.from({ length: 4 }, () => createHudText(11, 0xf4eedc));
   private readonly cardCosts = Array.from({ length: 4 }, () => createHudText(12, 0xffffff));
+  private readonly nextCardLabel = createHudText(7, 0xf0e4c7);
   private readonly nextCardName = createHudText(9, 0xe7dfca);
   private readonly nextCardCost = createHudText(10, 0xffffff);
   private readonly elixirValue = createHudText(17, 0xf1d8ff);
@@ -145,6 +146,7 @@ export class ArenaRenderer {
       ...this.cardGlyphs,
       ...this.cardNames,
       ...this.cardCosts,
+      this.nextCardLabel,
       this.nextCardName,
       this.nextCardCost,
       this.elixirValue,
@@ -228,7 +230,10 @@ export class ArenaRenderer {
     graphics
       .roundRect(nextX + 5, layout.cardY - 1, layout.nextWidth - 10, 14, 4)
       .fill({ color: 0x4b3d62 });
-    this.nextCardName.text = `NEXT\n${cardById(nextCardId).name}`;
+    this.nextCardLabel.text = "NEXT";
+    this.nextCardLabel.anchor.set(0.5);
+    this.nextCardLabel.position.set(nextX + layout.nextWidth / 2, layout.cardY + 6);
+    this.nextCardName.text = cardById(nextCardId).name;
     this.nextCardName.anchor.set(0.5);
     this.nextCardName.position.set(nextX + layout.nextWidth / 2, nextY + (layout.cardHeight - 16) / 2);
     this.nextCardName.style.fontSize = Math.max(7, Math.min(9, layout.nextWidth * 0.15));
