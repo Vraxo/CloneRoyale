@@ -1,3 +1,4 @@
+import { createBattleMusic } from "./audio/battleMusic";
 import { ArenaRenderer } from "./render/arenaRenderer";
 import { createGame, SIMULATION_STEP, stepGame } from "./game/simulation";
 import type { GameState, Side } from "./game/types";
@@ -11,28 +12,34 @@ function element<T extends HTMLElement>(id: string): T {
 
 const host = element<HTMLDivElement>("game");
 const renderer = new ArenaRenderer();
+const music = createBattleMusic();
 let game: GameState = createGame(Date.now() >>> 0);
 let paused = false;
 let speed = 1;
 let accumulator = 0;
 let lastHudUpdate = 0;
+let previousGameOver = false;
 
 await renderer.initialize(host);
 
 const pauseButton = element<HTMLButtonElement>("pause");
 const speedButton = element<HTMLButtonElement>("speed");
+const musicButton = element<HTMLButtonElement>("music");
 const statusLabel = element<HTMLSpanElement>("match-status");
 
 function setPaused(value: boolean): void {
   paused = value;
   pauseButton.innerHTML = paused ? "▶ &nbsp; Resume" : "Ⅱ &nbsp; Pause";
   statusLabel.textContent = game.gameOver ? "Battle complete" : paused ? "Paused" : "Live simulation";
+  music.setPaused(paused || game.gameOver);
 }
 
 function startNewBattle(): void {
   game = createGame((Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0);
   accumulator = 0;
+  previousGameOver = false;
   setPaused(false);
+  music.start(game.time);
   updateHud();
 }
 
@@ -80,6 +87,7 @@ pauseButton.addEventListener("click", () => setPaused(!paused));
 element<HTMLButtonElement>("step").addEventListener("click", () => {
   if (!game.gameOver) {
     stepGame(game, SIMULATION_STEP);
+    if (game.gameOver) music.stop();
     renderer.render(game);
     updateHud();
   }
@@ -89,6 +97,13 @@ speedButton.addEventListener("click", () => {
   const currentIndex = speeds.indexOf(speed);
   speed = speeds[(currentIndex + 1) % speeds.length];
   speedButton.textContent = `${speed}×`;
+  music.setSpeed(speed);
+});
+musicButton.addEventListener("click", () => {
+  const enabled = musicButton.getAttribute("aria-pressed") !== "true";
+  musicButton.setAttribute("aria-pressed", enabled.toString());
+  musicButton.textContent = enabled ? "On" : "Off";
+  music.setEnabled(enabled);
 });
 
 renderer.app.ticker.add((ticker) => {
@@ -102,6 +117,11 @@ renderer.app.ticker.add((ticker) => {
     }
   }
 
+  if (game.gameOver && !previousGameOver) {
+    music.stop();
+  }
+  previousGameOver = game.gameOver;
+
   renderer.render(game);
 
   const now = performance.now();
@@ -111,4 +131,5 @@ renderer.app.ticker.add((ticker) => {
   }
 });
 
+music.start(game.time);
 updateHud();
