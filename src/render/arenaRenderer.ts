@@ -115,6 +115,7 @@ export class ArenaRenderer {
   private readonly cardNames = Array.from({ length: 4 }, () => createHudText(11, 0xf4eedc));
   private readonly cardCosts = Array.from({ length: 4 }, () => createHudText(12, 0xffffff));
   private readonly nextCardName = createHudText(9, 0xe7dfca);
+  private readonly nextCardCost = createHudText(10, 0xffffff);
   private readonly elixirValue = createHudText(17, 0xf1d8ff);
   private readonly elixirMax = createHudText(8, 0xc1a5d8);
   private readonly placementHint = createHudText(9, 0xc9d1c2);
@@ -145,6 +146,7 @@ export class ArenaRenderer {
       ...this.cardNames,
       ...this.cardCosts,
       this.nextCardName,
+      this.nextCardCost,
       this.elixirValue,
       this.elixirMax,
       this.placementHint
@@ -223,20 +225,23 @@ export class ArenaRenderer {
     graphics
       .roundRect(nextX, nextY, layout.nextWidth, layout.cardHeight - 16, 7)
       .stroke({ color: 0x7c806a, width: 1 });
-    this.nextCardName.text = cardById(nextCardId).name;
+    graphics
+      .roundRect(nextX + 5, layout.cardY - 1, layout.nextWidth - 10, 14, 4)
+      .fill({ color: 0x4b3d62 });
+    this.nextCardName.text = `NEXT\n${cardById(nextCardId).name}`;
     this.nextCardName.anchor.set(0.5);
     this.nextCardName.position.set(nextX + layout.nextWidth / 2, nextY + (layout.cardHeight - 16) / 2);
     this.nextCardName.style.fontSize = Math.max(7, Math.min(9, layout.nextWidth * 0.15));
     this.nextCardName.style.wordWrap = true;
     this.nextCardName.style.wordWrapWidth = layout.nextWidth - 8;
 
-    graphics
-      .roundRect(nextX + 5, layout.cardY - 1, layout.nextWidth - 10, 14, 4)
-      .fill({ color: 0x4b3d62 });
-    // "NEXT" is rendered as part of the text itself to keep the preview compact.
-    this.nextCardName.text = `NEXT\n${cardById(nextCardId).name}`;
-    this.nextCardName.position.set(nextX + layout.nextWidth / 2, nextY + (layout.cardHeight - 16) / 2);
-    this.nextCardName.style.fontSize = Math.max(7, Math.min(9, layout.nextWidth * 0.15));
+    const nextCostX = nextX + layout.nextWidth - 11;
+    const nextCostY = nextY + layout.cardHeight - 27;
+    graphics.circle(nextCostX, nextCostY, 9).fill({ color: 0x76569a });
+    graphics.circle(nextCostX, nextCostY, 9).stroke({ color: 0xc2a4df, width: 1 });
+    this.nextCardCost.text = cardById(nextCardId).cost.toString();
+    this.nextCardCost.anchor.set(0.5);
+    this.nextCardCost.position.set(nextCostX, nextCostY);
 
     for (let index = 0; index < 4; index += 1) {
       const cardId = blue.hand[index];
