@@ -13,7 +13,7 @@ export const MINI_PEKKA: UnitDefinition = {
   radius: 14,
   splashRadius: 0,
   isAir: false,
-  canTargetAir: true,
+  canTargetAir: false,
   targetsBuildingsOnly: false,
   lifetime: 0
 };
