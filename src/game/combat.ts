@@ -84,6 +84,19 @@ function movementTarget(unit: Unit, targetX: number, targetY: number): { x: numb
   };
 }
 
+function moveToward(unit: Unit, x: number, y: number, dt: number): void {
+  const dx = x - unit.x;
+  const dy = y - unit.y;
+  const distance = Math.hypot(dx, dy);
+  if (distance < 0.001 || unit.speed <= 0) return;
+
+  unit.facing = Math.atan2(dy, dx);
+  unit.isMoving = true;
+  const amount = Math.min(distance, unit.speed * dt);
+  unit.x += (dx / distance) * amount;
+  unit.y += (dy / distance) * amount;
+}
+
 function moveTowardTarget(unit: Unit, x: number, y: number, dt: number): void {
   const target = movementTarget(unit, x, y);
   moveToward(unit, target.x, target.y, dt);
