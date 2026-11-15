@@ -164,6 +164,26 @@ export class ArenaRenderer {
       }
     }
 
+    for (const laneX of [205, 515]) {
+      for (const laneY of [24, 512]) {
+        g.roundRect(laneX - 54, laneY, 108, 424, 12)
+          .fill({ color: 0x786f4e, alpha: 0.72 });
+        g.roundRect(laneX - 48, laneY, 96, 424, 9)
+          .fill({ color: 0x9a8b63, alpha: 0.78 });
+        g.roundRect(laneX - 43, laneY, 86, 424, 7)
+          .fill({ color: 0xa2946c, alpha: 0.38 });
+
+        for (let mark = 0; mark < 13; mark += 1) {
+          const y = laneY + 18 + mark * 32;
+          const offset = mark % 2 === 0 ? 0 : 13;
+          g.circle(laneX - 28 + offset, y, 1.8)
+            .fill({ color: 0x6e674b, alpha: 0.32 });
+          g.circle(laneX + 25 - offset, y + 12, 1.4)
+            .fill({ color: 0xd0bd8b, alpha: 0.3 });
+        }
+      }
+    }
+
     g.rect(24, 448, 672, 64).fill(0x4b94a0);
     g.rect(24, 455, 672, 50).fill(0x5ba8ad);
 
