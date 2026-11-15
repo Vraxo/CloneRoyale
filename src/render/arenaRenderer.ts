@@ -24,13 +24,13 @@ function drawLaneConnector(
 ): void {
   const left = Math.min(startX, endX);
   const width = Math.abs(endX - startX);
-  const top = centerY - 36;
+  const top = centerY - 16;
 
-  graphics.rect(left, top, width, 72)
+  graphics.rect(left, top, width, 32)
     .fill({ color: 0x786f4e, alpha: 0.72 });
-  graphics.rect(left, top + 5, width, 62)
+  graphics.rect(left, top + 3, width, 26)
     .fill({ color: 0x9a8b63, alpha: 0.78 });
-  graphics.rect(left, top + 9, width, 54)
+  graphics.rect(left, top + 5, width, 22)
     .fill({ color: 0xa2946c, alpha: 0.38 });
 }
 function synchronizeViews<T extends { id: number }, V extends EntityView<T>>(
@@ -182,20 +182,26 @@ export class ArenaRenderer {
     }
 
     for (const laneX of [205, 515]) {
-      for (const laneY of [24, 512]) {
-        g.roundRect(laneX - 36, laneY, 72, 424, 10)
+      const laneSegments = [
+        { top: 78, height: 370 },
+        { top: 512, height: 370 }
+      ];
+
+      for (const segment of laneSegments) {
+        g.rect(laneX - 16, segment.top, 32, segment.height)
           .fill({ color: 0x786f4e, alpha: 0.72 });
-        g.roundRect(laneX - 31, laneY, 62, 424, 8)
+        g.rect(laneX - 13, segment.top, 26, segment.height)
           .fill({ color: 0x9a8b63, alpha: 0.78 });
-        g.roundRect(laneX - 27, laneY, 54, 424, 6)
+        g.rect(laneX - 11, segment.top, 22, segment.height)
           .fill({ color: 0xa2946c, alpha: 0.38 });
 
-        for (let mark = 0; mark < 13; mark += 1) {
-          const y = laneY + 18 + mark * 32;
-          const offset = mark % 2 === 0 ? 0 : 13;
-          g.circle(laneX - 18 + offset * 0.6, y, 1.5)
+        const markCount = Math.floor(segment.height / 32);
+        for (let mark = 0; mark < markCount; mark += 1) {
+          const y = segment.top + 18 + mark * 32;
+          const offset = mark % 2 === 0 ? 0 : 7;
+          g.circle(laneX - 8 + offset, y, 1.2)
             .fill({ color: 0x6e674b, alpha: 0.32 });
-          g.circle(laneX + 17 - offset * 0.6, y + 12, 1.2)
+          g.circle(laneX + 8 - offset, y + 12, 1)
             .fill({ color: 0xd0bd8b, alpha: 0.3 });
         }
       }
