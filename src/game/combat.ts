@@ -99,13 +99,11 @@ function separateUnits(units: Unit[]): void {
         if (firstDisplacement > 0) {
           first.x = clamp(first.x - directionX * firstDisplacement, first.radius, FIELD_WIDTH - first.radius);
           first.y = clamp(first.y - directionY * firstDisplacement, first.radius, FIELD_HEIGHT - first.radius);
-          if (!firstDeploying) first.isMoving = true;
         }
 
         if (secondDisplacement > 0) {
           second.x = clamp(second.x + directionX * secondDisplacement, second.radius, FIELD_WIDTH - second.radius);
           second.y = clamp(second.y + directionY * secondDisplacement, second.radius, FIELD_HEIGHT - second.radius);
-          if (!secondDeploying) second.isMoving = true;
         }
       }
     }
