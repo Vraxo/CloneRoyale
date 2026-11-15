@@ -42,21 +42,6 @@ function drawLaneConnector(
     points.push({ x, y });
   }
 
-  const left: { x: number; y: number }[] = [];
-  const right: { x: number; y: number }[] = [];
-
-  for (let index = 0; index < points.length; index += 1) {
-    const previous = points[Math.max(0, index - 1)];
-    const next = points[Math.min(points.length - 1, index + 1)];
-    const dx = next.x - previous.x;
-    const dy = next.y - previous.y;
-    const length = Math.hypot(dx, dy) || 1;
-    const offsetX = -dy / length * 43;
-    const offsetY = dx / length * 43;
-    left.push({ x: points[index].x + offsetX, y: points[index].y + offsetY });
-    right.push({ x: points[index].x - offsetX, y: points[index].y - offsetY });
-  }
-
   const drawRibbon = (width: number, color: number, alpha: number): void => {
     const halfWidth = width / 2;
     const outline: { x: number; y: number }[] = [];
