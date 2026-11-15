@@ -140,10 +140,6 @@ function updateHud(): void {
     clockLabel.textContent = "00:00";
   }
 
-  element<HTMLSpanElement>("blue-elixir").textContent = blue.elixir.toFixed(1);
-  element<HTMLSpanElement>("red-elixir").textContent = red.elixir.toFixed(1);
-  element<HTMLElement>("blue-elixir-bar").style.width = `${blue.elixir * 10}%`;
-  element<HTMLElement>("red-elixir-bar").style.width = `${red.elixir * 10}%`;
   element<HTMLSpanElement>("blue-units").textContent = game.units.filter((unit) => unit.side === "blue").length.toString();
   element<HTMLSpanElement>("red-units").textContent = game.units.filter((unit) => unit.side === "red").length.toString();
   element<HTMLSpanElement>("blue-towers").textContent = towerHealth(game, "blue").toString();
