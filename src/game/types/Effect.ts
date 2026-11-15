@@ -1,3 +1,5 @@
+import type { Side } from "./Side";
+
 export interface Effect {
   id: number;
   x: number;
@@ -5,5 +7,6 @@ export interface Effect {
   age: number;
   lifetime: number;
   radius: number;
-  style: "hit" | "explosion" | "arrows";
+  style: "hit" | "explosion" | "arrows" | "deployment";
+  side?: Side;
 }

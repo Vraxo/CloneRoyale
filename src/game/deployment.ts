@@ -24,6 +24,9 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
     const row = Math.floor(index / 5);
     const offsetX = card.count === 1 ? 0 : (column - 2) * Math.min(11, definition.radius * 0.85);
     const offsetY = card.count === 1 ? 0 : row * direction * 11;
+    const x = centerX + offsetX;
+    const y = baseY + offsetY;
+
     state.units.push({
       id: state.nextId++,
       side,
@@ -31,8 +34,8 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
       type: definition.type,
       kind: card.category === "building" ? "building" : "troop",
       lane,
-      x: centerX + offsetX,
-      y: baseY + offsetY,
+      x,
+      y,
       hp: definition.hp,
       maxHp: definition.hp,
       radius: definition.radius,
@@ -51,6 +54,17 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
       animationOffset: nextRandom(state) * Math.PI * 2,
       attackAnim: 0
+    });
+
+    state.effects.push({
+      id: state.nextId++,
+      x,
+      y,
+      age: 0,
+      lifetime: 0.58,
+      radius: Math.max(22, definition.radius * 2.2),
+      style: "deployment",
+      side
     });
   }
 }

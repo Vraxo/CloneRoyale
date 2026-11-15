@@ -117,7 +117,7 @@ export class ArenaRenderer {
       this.entities,
       (effect) => new EffectView(effect),
       (view, effect) => view.update(effect),
-      (effect) => effect.y + 2000
+      (effect) => effect.style === "deployment" ? effect.y - 1 : effect.y + 2000
     );
   }
 
