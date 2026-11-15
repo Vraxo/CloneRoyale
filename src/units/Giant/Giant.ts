@@ -13,7 +13,7 @@ export const GIANT: UnitDefinition = {
   radius: 22,
   splashRadius: 0,
   isAir: false,
-  canTargetAir: true,
+  canTargetAir: false,
   targetsBuildingsOnly: true,
   lifetime: 0
 };
