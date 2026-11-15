@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#151918" />
+    <meta name="description" content="A small, top-down real-time strategy battle lab." />
+    <title>Clone Royale — Battle Lab</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Clone Royale home">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-copy">
+            <strong>Clone Royale</strong>
+            <small>Battle Lab <i></i> AI vs AI</small>
+          </span>
+        </a>
+        <div class="match-summary" aria-live="polite">
+          <span class="live-dot"></span>
+          <span id="match-status">Preparing arena</span>
+          <span class="summary-divider"></span>
+          <strong id="match-clock">00:00</strong>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="arena-column" aria-label="Battlefield">
+          <div class="arena-frame">
+            <div id="game" class="game-surface"></div>
+            <div class="arena-caption">
+              <span><i class="team-dot blue"></i> BLUE</span>
+              <span class="caption-center">SPECTATOR MODE</span>
+              <span>RED <i class="team-dot red"></i></span>
+            </div>
+          </div>
+          <p class="mobile-hint">The battlefield scales to your screen. Rotate your device for a taller view.</p>
+        </section>
+
+        <aside class="control-panel">
+          <section class="panel-section">
+            <div class="section-heading">
+              <span class="eyebrow">MATCH CONTROL</span>
+              <span class="status-tag">LOCAL SIMULATION</span>
+            </div>
+            <button id="new-battle" class="primary-button" type="button">
+              <span aria-hidden="true">↻</span> New battle
+            </button>
+            <div class="control-row">
+              <button id="pause" class="secondary-button" type="button">Ⅱ &nbsp; Pause</button>
+              <button id="step" class="secondary-button icon-button" type="button" aria-label="Advance one simulation step" title="Advance one simulation step">▸|</button>
+            </div>
+            <div class="speed-row">
+              <span>Simulation speed</span>
+              <button id="speed" class="speed-button" type="button">1×</button>
+            </div>
+          </section>
+
+          <section class="panel-section team-section">
+            <div class="section-heading">
+              <span class="eyebrow">BLUE TEAM</span>
+              <span class="team-label blue-text">SOUTH</span>
+            </div>
+            <div class="elixir-line">
+              <strong id="blue-elixir">5.0</strong>
+              <span>ELIXIR</span>
+              <div class="elixir-track"><i id="blue-elixir-bar"></i></div>
+            </div>
+            <div class="team-stats">
+              <div><strong id="blue-units">0</strong><span>UNITS</span></div>
+              <div><strong id="blue-towers">3</strong><span>TOWERS</span></div>
+              <div><strong id="blue-played">0</strong><span>CARDS</span></div>
+            </div>
+          </section>
+
+          <section class="panel-section team-section">
+            <div class="section-heading">
+              <span class="eyebrow">RED TEAM</span>
+              <span class="team-label red-text">NORTH</span>
+            </div>
+            <div class="elixir-line">
+              <strong id="red-elixir">5.0</strong>
+              <span>ELIXIR</span>
+              <div class="elixir-track red-track"><i id="red-elixir-bar"></i></div>
+            </div>
+            <div class="team-stats">
+              <div><strong id="red-units">0</strong><span>UNITS</span></div>
+              <div><strong id="red-towers">3</strong><span>TOWERS</span></div>
+              <div><strong id="red-played">0</strong><span>CARDS</span></div>
+            </div>
+          </section>
+
+          <section class="panel-section event-section">
+            <div class="section-heading">
+              <span class="eyebrow">BATTLE FEED</span>
+              <span class="feed-indicator"></span>
+            </div>
+            <ol id="event-feed" class="event-feed">
+              <li>Waiting for the first deployment…</li>
+            </ol>
+          </section>
+
+          <footer class="panel-footer">
+            <span>PROTOTYPE 0.1</span>
+            <span>DETERMINISTIC SIMULATION</span>
+          </footer>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
