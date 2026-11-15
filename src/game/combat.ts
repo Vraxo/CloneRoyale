@@ -45,6 +45,7 @@ function moveToward(unit: Unit, x: number, y: number, dt: number): void {
   if (distance < 0.001 || unit.speed <= 0) return;
 
   unit.facing = Math.atan2(dy, dx);
+  unit.isMoving = true;
   const amount = Math.min(distance, unit.speed * dt);
   unit.x += (dx / distance) * amount;
   unit.y += (dy / distance) * amount;
@@ -85,6 +86,7 @@ export function updateUnits(state: GameState, dt: number): void {
       continue;
     }
 
+    unit.isMoving = false;
     unit.age += dt;
     unit.attackCooldown = Math.max(0, unit.attackCooldown - dt);
     unit.attackAnim = Math.max(0, unit.attackAnim - dt);

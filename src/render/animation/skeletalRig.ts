@@ -102,12 +102,12 @@ export class SkeletalRig {
 
   public update(unit: Unit, time: number): void {
     const phase = time * 8.2 + unit.animationOffset;
-    const moving = unit.speed > 0;
-    const stride = moving ? Math.sin(phase) * 0.42 : Math.sin(time * 2 + unit.animationOffset) * 0.035;
+    const moving = unit.isMoving ?? false;
+    const stride = moving ? Math.sin(phase) * 0.42 : 0;
     const attackProgress = unit.attackAnim > 0 ? 1 - unit.attackAnim / 0.32 : 0;
     const attackSwing = unit.attackAnim > 0 ? Math.sin(attackProgress * Math.PI) : 0;
 
-    const idleBob = moving ? Math.abs(Math.sin(phase * 2)) * -0.65 : Math.sin(time * 2 + unit.animationOffset) * -0.35;
+    const idleBob = moving ? Math.abs(Math.sin(phase * 2)) * -0.65 : Math.sin(time * 2 + unit.animationOffset) * -0.2;
     this.container.position.set(0, idleBob);
     this.container.rotation = unit.facing + Math.PI / 2;
 

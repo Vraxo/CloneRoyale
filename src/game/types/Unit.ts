@@ -37,6 +37,7 @@ export interface Unit {
   age: number;
   deploymentDuration?: number;
   deploymentRemaining?: number;
+  isMoving?: boolean;
   facing: number;
   animationOffset: number;
   attackAnim: number;
