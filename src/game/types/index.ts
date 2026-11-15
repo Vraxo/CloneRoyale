@@ -1,13 +1,11 @@
 export type { Side } from "./Side";
 export type { Lane } from "./Lane";
-export type {
-  CardId,
-  CardDefinition,
-  TroopCardDefinition,
-  BuildingCardDefinition,
-  SpellCardDefinition,
-  UnitCardDefinition
-} from "./Card";
+export type { CardId } from "./CardId";
+export type { CardDefinition } from "./CardDefinition";
+export type { TroopCardDefinition } from "./TroopCardDefinition";
+export type { BuildingCardDefinition } from "./BuildingCardDefinition";
+export type { SpellCardDefinition } from "./SpellCardDefinition";
+export type { UnitCardDefinition } from "./UnitCardDefinition";
 export type { UnitType, Unit } from "./Unit";
 export type { UnitAttack, ProjectileAttackStyle } from "./UnitAttack";
 export type { UnitDefinition } from "./UnitDefinition";

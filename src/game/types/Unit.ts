@@ -1,4 +1,4 @@
-import type { CardId } from "./Card";
+import type { CardId } from "./CardId";
 import type { Lane } from "./Lane";
 import type { Side } from "./Side";
 import type { UnitAttack } from "./UnitAttack";
