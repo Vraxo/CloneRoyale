@@ -19,65 +19,20 @@ interface EntityView<T> {
 function drawLaneConnector(
   graphics: Graphics,
   startX: number,
-  startY: number,
   endX: number,
-  endY: number,
-  direction: -1 | 1
+  centerY: number
 ): void {
-  const points: { x: number; y: number }[] = [];
-  const control1 = { x: startX, y: startY + direction * 35 };
-  const control2 = { x: endX, y: endY - direction * 18 };
+  const left = Math.min(startX, endX);
+  const width = Math.abs(endX - startX);
+  const top = centerY - 54;
 
-  for (let step = 0; step <= 24; step += 1) {
-    const t = step / 24;
-    const inverse = 1 - t;
-    const x = inverse ** 3 * startX
-      + 3 * inverse ** 2 * t * control1.x
-      + 3 * inverse * t ** 2 * control2.x
-      + t ** 3 * endX;
-    const y = inverse ** 3 * startY
-      + 3 * inverse ** 2 * t * control1.y
-      + 3 * inverse * t ** 2 * control2.y
-      + t ** 3 * endY;
-    points.push({ x, y });
-  }
-
-  const drawRibbon = (width: number, color: number, alpha: number): void => {
-    const halfWidth = width / 2;
-    const outline: { x: number; y: number }[] = [];
-
-    for (let index = 0; index < points.length; index += 1) {
-      const previous = points[Math.max(0, index - 1)];
-      const next = points[Math.min(points.length - 1, index + 1)];
-      const dx = next.x - previous.x;
-      const dy = next.y - previous.y;
-      const length = Math.hypot(dx, dy) || 1;
-      outline.push({
-        x: points[index].x - dy / length * halfWidth,
-        y: points[index].y + dx / length * halfWidth
-      });
-    }
-
-    for (let index = points.length - 1; index >= 0; index -= 1) {
-      const previous = points[Math.max(0, index - 1)];
-      const next = points[Math.min(points.length - 1, index + 1)];
-      const dx = next.x - previous.x;
-      const dy = next.y - previous.y;
-      const length = Math.hypot(dx, dy) || 1;
-      outline.push({
-        x: points[index].x + dy / length * halfWidth,
-        y: points[index].y - dx / length * halfWidth
-      });
-    }
-
-    graphics.poly(outline.flatMap((point) => [point.x, point.y])).fill({ color, alpha });
-  };
-
-  drawRibbon(108, 0x786f4e, 0.72);
-  drawRibbon(96, 0x9a8b63, 0.78);
-  drawRibbon(86, 0xa2946c, 0.38);
+  graphics.rect(left, top, width, 108)
+    .fill({ color: 0x786f4e, alpha: 0.72 });
+  graphics.rect(left, top + 6, width, 96)
+    .fill({ color: 0x9a8b63, alpha: 0.78 });
+  graphics.rect(left, top + 11, width, 86)
+    .fill({ color: 0xa2946c, alpha: 0.38 });
 }
-
 function synchronizeViews<T extends { id: number }, V extends EntityView<T>>(
   entities: T[],
   views: Map<number, V>,
@@ -246,10 +201,10 @@ export class ArenaRenderer {
       }
     }
 
-    drawLaneConnector(g, 205, 112, 360, 78, -1);
-    drawLaneConnector(g, 515, 112, 360, 78, -1);
-    drawLaneConnector(g, 205, 848, 360, 882, 1);
-    drawLaneConnector(g, 515, 848, 360, 882, 1);
+    drawLaneConnector(g, 205, 360, 78);
+    drawLaneConnector(g, 515, 360, 78);
+    drawLaneConnector(g, 205, 360, 882);
+    drawLaneConnector(g, 515, 360, 882);
 
     g.rect(24, 448, 672, 64).fill(0x4b94a0);
     g.rect(24, 455, 672, 50).fill(0x5ba8ad);
