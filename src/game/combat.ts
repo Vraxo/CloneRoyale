@@ -238,6 +238,9 @@ export function updateTowers(state: GameState, dt: number): void {
     if (!target) continue;
 
     tower.attackCooldown = tower.attackInterval;
+    state.audioEvents.push(
+      tower.kind === "king" ? "king-tower-attack" : "princess-tower-attack"
+    );
     addProjectile(
       state,
       tower.side,

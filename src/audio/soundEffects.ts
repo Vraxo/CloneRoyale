@@ -8,32 +8,40 @@ export interface SoundEffects {
   stopAll(): void;
 }
 
-const SOUND_SOURCES: Record<AudioEvent, string> = {
-  "mini-pekka-deploy": "/audio/sfx/mini-pekka/deploy.ogg",
-  "mini-pekka-attack": "/audio/sfx/mini-pekka/attack.ogg",
-  "mini-pekka-hit": "/audio/sfx/mini-pekka/hit.ogg",
-  "mini-pekka-step": "/audio/sfx/mini-pekka/step.ogg"
+const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
+  "mini-pekka-deploy": ["/audio/sfx/mini-pekka/deploy.ogg"],
+  "mini-pekka-attack": ["/audio/sfx/mini-pekka/attack.ogg"],
+  "mini-pekka-hit": ["/audio/sfx/mini-pekka/hit.ogg"],
+  "mini-pekka-step": ["/audio/sfx/mini-pekka/step.ogg"],
+  "princess-tower-attack": ["/audio/sfx/towers/princess-attack.ogg"],
+  "king-tower-attack": ["/audio/sfx/towers/king-attack.ogg"]
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "mini-pekka-deploy": 0.8,
   "mini-pekka-attack": 0.8,
   "mini-pekka-hit": 0.65,
-  "mini-pekka-step": 0.28
+  "mini-pekka-step": 0.28,
+  "princess-tower-attack": 0.42,
+  "king-tower-attack": 0.48
 };
 
 const MAX_VOICES_PER_SOUND = 6;
 const MAX_HIT_VOICES = 2;
 const HIT_SOUND_MIN_INTERVAL_MS = 180;
+const PITCH_VARIATION = 0.025;
 
 export function createSoundEffects(): SoundEffects {
-  const sources = new Map<AudioEvent, HTMLAudioElement>();
+  const sources = new Map<AudioEvent, HTMLAudioElement[]>();
   const voices = new Map<AudioEvent, HTMLAudioElement[]>();
+  const lastVariant = new Map<AudioEvent, number>();
 
-  for (const [event, source] of Object.entries(SOUND_SOURCES) as [AudioEvent, string][]) {
-    const audio = new Audio(source);
-    audio.preload = "auto";
-    sources.set(event, audio);
+  for (const [event, paths] of Object.entries(SOUND_SOURCES) as [AudioEvent, readonly string[]][]) {
+    sources.set(event, paths.map((path) => {
+      const audio = new Audio(path);
+      audio.preload = "auto";
+      return audio;
+    }));
     voices.set(event, []);
   }
 
@@ -62,6 +70,24 @@ export function createSoundEffects(): SoundEffects {
     }
   }
 
+  function chooseSource(event: AudioEvent): HTMLAudioElement | null {
+    const options = sources.get(event);
+    if (!options?.length) return null;
+
+    if (options.length === 1) return options[0];
+
+    const previous = lastVariant.get(event) ?? -1;
+    let selected = Math.floor(Math.random() * options.length);
+
+    if (selected === previous) {
+      selected = (selected + 1 + Math.floor(Math.random() * (options.length - 1)))
+        % options.length;
+    }
+
+    lastVariant.set(event, selected);
+    return options[selected];
+  }
+
   return {
     play(event: AudioEvent): void {
       if (!enabled || !unlocked) return;
@@ -72,7 +98,7 @@ export function createSoundEffects(): SoundEffects {
         lastHitSoundAt = now;
       }
 
-      const source = sources.get(event);
+      const source = chooseSource(event);
       const active = voices.get(event);
       if (!source || !active) return;
 
@@ -85,8 +111,9 @@ export function createSoundEffects(): SoundEffects {
       }
 
       const audio = source.cloneNode(true) as HTMLAudioElement;
+      const pitch = 1 + (Math.random() * 2 - 1) * PITCH_VARIATION;
       audio.volume = SOUND_VOLUMES[event];
-      audio.playbackRate = speed;
+      audio.playbackRate = speed * pitch;
       audio.currentTime = 0;
       active.push(audio);
 
