@@ -1,25 +1,21 @@
 import type { Unit } from "../../game/types";
 import type { UnitView } from "./unitView";
-import { ArcherView } from "./units/archerView";
-import { BabyDragonView } from "./units/babyDragonView";
-import { CannonView } from "./units/cannonView";
-import { GiantView } from "./units/giantView";
-import { MiniPekkaView } from "./units/miniPekkaView";
-import { SkeletonView } from "./units/skeletonView";
-
+import { ArcherView } from "../../units/archer/view";
+import { BabyDragonView } from "../../units/babyDragon/view";
+import { CannonView } from "../../units/cannon/view";
+import { GiantView } from "../../units/giant/view";
+import { MiniPekkaView } from "../../units/miniPekka/view";
+import { SkeletonView } from "../../units/skeleton/view";
+type UnitViewConstructor = new (unit: Unit) => UnitView;
+const UNIT_VIEWS: Record<Unit["type"], UnitViewConstructor> = {
+  giant: GiantView,
+  archer: ArcherView,
+  "mini-pekka": MiniPekkaView,
+  "baby-dragon": BabyDragonView,
+  skeleton: SkeletonView,
+  cannon: CannonView
+};
 export function createUnitView(unit: Unit): UnitView {
-  switch (unit.type) {
-    case "skeleton":
-      return new SkeletonView(unit);
-    case "giant":
-      return new GiantView(unit);
-    case "archer":
-      return new ArcherView(unit);
-    case "mini-pekka":
-      return new MiniPekkaView(unit);
-    case "baby-dragon":
-      return new BabyDragonView(unit);
-    case "cannon":
-      return new CannonView(unit);
-  }
+  const View = UNIT_VIEWS[unit.type];
+  return new View(unit);
 }
