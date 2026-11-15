@@ -4,7 +4,7 @@ import { ArenaRenderer } from "./render/arenaRenderer";
 import { createGame, SIMULATION_STEP, stepGame } from "./game/simulation";
 import { MATCH_RULES } from "./game/matchRules";
 import { createGameHistory } from "./game/history";
-import { CARDS, cardById } from "./game/cards";
+import { cardById } from "./game/cards";
 import { canPlaceCard, playCard } from "./game/deployment";
 import type { CardId, GameState, Lane, Side } from "./game/types";
 import "./style.css";
