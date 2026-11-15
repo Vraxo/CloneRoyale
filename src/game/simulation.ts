@@ -144,3 +144,5 @@ export function stepGame(state: GameState, dt: number): void {
 
   checkGameEnd(state);
 }
+
+export const SIMULATION_STEP = 1 / 30;
