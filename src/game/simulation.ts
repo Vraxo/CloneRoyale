@@ -159,28 +159,30 @@ function checkGameEnd(state: GameState): void {
     return;
   }
 
-  if (state.phase === "tiebreaker") {
-    const blueTowerDestroyed = state.towers.some((tower) => tower.side === "blue" && tower.hp <= 0);
-    const redTowerDestroyed = state.towers.some((tower) => tower.side === "red" && tower.hp <= 0);
-
-    if (blueTowerDestroyed && redTowerDestroyed) {
-      finishGame(state, "draw", "The tiebreaker ended in a draw.");
-    } else if (blueTowerDestroyed) {
-      finishGame(state, "red", "Red wins the tiebreaker!");
-    } else if (redTowerDestroyed) {
-      finishGame(state, "blue", "Blue wins the tiebreaker!");
-    }
-  }
 }
 
 function updateTiebreaker(state: GameState, dt: number): void {
   const damage = MATCH_RULES.tiebreakerDamagePerSecond * dt;
+  const lowestBlueTower = Math.min(
+    ...state.towers.filter((tower) => tower.side === "blue" && tower.hp > 0).map((tower) => tower.hp)
+  );
+  const lowestRedTower = Math.min(
+    ...state.towers.filter((tower) => tower.side === "red" && tower.hp > 0).map((tower) => tower.hp)
+  );
+  const blueLoses = lowestBlueTower <= damage;
+  const redLoses = lowestRedTower <= damage;
 
   for (const tower of state.towers) {
     tower.hp = Math.max(0, tower.hp - damage);
   }
 
-  checkGameEnd(state);
+  if (blueLoses && redLoses) {
+    finishGame(state, "draw", "The tiebreaker ended in a draw.");
+  } else if (blueLoses) {
+    finishGame(state, "red", "Red wins the tiebreaker!");
+  } else if (redLoses) {
+    finishGame(state, "blue", "Blue wins the tiebreaker!");
+  }
 }
 
 function elixirInterval(state: GameState): number {
