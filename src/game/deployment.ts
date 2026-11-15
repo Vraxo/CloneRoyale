@@ -63,6 +63,10 @@ function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane:
       attackAnim: 0
     });
 
+    if (definition.type === "mini-pekka") {
+      state.audioEvents.push("mini-pekka-deploy");
+    }
+
     state.effects.push({
       id: state.nextId++,
       x,

@@ -124,6 +124,7 @@ function attackUnit(state: GameState, unit: Unit, target: Unit | Tower): void {
 
   if (unit.attack.type === "melee") {
     damageTarget(state, target.id, unit.damage);
+    if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-hit");
     return;
   }
 
@@ -151,9 +152,6 @@ export function updateUnits(state: GameState, dt: number): void {
     if (deploymentRemaining > 0) {
       const remaining = Math.max(0, deploymentRemaining - dt);
       unit.deploymentRemaining = remaining;
-      if (remaining === 0 && unit.type === "mini-pekka") {
-        state.audioEvents.push("mini-pekka-deploy");
-      }
       continue;
     }
 
