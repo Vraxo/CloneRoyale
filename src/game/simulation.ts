@@ -2,7 +2,6 @@ import { cardById, STARTER_DECK } from "./cards";
 import { chooseBotAction } from "./bot";
 import type {
   CardId,
-  Effect,
   GameState,
   Lane,
   Projectile,
@@ -133,6 +132,8 @@ function addProjectile(
     side,
     x,
     y,
+    startX: x,
+    startY: y,
     targetId,
     targetX,
     targetY,
@@ -234,14 +235,14 @@ function playCard(state: GameState, side: Side, cardId: CardId, lane: Lane, targ
   return true;
 }
 
-function findEnemyUnit(state: GameState, unit: Unit, detectionRange: number): Unit | null {
+function findEnemyUnit(state: GameState, unit: Unit, detectionRange: number, buildingsOnly = false): Unit | null {
   let nearest: Unit | null = null;
   let nearestDistance = detectionRange;
 
   for (const candidate of state.units) {
     if (candidate.side === unit.side || candidate.hp <= 0) continue;
-    if (candidate.kind === "building" && unit.type !== "giant" && unit.targetsBuildingsOnly) continue;
-    if (candidate.isAir && unit.type === "cannon") continue;
+    if (buildingsOnly && candidate.kind !== "building") continue;
+    if (unit.type === "cannon" && candidate.isAir) continue;
 
     const distance = Math.hypot(candidate.x - unit.x, candidate.y - unit.y);
     if (distance < nearestDistance) {
@@ -347,7 +348,7 @@ function updateUnits(state: GameState, dt: number): void {
     }
 
     const detectionRange = Math.max(105, unit.range + 65);
-    const enemy = unit.targetsBuildingsOnly ? null : findEnemyUnit(state, unit, detectionRange);
+    const enemy = findEnemyUnit(state, unit, detectionRange, unit.targetsBuildingsOnly);
 
     if (enemy) {
       const distance = Math.hypot(enemy.x - unit.x, enemy.y - unit.y);
@@ -383,12 +384,10 @@ function updateTowers(state: GameState, dt: number): void {
 
     for (const unit of state.units) {
       if (unit.side === tower.side || unit.hp <= 0) continue;
-      if (unit.isAir === false || tower.kind === "king") {
-        const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y);
-        if (distance < nearestDistance) {
-          nearestDistance = distance;
-          target = unit;
-        }
+      const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        target = unit;
       }
     }
 
@@ -433,15 +432,8 @@ function updateProjectiles(state: GameState, dt: number): void {
     const projectile = state.projectiles[index];
     projectile.age += dt;
     const progress = Math.min(1, projectile.age / projectile.duration);
-    projectile.x = projectile.targetX + (projectile.x - projectile.targetX) * 0;
-    projectile.y = projectile.targetY + (projectile.y - projectile.targetY) * 0;
-
-    const startX = projectile._startX;
-    const startY = projectile._startY;
-    if (startX !== undefined && startY !== undefined) {
-      projectile.x = startX + (projectile.targetX - startX) * progress;
-      projectile.y = startY + (projectile.targetY - startY) * progress;
-    }
+    projectile.x = projectile.startX + (projectile.targetX - projectile.startX) * progress;
+    projectile.y = projectile.startY + (projectile.targetY - projectile.startY) * progress;
 
     if (progress < 1) continue;
 

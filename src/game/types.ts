@@ -84,6 +84,8 @@ export interface Projectile {
   side: Side;
   x: number;
   y: number;
+  startX: number;
+  startY: number;
   targetId: number | null;
   targetX: number;
   targetY: number;
