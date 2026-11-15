@@ -106,13 +106,13 @@ function advanceOneStep(): void {
   }
 }
 
-element<HTMLButtonElement>("step").addEventListener("click", () => {
+function stepForward(): void {
   advanceOneStep();
   renderer.render(game);
   updateHud();
-});
+}
 
-stepBackButton.addEventListener("click", () => {
+function stepBackward(): void {
   const previousState = history.stepBack();
   if (!previousState) return;
 
@@ -124,7 +124,69 @@ stepBackButton.addEventListener("click", () => {
   music.setPaused(true);
   renderer.render(game);
   updateHud();
-});
+}
+
+function bindHoldControl(
+  button: HTMLButtonElement,
+  action: () => void,
+  canRepeat: () => boolean
+): void {
+  const initialDelay = 300;
+  const repeatInterval = 34;
+  let delayTimer = 0;
+  let repeatTimer = 0;
+  let activePointer: number | null = null;
+
+  function stopHolding(): void {
+    window.clearTimeout(delayTimer);
+    window.clearInterval(repeatTimer);
+    delayTimer = 0;
+    repeatTimer = 0;
+    activePointer = null;
+  }
+
+  function repeatAction(): void {
+    if (!canRepeat()) {
+      stopHolding();
+      return;
+    }
+
+    action();
+  }
+
+  button.addEventListener("pointerdown", (event: PointerEvent) => {
+    if (event.button !== 0 || button.disabled || activePointer !== null) return;
+
+    event.preventDefault();
+    activePointer = event.pointerId;
+    button.setPointerCapture(event.pointerId);
+    action();
+
+    delayTimer = window.setTimeout(() => {
+      repeatTimer = window.setInterval(repeatAction, repeatInterval);
+    }, initialDelay);
+  });
+
+  button.addEventListener("pointerup", (event: PointerEvent) => {
+    if (event.pointerId === activePointer) stopHolding();
+  });
+
+  button.addEventListener("pointercancel", stopHolding);
+  button.addEventListener("lostpointercapture", stopHolding);
+
+  button.addEventListener("click", (event: MouseEvent) => {
+    if (event.detail === 0 && !button.disabled) action();
+  });
+
+  window.addEventListener("blur", stopHolding);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopHolding();
+  });
+}
+
+const stepButton = element<HTMLButtonElement>("step");
+bindHoldControl(stepButton, stepForward, () => !game.gameOver);
+bindHoldControl(stepBackButton, stepBackward, () => history.canStepBack());
 speedButton.addEventListener("click", () => {
   const speeds = [0.5, 1, 2, 4, 8];
   const currentIndex = speeds.indexOf(speed);

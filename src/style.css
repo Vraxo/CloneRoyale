@@ -230,6 +230,11 @@ button {
 .secondary-button, .speed-button { background: #303a34; border-color: #424f45; color: #d9dfd1; font-size: 11px; font-weight: 700; }
 .secondary-button:hover, .speed-button:hover { background: #3a463d; border-color: #667761; }
 .icon-button { font-size: 14px; }
+.hold-step-button {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
 .secondary-button:disabled { opacity: .35; cursor: not-allowed; transform: none; }
 .speed-row { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; color: var(--muted); font-size: 10px; }
 .speed-button { min-width: 45px; min-height: 28px; padding: 0 9px; color: var(--gold); }
