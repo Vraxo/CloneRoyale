@@ -23,6 +23,8 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
 };
 
 const MAX_VOICES_PER_SOUND = 6;
+const MAX_HIT_VOICES = 2;
+const HIT_SOUND_MIN_INTERVAL_MS = 180;
 
 export function createSoundEffects(): SoundEffects {
   const sources = new Map<AudioEvent, HTMLAudioElement>();
@@ -38,6 +40,7 @@ export function createSoundEffects(): SoundEffects {
   let enabled = true;
   let unlocked = false;
   let speed = 1;
+  let lastHitSoundAt = Number.NEGATIVE_INFINITY;
 
   function removeVoice(event: AudioEvent, audio: HTMLAudioElement): void {
     const active = voices.get(event);
@@ -63,11 +66,21 @@ export function createSoundEffects(): SoundEffects {
     play(event: AudioEvent): void {
       if (!enabled || !unlocked) return;
 
+      const now = Date.now();
+      if (event === "mini-pekka-hit") {
+        if (now - lastHitSoundAt < HIT_SOUND_MIN_INTERVAL_MS) return;
+        lastHitSoundAt = now;
+      }
+
       const source = sources.get(event);
       const active = voices.get(event);
       if (!source || !active) return;
 
-      if (active.length >= MAX_VOICES_PER_SOUND) {
+      const voiceLimit = event === "mini-pekka-hit"
+        ? MAX_HIT_VOICES
+        : MAX_VOICES_PER_SOUND;
+
+      if (active.length >= voiceLimit) {
         stopVoice(event, active[0]);
       }
 
