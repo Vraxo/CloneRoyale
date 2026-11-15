@@ -1,7 +1,7 @@
-import type { CardDefinition } from "../../game/types";
+import type { TroopCardDefinition } from "../../game/types";
 import { ARCHER } from "./Archer";
 
-export const ARCHERS_CARD: CardDefinition = {
+export const ARCHERS_CARD: TroopCardDefinition = {
   id: "archers",
   name: "Archers",
   cost: 3,

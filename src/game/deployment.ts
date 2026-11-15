@@ -1,5 +1,5 @@
 import { cardById } from "./cards";
-import type { CardId, GameState, Lane, Side } from "./types";
+import type { CardId, GameState, Lane, Side, UnitCardDefinition } from "./types";
 import { addEvent, directionFor, FIELD_HEIGHT, LANE_X, nextRandom } from "./state";
 import { addProjectile } from "./projectiles";
 
@@ -13,11 +13,8 @@ function rotateCard(state: GameState, side: Side, cardId: CardId): void {
   runtime.cardsPlayed += 1;
 }
 
-function spawnCard(state: GameState, side: Side, cardId: CardId, lane: Lane): void {
-  const card = cardById(cardId);
+function spawnCard(state: GameState, side: Side, card: UnitCardDefinition, lane: Lane): void {
   const definition = card.unit;
-  if (!definition) return;
-
   const direction = directionFor(side);
   const centerX = LANE_X[lane];
   const baseY = card.category === "building" ? (side === "blue" ? 690 : 270) : (side === "blue" ? 748 : 212);
@@ -28,7 +25,7 @@ function spawnCard(state: GameState, side: Side, cardId: CardId, lane: Lane): vo
     const offsetX = card.count === 1 ? 0 : (column - 2) * Math.min(11, definition.radius * 0.85);
     const offsetY = card.count === 1 ? 0 : row * direction * 11;
     state.units.push({
-      id: state.nextId++, side, cardId, type: definition.type,
+      id: state.nextId++, side, cardId: card.id, type: definition.type,
       kind: card.category === "building" ? "building" : "troop", lane,
       x: centerX + offsetX, y: baseY + offsetY,
       hp: definition.hp, maxHp: definition.hp, radius: definition.radius, damage: definition.damage,
@@ -55,12 +52,23 @@ export function playCard(state: GameState, side: Side, cardId: CardId, lane: Lan
       ?? enemyTowers.find((tower) => tower.kind === "king");
     const x = targetX ?? defaultTower?.x ?? LANE_X[lane];
     const y = targetY ?? defaultTower?.y ?? (side === "blue" ? 180 : 780);
-    if (card.projectileStyle) {
-      addProjectile(state, side, x, side === "blue" ? FIELD_HEIGHT - 50 : 50, null, x, y,
-        card.spellDamage ?? 0, card.spellRadius ?? 0, card.projectileStyle, card.projectileDuration ?? 0.4);
-    }
+    const { damage, radius, projectile } = card.effect;
+
+    addProjectile(
+      state,
+      side,
+      x,
+      side === "blue" ? FIELD_HEIGHT - 50 : 50,
+      null,
+      x,
+      y,
+      damage,
+      radius,
+      projectile.style,
+      projectile.duration
+    );
   } else {
-    spawnCard(state, side, cardId, lane);
+    spawnCard(state, side, card, lane);
   }
 
   addEvent(state, `${side === "blue" ? "Blue" : "Red"} played ${card.name}.`);

@@ -1,6 +1,13 @@
 export type { Side } from "./Side";
 export type { Lane } from "./Lane";
-export type { CardId, CardDefinition } from "./Card";
+export type {
+  CardId,
+  CardDefinition,
+  TroopCardDefinition,
+  BuildingCardDefinition,
+  SpellCardDefinition,
+  UnitCardDefinition
+} from "./Card";
 export type { UnitType, Unit } from "./Unit";
 export type { UnitDefinition } from "./UnitDefinition";
 export type { Tower } from "./Tower";

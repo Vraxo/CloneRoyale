@@ -121,8 +121,9 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
   const cardId = priority.find((candidate) => affordable.has(candidate));
   if (!cardId) return null;
 
-  const cluster = cardId === "fireball" || cardId === "arrows"
-    ? bestEnemyCluster(threats, cardById(cardId).spellRadius ?? 0)
+  const card = cardById(cardId);
+  const cluster = card.category === "spell"
+    ? bestEnemyCluster(threats, card.effect.radius)
     : null;
 
   return {

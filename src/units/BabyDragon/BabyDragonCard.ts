@@ -1,7 +1,7 @@
-import type { CardDefinition } from "../../game/types";
+import type { TroopCardDefinition } from "../../game/types";
 import { BABY_DRAGON } from "./BabyDragon";
 
-export const BABY_DRAGON_CARD: CardDefinition = {
+export const BABY_DRAGON_CARD: TroopCardDefinition = {
   id: "baby-dragon",
   name: "Baby Dragon",
   cost: 4,

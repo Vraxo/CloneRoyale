@@ -10,15 +10,39 @@ export type CardId =
   | "fireball"
   | "arrows";
 
-export interface CardDefinition {
+interface CardDefinitionBase {
   id: CardId;
   name: string;
   cost: number;
-  category: "troop" | "building" | "spell";
-  count: number;
-  unit?: UnitDefinition;
-  spellDamage?: number;
-  spellRadius?: number;
-  projectileStyle?: "fireball" | "arrows";
-  projectileDuration?: number;
 }
+
+export interface TroopCardDefinition extends CardDefinitionBase {
+  category: "troop";
+  count: number;
+  unit: UnitDefinition;
+}
+
+export interface BuildingCardDefinition extends CardDefinitionBase {
+  category: "building";
+  count: number;
+  unit: UnitDefinition;
+}
+
+export interface SpellCardDefinition extends CardDefinitionBase {
+  category: "spell";
+  effect: {
+    damage: number;
+    radius: number;
+    projectile: {
+      style: "fireball" | "arrows";
+      duration: number;
+    };
+  };
+}
+
+export type UnitCardDefinition = TroopCardDefinition | BuildingCardDefinition;
+
+export type CardDefinition =
+  | TroopCardDefinition
+  | BuildingCardDefinition
+  | SpellCardDefinition;

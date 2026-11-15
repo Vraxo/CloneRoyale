@@ -1,7 +1,7 @@
-import type { CardDefinition } from "../../game/types";
+import type { TroopCardDefinition } from "../../game/types";
 import { SKELETON } from "./Skeleton";
 
-export const SKELETON_ARMY_CARD: CardDefinition = {
+export const SKELETON_ARMY_CARD: TroopCardDefinition = {
   id: "skeleton-army",
   name: "Skeleton Army",
   cost: 3,
