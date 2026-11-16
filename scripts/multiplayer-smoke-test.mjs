@@ -39,7 +39,6 @@ function nextMessage(socket, predicate, timeoutMs = 5000) {
     }, timeoutMs);
     function onMessage(event) {
       const message = JSON.parse(String(event.data));
-      console.log("smoke received:", message.type);
       if (!predicate(message)) return;
       clearTimeout(timeout);
       socket.removeEventListener("message", onMessage);
@@ -52,11 +51,9 @@ function nextMessage(socket, predicate, timeoutMs = 5000) {
 try {
   await waitForServer();
   const first = await connect();
-  console.log("waiting for room assignment");
   const assignedPromise = nextMessage(first, message => message.type === "assigned");
   first.send(JSON.stringify({ type: "create-room" }));
   const assigned = await assignedPromise;
-  console.log("room assigned", assigned.code);
   assert.equal(assigned.side, "blue");
   assert.equal(assigned.code.length, 5);
 

@@ -95,7 +95,7 @@ function decodeFrames(client, chunk) {
     if (opcode === 8) return closeClient(client);
     if (opcode === 9) { client.socket.write(Buffer.from([0x8a, 0x00])); continue; }
     if (opcode !== 1) continue;
-    try { const message = JSON.parse(payload.toString("utf8")); console.log("Received WebSocket message:", message.type); handleMessage(client, message); } catch { send(client, { type: "error", message: "Invalid message." }); }
+    try { handleMessage(client, JSON.parse(payload.toString("utf8"))); } catch { send(client, { type: "error", message: "Invalid message." }); }
   }
 }
 function contentType(path) {
