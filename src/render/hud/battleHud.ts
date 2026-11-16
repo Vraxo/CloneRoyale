@@ -71,6 +71,7 @@ export class BattleHud {
 
   private readonly graphics = new Graphics();
   private readonly heldCardGraphics = new Graphics();
+  private readonly cardOverlayGraphics = new Graphics();
   private readonly heldCardArt = new Sprite(Texture.EMPTY);
   private readonly cardArts = Array.from({ length: 4 }, () => new Sprite(Texture.EMPTY));
   private readonly nextCardArt = new Sprite(Texture.EMPTY);
@@ -95,6 +96,7 @@ export class BattleHud {
       this.graphics,
       this.nextCardArt,
       ...this.cardArts,
+      this.cardOverlayGraphics,
       this.heldCardArt,
       ...this.cardGlyphs,
       ...this.cardNames,
@@ -216,6 +218,7 @@ export class BattleHud {
 
     this.drawMatchClock(state, layout.width, graphics);
     this.drawCards(state, selectedCard, layout.cards, graphics);
+    this.drawCardBadges(state, layout);
     this.drawElixir(blue.elixir, layout, graphics);
 
     this.placementHint.text = message;
@@ -250,13 +253,14 @@ export class BattleHud {
     const height = width * 1.22;
     const x = point.x - width / 2;
     const y = point.y - height / 2;
+    const texture = this.cardTextures.get(cardId);
     const fill = card.category === "spell"
       ? 0x4b4662
       : card.category === "building" ? 0x55513e : 0x35473d;
 
     this.heldCardGraphics
       .roundRect(x, y, width, height, 10)
-      .fill({ color: fill, alpha: 0.72 });
+      .fill({ color: fill, alpha: texture ? 0 : 0.72 });
     this.heldCardGraphics
       .roundRect(x, y, width, height, 10)
       .stroke({ color: 0xe3c77d, alpha: 0.95, width: 2.5 });
@@ -264,7 +268,6 @@ export class BattleHud {
       .roundRect(x + 6, y + 6, width - 12, height - 12, 6)
       .stroke({ color: 0xe4d7ad, alpha: 0.32, width: 1 });
 
-    const texture = this.cardTextures.get(cardId);
     if (texture) {
       this.heldCardArt.texture = texture;
       this.heldCardArt.position.set(point.x, y + height * 0.47);
@@ -278,7 +281,6 @@ export class BattleHud {
     this.heldCardGlyph.anchor.set(0.5);
     this.heldCardGlyph.position.set(point.x, y + height * 0.38);
     this.heldCardGlyph.style.fontSize = Math.max(24, Math.min(38, width * 0.38));
-    this.heldCardGlyph.visible = true;
 
     this.heldCardName.text = card.name;
     this.heldCardName.anchor.set(0.5);
@@ -336,6 +338,24 @@ export class BattleHud {
     this.matchClockLabel.anchor.set(0.5);
     this.matchClockLabel.position.set(width / 2, y + clockHeight / 2);
   }
+  private drawCardBadges(state: GameState, layout: ReturnType<typeof calculateHudLayout>): void {
+    const graphics = this.cardOverlayGraphics;
+    graphics.clear();
+
+    const nextX = layout.padding;
+    const nextCostX = nextX + layout.nextWidth - 11;
+    const nextCostY = layout.cardY + layout.cardHeight - 11;
+    graphics.circle(nextCostX, nextCostY, 9).fill({ color: 0x76569a });
+    graphics.circle(nextCostX, nextCostY, 9).stroke({ color: 0xc2a4df, width: 1 });
+
+    for (const rect of layout.cards) {
+      const badgeX = rect.x + rect.width - 14;
+      const badgeY = rect.y + 14;
+      graphics.circle(badgeX, badgeY, 12).fill({ color: 0x76569a, alpha: 0.98 });
+      graphics.circle(badgeX, badgeY, 12).stroke({ color: 0xc2a4df, width: 1 });
+    }
+  }
+
   private drawCards(
     state: GameState,
     selectedCard: CardId | null,
