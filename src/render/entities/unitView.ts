@@ -1,4 +1,4 @@
-import { Container, Graphics } from "pixi.js";
+import { ColorMatrixFilter, Container, Graphics } from "pixi.js";
 import type { Unit } from "../../game/types";
 
 export abstract class UnitView {
@@ -8,9 +8,17 @@ export abstract class UnitView {
   protected readonly body = new Container();
   private readonly shadow = new Graphics();
   private readonly healthBar = new Graphics();
+  private readonly damageFlash = new ColorMatrixFilter();
+  private previousHp: number;
+  private damageFlashUntil = 0;
 
   protected constructor(unit: Unit) {
     this.id = unit.id;
+    this.previousHp = unit.hp;
+    this.damageFlash.brightness(2.1, false);
+    this.damageFlash.saturate(0.45, true);
+    this.damageFlash.alpha = 0;
+    this.body.filters = [this.damageFlash];
     this.shadow.ellipse(0, unit.radius * 0.58, unit.radius * 1.3, unit.radius * 0.62)
       .fill(unit.isAir ? 0x283b2d : 0x344338);
     this.container.addChild(this.shadow, this.body, this.healthBar);
@@ -22,7 +30,15 @@ export abstract class UnitView {
     this.container.destroy({ children: true });
   }
 
-  protected updateCommon(unit: Unit): void {
+  protected updateCommon(unit: Unit, time: number): void {
+    if (unit.hp < this.previousHp) {
+      this.damageFlashUntil = time + 0.12;
+    }
+    this.previousHp = unit.hp;
+
+    const flashRemaining = Math.max(0, this.damageFlashUntil - time);
+    this.damageFlash.alpha = flashRemaining / 0.12 * 0.9;
+
     this.container.position.set(unit.x, unit.y);
 
     const remaining = unit.deploymentRemaining ?? 0;
