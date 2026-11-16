@@ -569,3 +569,8 @@ body[data-online="true"] #play-again { display: none; }
 }
 #private-room-section[hidden] { display: none; }
 #private-room-section > #create-room { width: 100%; }
+
+
+/* Post-match actions */
+#leave-result { width: 100%; margin-top: 9px; }
+#leave-result[hidden] { display: none; }

@@ -367,6 +367,7 @@ export class BattleController {
       this.renderer.setDeploymentArea(this.game, "blue", null);
       this.renderer.clearUnitPreview();
       this.music.stop();
+      this.soundEffects.play(this.game.winner === "draw" ? "match-draw" : this.game.winner === "blue" ? "match-victory" : "match-defeat");
       this.previousGameOver = true;
       this.accumulator = 0;
       this.updateHud();

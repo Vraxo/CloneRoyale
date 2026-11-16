@@ -125,8 +125,12 @@ async function connectOnline(): Promise<boolean> {
           battle.applyOnlineState(message.state);
         } else if (message.type === "opponent-left") {
           if (battle.isOnline) {
-            setLobbyStatus("Opponent disconnected. Leave the room to start another match.");
-            battle.setOnlineNotice("Opponent disconnected. Leave the match to return to solo play.");
+            setLobbyStatus("Opponent left. You can leave this match and find another opponent.");
+            battle.setOnlineNotice("Opponent left the match. Leave to find another opponent.");
+            if (playAgainButton instanceof HTMLButtonElement && battle.isGameOver) {
+              playAgainButton.disabled = true;
+              playAgainButton.textContent = "Opponent left";
+            }
           }
         } else if (message.type === "action-error" || message.type === "error") {
           setLobbyStatus(message.message);
