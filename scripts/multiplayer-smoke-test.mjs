@@ -51,8 +51,9 @@ function nextMessage(socket, predicate, timeoutMs = 5000) {
 try {
   await waitForServer();
   const first = await connect();
+  const assignedPromise = nextMessage(first, message => message.type === "assigned");
   first.send(JSON.stringify({ type: "create-room" }));
-  const assigned = await nextMessage(first, message => message.type === "assigned");
+  const assigned = await assignedPromise;
   assert.equal(assigned.side, "blue");
   assert.equal(assigned.code.length, 5);
 
