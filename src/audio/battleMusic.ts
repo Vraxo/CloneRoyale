@@ -115,6 +115,8 @@ export function createBattleMusic(): BattleMusic {
     playTransition: boolean
   ): void {
     const previousPhase = currentPhase;
+    const enteredOvertime = playTransition && phase === "overtime" &&
+      previousPhase !== "overtime" && previousPhase !== "tiebreaker";
     currentPhase = phase;
 
     const segment = segmentFor(gameTime, phase);
@@ -131,8 +133,9 @@ export function createBattleMusic(): BattleMusic {
       audio.load();
       setPosition(gameTime, segment);
       playBlocked = false;
-    } else if (playTransition && phase === "overtime" && previousPhase !== "overtime" &&
-      previousPhase !== "tiebreaker") {
+    }
+
+    if (enteredOvertime) {
       overtimeStart.currentTime = 0;
       if (enabled && !paused) {
         void overtimeStart.play().catch(() => undefined);
