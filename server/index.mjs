@@ -50,8 +50,8 @@ function leaveRoom(client) {
   const room = client.room;
   if (!room) return;
   room.players.delete(client.id); client.room = null; client.side = null;
-  if (room.players.size === 0) { rooms.delete(room.code); return; }
-  broadcast(room, { type: "opponent-left" }); sendRoom(room);
+  if (room.players.size === 0 || room.state) { rooms.delete(room.code); }
+  if (room.players.size > 0) { broadcast(room, { type: "opponent-left" }); sendRoom(room); }
 }
 function handleMessage(client, message) {
   if (!message || typeof message.type !== "string") return;
@@ -130,7 +130,7 @@ setInterval(() => {
     if (!room.state || room.state.gameOver || room.players.size !== 2) continue;
     const now = Date.now(); const elapsed = Math.min((now - room.lastUpdate) / 1000, 0.1); room.lastUpdate = now;
     room.accumulator += elapsed;
-    while (room.accumulator >= SIMULATION_STEP) { stepGame(room.state, SIMULATION_STEP, null); room.accumulator -= SIMULATION_STEP; }
+    while (room.accumulator >= SIMULATION_STEP) { stepGame(room.state, SIMULATION_STEP, null, true); room.accumulator -= SIMULATION_STEP; }
     broadcast(room, { type: "state", state: room.state });
   }
 }, SIMULATION_STEP * 1000);

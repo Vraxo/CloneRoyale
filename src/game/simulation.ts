@@ -214,7 +214,12 @@ function emitCountdownEvents(
   }
 }
 
-export function stepGame(state: GameState, dt: number, botSide: Side | null = null): void {
+export function stepGame(
+  state: GameState,
+  dt: number,
+  botSide: Side | null = null,
+  disableBots = false
+): void {
   if (state.gameOver) return;
 
   state.audioEvents = [];
@@ -255,7 +260,7 @@ export function stepGame(state: GameState, dt: number, botSide: Side | null = nu
   for (const side of ["blue", "red"] as const) {
     const runtime = state.sides[side];
     runtime.elixir = Math.min(MAX_ELIXIR, runtime.elixir + dt / regenerationInterval);
-    if (botSide !== null && side !== botSide) continue;
+    if (disableBots || (botSide !== null && side !== botSide)) continue;
 
     runtime.thinkIn -= dt;
 
