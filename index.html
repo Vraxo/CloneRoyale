@@ -54,14 +54,14 @@
               <button id="pause" class="secondary-button" type="button">Ⅱ &nbsp; Pause</button>
             </div>
             <div class="sound-controls">
-              <div class="speed-row">
-                <span>Sound effects</span>
-                <button id="sound-effects" class="speed-button" type="button" aria-pressed="true">On</button>
-              </div>
-              <div class="speed-row">
-                <span>Battle music</span>
-                <button id="music" class="speed-button" type="button" aria-pressed="true">On</button>
-              </div>
+              <label class="volume-control" for="sound-effects-volume">
+                <span><span>Sound effects</span><output id="sound-effects-value" for="sound-effects-volume">100%</output></span>
+                <input id="sound-effects-volume" type="range" min="0" max="1" step="0.01" value="1" />
+              </label>
+              <label class="volume-control" for="music-volume">
+                <span><span>Battle music</span><output id="music-value" for="music-volume">100%</output></span>
+                <input id="music-volume" type="range" min="0" max="1" step="0.01" value="1" />
+              </label>
             </div>
             <details class="debug-controls">
               <summary>Simulation tools</summary>

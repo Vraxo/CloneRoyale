@@ -1,6 +1,7 @@
 export interface BattleMusic {
   start(gameTime: number): void;
   setEnabled(enabled: boolean): void;
+  setVolume(volume: number): void;
   setPaused(paused: boolean): void;
   setSpeed(speed: number): void;
   seek(gameTime: number): void;
@@ -11,7 +12,9 @@ export function createBattleMusic(): BattleMusic {
   const audio = new Audio("/battle.opus");
   audio.loop = true;
   audio.preload = "auto";
-  audio.volume = 0.35;
+  const baseVolume = 0.35;
+  let volume = 1;
+  audio.volume = baseVolume;
 
   let enabled = true;
   let paused = false;
@@ -56,6 +59,13 @@ export function createBattleMusic(): BattleMusic {
       paused = false;
       playBlocked = false;
       setPosition(gameTime);
+      synchronize();
+    },
+
+    setVolume(value: number): void {
+      volume = Math.max(0, Math.min(1, value));
+      audio.volume = baseVolume * volume;
+      if (volume > 0) playBlocked = false;
       synchronize();
     },
 

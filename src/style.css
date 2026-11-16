@@ -322,17 +322,40 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
 
 .sound-controls {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 13px;
+  margin-top: 13px;
 }
 
-.sound-controls .speed-row {
-  margin-top: 0;
+.volume-control {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 10px;
 }
 
-.sound-controls .speed-row span {
+.volume-control > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.volume-control output {
+  color: var(--gold);
   font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.volume-control input {
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+.volume-control input:focus-visible {
+  outline: 2px solid #d8bd7c;
+  outline-offset: 3px;
 }
 
 .debug-controls {
@@ -443,6 +466,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
   }
 
   .sound-controls {
-    gap: 7px;
+    gap: 11px;
   }
 }

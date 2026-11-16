@@ -37,8 +37,10 @@ await renderer.initialize(host);
 const pauseButton = element<HTMLButtonElement>("pause");
 const speedButton = element<HTMLButtonElement>("speed");
 const stepBackButton = element<HTMLButtonElement>("step-back");
-const musicButton = element<HTMLButtonElement>("music");
-const soundEffectsButton = element<HTMLButtonElement>("sound-effects");
+const musicVolume = element<HTMLInputElement>("music-volume");
+const soundEffectsVolume = element<HTMLInputElement>("sound-effects-volume");
+const musicVolumeValue = element<HTMLOutputElement>("music-value");
+const soundEffectsVolumeValue = element<HTMLOutputElement>("sound-effects-value");
 const statusLabel = element<HTMLSpanElement>("match-status");
 const clockLabel = element<HTMLSpanElement>("match-clock");
 const matchResult = element<HTMLDivElement>("match-result");
@@ -375,19 +377,21 @@ speedButton.addEventListener("click", () => {
   soundEffects.setSpeed(speed);
 });
 
-soundEffectsButton.addEventListener("click", () => {
+function updateVolumeLabel(output: HTMLOutputElement, value: number): void {
+  output.value = `${Math.round(value * 100)}%`;
+}
+
+soundEffectsVolume.addEventListener("input", () => {
+  const volume = Number(soundEffectsVolume.value);
   soundEffects.unlock();
-  const enabled = soundEffectsButton.getAttribute("aria-pressed") !== "true";
-  soundEffectsButton.setAttribute("aria-pressed", enabled.toString());
-  soundEffectsButton.textContent = enabled ? "On" : "Off";
-  soundEffects.setEnabled(enabled);
+  soundEffects.setVolume(volume);
+  updateVolumeLabel(soundEffectsVolumeValue, volume);
 });
 
-musicButton.addEventListener("click", () => {
-  const enabled = musicButton.getAttribute("aria-pressed") !== "true";
-  musicButton.setAttribute("aria-pressed", enabled.toString());
-  musicButton.textContent = enabled ? "On" : "Off";
-  music.setEnabled(enabled);
+musicVolume.addEventListener("input", () => {
+  const volume = Number(musicVolume.value);
+  music.setVolume(volume);
+  updateVolumeLabel(musicVolumeValue, volume);
 });
 
 renderer.app.ticker.add((ticker) => {

@@ -3,6 +3,7 @@ import type { AudioEvent } from "../game/types";
 export interface SoundEffects {
   play(event: AudioEvent): void;
   setEnabled(enabled: boolean): void;
+  setVolume(volume: number): void;
   setSpeed(speed: number): void;
   unlock(): void;
   stopAll(): void;
@@ -52,6 +53,7 @@ export function createSoundEffects(): SoundEffects {
   }
 
   let enabled = true;
+  let volume = 1;
   let unlocked = false;
   let speed = 1;
   let lastHitSoundAt = Number.NEGATIVE_INFINITY;
@@ -118,13 +120,20 @@ export function createSoundEffects(): SoundEffects {
 
       const audio = source.cloneNode(true) as HTMLAudioElement;
       const pitch = 1 + (Math.random() * 2 - 1) * PITCH_VARIATION;
-      audio.volume = SOUND_VOLUMES[event];
+      audio.volume = SOUND_VOLUMES[event] * volume;
       audio.playbackRate = speed * pitch;
       audio.currentTime = 0;
       active.push(audio);
 
       audio.addEventListener("ended", () => removeVoice(event, audio), { once: true });
       void audio.play().catch(() => removeVoice(event, audio));
+    },
+
+    setVolume(value: number): void {
+      volume = Math.max(0, Math.min(1, value));
+      for (const [event, active] of voices) {
+        for (const audio of active) audio.volume = SOUND_VOLUMES[event] * volume;
+      }
     },
 
     setEnabled(value: boolean): void {
