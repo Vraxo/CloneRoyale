@@ -40,6 +40,8 @@ const joinRoomButton = document.getElementById("join-room");
 const closeLobbyButton = document.getElementById("close-lobby");
 const onlineButton = document.getElementById("online-play");
 const leaveOnlineButton = document.getElementById("leave-online");
+const playAgainButton = document.getElementById("play-again");
+const leaveResultButton = document.getElementById("leave-result");
 
 function setLobbyStatus(message: string): void {
   if (lobbyStatus) lobbyStatus.textContent = message;
@@ -71,6 +73,10 @@ async function connectOnline(): Promise<boolean> {
           document.body.dataset.onlineSide = message.side;
           if (message.state) {
             battle.activateOnline(message.side, message.state, onlineClient);
+            if (playAgainButton instanceof HTMLButtonElement) {
+              playAgainButton.disabled = false;
+              playAgainButton.textContent = "Rematch";
+            }
             if (lobby instanceof HTMLDivElement) lobby.hidden = true;
             setLobbyStatus("Connection restored. Back in the match.");
           } else setLobbyStatus("Connection restored. Waiting for your opponent…");
@@ -93,11 +99,28 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "match-start") {
           const side = document.body.dataset.onlineSide === "red" ? "red" : "blue";
           battle.activateOnline(side, message.state, onlineClient);
+          if (playAgainButton instanceof HTMLButtonElement) {
+            playAgainButton.disabled = false;
+            playAgainButton.textContent = "Rematch";
+          }
           if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = true;
           if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = false;
           if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = false;
           if (lobby instanceof HTMLDivElement) lobby.hidden = true;
           setLobbyStatus("Match in progress.");
+        } else if (message.type === "rematch-status") {
+          if (playAgainButton instanceof HTMLButtonElement) {
+            playAgainButton.disabled = true;
+            playAgainButton.textContent = "Waiting (" + message.ready + "/" + message.total + ")";
+          }
+          setLobbyStatus("Rematch requested. Waiting for your opponent…");
+        } else if (message.type === "rematch-start") {
+          if (playAgainButton instanceof HTMLButtonElement) {
+            playAgainButton.disabled = false;
+            playAgainButton.textContent = "Rematch";
+          }
+          battle.activateOnline(battle.side, message.state, onlineClient);
+          setLobbyStatus("Rematch started.");
         } else if (message.type === "state") {
           battle.applyOnlineState(message.state);
         } else if (message.type === "opponent-left") {
@@ -157,11 +180,27 @@ joinRoomButton?.addEventListener("click", async () => {
   onlineClient.joinRoom(code);
   setLobbyStatus("Joining room…");
 });
-leaveOnlineButton?.addEventListener("click", () => {
+function leaveOnlineMatch(): void {
   onlineUnsubscribe?.();
   onlineUnsubscribe = null;
   battle.leaveOnline();
   if (lobby instanceof HTMLDivElement) lobby.hidden = true;
+  if (playAgainButton instanceof HTMLButtonElement) {
+    playAgainButton.disabled = false;
+    playAgainButton.textContent = "Play again";
+  }
+}
+leaveOnlineButton?.addEventListener("click", leaveOnlineMatch);
+leaveResultButton?.addEventListener("click", leaveOnlineMatch);
+playAgainButton?.addEventListener("click", () => {
+  if (battle.isOnline) {
+    onlineClient.requestRematch();
+    playAgainButton.setAttribute("disabled", "true");
+    playAgainButton.textContent = "Waiting for opponent…";
+    setLobbyStatus("Rematch requested. Waiting for your opponent…");
+  } else {
+    battle.startNewBattle();
+  }
 });
 
 const modeButton = document.getElementById("mode-toggle");

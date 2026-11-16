@@ -15,6 +15,8 @@ interface HudElements {
   matchResult: HTMLDivElement;
   resultTitle: HTMLHeadingElement;
   resultSummary: HTMLParagraphElement;
+  playAgainButton: HTMLButtonElement;
+  leaveResultButton: HTMLButtonElement;
 }
 
 export interface BattleHud {
@@ -42,7 +44,9 @@ function findElements(): HudElements {
     eventFeed: element<HTMLOListElement>("event-feed"),
     matchResult: element<HTMLDivElement>("match-result"),
     resultTitle: element<HTMLHeadingElement>("result-title"),
-    resultSummary: element<HTMLParagraphElement>("result-summary")
+    resultSummary: element<HTMLParagraphElement>("result-summary"),
+    playAgainButton: element<HTMLButtonElement>("play-again"),
+    leaveResultButton: element<HTMLButtonElement>("leave-result")
   };
 }
 
@@ -112,6 +116,9 @@ function updateMatchResult(elements: HudElements, game: GameState, paused: boole
     ? "Draw"
     : game.winner === playerSide ? "Victory" : "Defeat";
   elements.resultSummary.textContent = "Crowns " + crownCount(game, playerSide) + " – " + crownCount(game, playerSide === "blue" ? "red" : "blue");
+  const online = document.body.dataset.online === "true";
+  elements.playAgainButton.textContent = online ? "Rematch" : "Play again";
+  elements.leaveResultButton.hidden = !online;
   elements.matchResult.hidden = false;
 }
 
@@ -134,6 +141,7 @@ export function createBattleHud(renderer: ArenaRenderer): BattleHud {
 
     update(game, selectedCard, paused, placementMessage, canStepBack, playerSide = "blue"): void {
       elements.stepBackButton.disabled = !canStepBack || game.gameOver;
+      elements.leaveResultButton.hidden = document.body.dataset.online !== "true" || !game.gameOver;
 
       updateStatistics(elements, game, playerSide);
       updateEventFeed(elements, game);

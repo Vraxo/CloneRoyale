@@ -12,6 +12,8 @@ export type OnlineMessage =
   | { type: "queue-cancelled" }
   | { type: "room"; code: string; players: { side: Side; name: string }[]; status: "waiting" | "playing" }
   | { type: "match-start"; state: GameState }
+  | { type: "rematch-status"; ready: number; total: number }
+  | { type: "rematch-start"; state: GameState }
   | { type: "state"; state: GameState }
   | { type: "opponent-left" }
   | { type: "action-error"; message: string }
@@ -67,6 +69,7 @@ export class OnlineClient {
   public createRoom(): void { this.send({ type: "create-room" }); }
   public joinRoom(code: string): void { this.send({ type: "join-room", code }); }
   public playCard(cardId: CardId, x: number, y: number): void { this.send({ type: "play-card", cardId, x, y }); }
+  public requestRematch(): void { this.send({ type: "rematch-ready" }); }
 
   public leave(): void {
     this.reconnectEnabled = false;

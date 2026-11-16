@@ -108,7 +108,10 @@ export class BattleController {
     this.game = state;
     this.music.update(state.time, state.phase);
     for (const event of state.audioEvents) this.soundEffects.play(event);
-    if (state.gameOver && !this.previousGameOver) this.music.stop();
+    if (state.gameOver && !this.previousGameOver) {
+      this.music.stop();
+      this.soundEffects.play(state.winner === "draw" ? "match-draw" : state.winner === this.playerSide ? "match-victory" : "match-defeat");
+    }
     this.previousGameOver = state.gameOver;
     if (state.gameOver) {
       this.selectedCard = null;
@@ -321,7 +324,10 @@ export class BattleController {
       }
     }
 
-    if (this.game.gameOver && !this.previousGameOver) this.music.stop();
+    if (this.game.gameOver && !this.previousGameOver) {
+      this.music.stop();
+      this.soundEffects.play(this.game.winner === "draw" ? "match-draw" : this.game.winner === "blue" ? "match-victory" : "match-defeat");
+    }
     this.previousGameOver = this.game.gameOver;
     this.renderer.render(this.game);
 

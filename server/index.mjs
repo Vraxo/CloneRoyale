@@ -94,7 +94,7 @@ function leaveRoom(client) {
   const timer = reconnectTimers.get(client.resumeToken);
   if (timer) clearTimeout(timer);
   reconnectTimers.delete(client.resumeToken);
-  room.players.delete(client.id); client.room = null; client.side = null;
+  room.players.delete(client.id); client.room = null; client.side = null; client.rematchReady = false;
   if (room.players.size === 0 || room.state) { rooms.delete(room.code); }
   if (room.players.size > 0) {
     broadcast(room, { type: "opponent-left" });
@@ -104,6 +104,7 @@ function leaveRoom(client) {
 function handleMessage(client, message) {
   if (!message || typeof message.type !== "string") return;
   if (message.type === "resume") { resumePlayer(client, message.token); return; }
+  if (message.type === "rematch-ready") { requestRematch(client); return; }
   if (message.type === "find-match") { joinMatchmaking(client); return; }
   if (message.type === "cancel-matchmaking") { removeFromQueue(client, true); return; }
   if (message.type === "create-room") { removeFromQueue(client); if (client.room) leaveRoom(client); createRoom(client); return; }
@@ -126,6 +127,20 @@ function handleMessage(client, message) {
   broadcast(client.room, { type: "state", state });
   state.audioEvents = [];
 }
+function requestRematch(client) {
+  const room = client.room;
+  if (!room?.state?.gameOver || !client.side || client.disconnected) return;
+  client.rematchReady = true;
+  const ready = [...room.players.values()].filter(player => player.rematchReady && !player.disconnected).length;
+  broadcast(room, { type: "rematch-status", ready, total: room.players.size });
+  if (room.players.size !== 2 || ready !== 2) return;
+  for (const player of room.players.values()) player.rematchReady = false;
+  room.state = createGame(randomBytes(4).readUInt32BE(0));
+  room.lastUpdate = Date.now();
+  room.accumulator = 0;
+  broadcast(room, { type: "rematch-start", state: room.state });
+}
+
 function resumePlayer(client, token) {
   if (typeof token !== "string" || token.length < 24 || token.length > 128) {
     send(client, { type: "resume-failed" });
@@ -144,6 +159,7 @@ function resumePlayer(client, token) {
     client.name = player.name;
     client.disconnected = false;
     client.queued = false;
+    client.rematchReady = false;
     room.players.set(client.id, client);
     clients.add(client);
     send(client, { type: "resumed", side: client.side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, state: room.state, resumeToken: token });
@@ -220,7 +236,7 @@ server.on("upgrade", (request, socket) => {
   if (typeof key !== "string" || request.headers.upgrade?.toLowerCase() !== "websocket") { socket.destroy(); return; }
   const accept = createHash("sha1").update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest("base64");
   socket.write(["HTTP/1.1 101 Switching Protocols", "Upgrade: websocket", "Connection: Upgrade", "Sec-WebSocket-Accept: " + accept, "", ""].join("\r\n"));
-  const client = { id: randomBytes(12).toString("hex"), resumeToken: randomBytes(32).toString("hex"), socket, buffer: Buffer.alloc(0), room: null, side: null, name: "Guest", queued: false, closed: false, disconnected: false, lastSeen: Date.now() };
+  const client = { id: randomBytes(12).toString("hex"), resumeToken: randomBytes(32).toString("hex"), socket, buffer: Buffer.alloc(0), room: null, side: null, name: "Guest", queued: false, closed: false, disconnected: false, rematchReady: false, lastSeen: Date.now() };
   clients.add(client); socket.on("data", chunk => decodeFrames(client, chunk)); socket.on("close", () => closeClient(client)); socket.on("error", () => closeClient(client));
   send(client, { type: "connected" });
 });
