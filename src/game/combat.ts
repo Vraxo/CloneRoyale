@@ -241,11 +241,13 @@ function attackUnit(state: GameState, unit: Unit, target: Unit | Tower): void {
   unit.attackAnim = 0.32;
   if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-attack");
   if (unit.type === "giant") state.audioEvents.push("giant-attack");
+  if (unit.type === "skeleton") state.audioEvents.push("skeleton-attack");
 
   if (unit.attack.type === "melee") {
     damageTarget(state, target.id, unit.damage);
     if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-hit");
     if (unit.type === "giant") state.audioEvents.push("giant-hit");
+    if (unit.type === "skeleton") state.audioEvents.push("skeleton-hit");
     return;
   }
 
@@ -317,10 +319,17 @@ export function updateUnits(state: GameState, dt: number): void {
   }
 
   for (const unit of state.units) {
-    if ((unit.type !== "mini-pekka" && unit.type !== "giant") || unit.hp <= 0) continue;
+    if (
+      (unit.type !== "mini-pekka" && unit.type !== "giant" && unit.type !== "skeleton")
+      || unit.hp <= 0
+    ) continue;
 
-    const stepInterval = unit.type === "giant" ? 0.62 : 0.42;
-    const stepEvent = unit.type === "giant" ? "giant-step" : "mini-pekka-step";
+    const stepInterval = unit.type === "giant"
+      ? 0.62
+      : unit.type === "skeleton" ? 0.5 : 0.42;
+    const stepEvent = unit.type === "giant"
+      ? "giant-step"
+      : unit.type === "skeleton" ? "skeleton-step" : "mini-pekka-step";
 
     if (unit.isMoving) {
       unit.footstepCooldown = (unit.footstepCooldown ?? 0) - dt;

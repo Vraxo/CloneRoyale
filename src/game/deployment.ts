@@ -92,6 +92,10 @@ function spawnCard(
       side
     });
   }
+
+  if (definition.type === "skeleton") {
+    state.audioEvents.push("skeleton-deploy");
+  }
 }
 
 export function canPlaceCard(

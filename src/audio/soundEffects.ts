@@ -28,6 +28,16 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
     "/audio/sfx/giant/step-4.ogg"
   ],
   "giant-death": ["/audio/sfx/giant/death.ogg"],
+  "skeleton-deploy": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/skeleton_deploy_03.ogg"],
+  "skeleton-attack": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/skeleton_atk_03.ogg"],
+  "skeleton-hit": [
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/footman_attack_hit_01.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/footman_attack_hit_02.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/footman_attack_hit_03.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/footman_attack_hit_04.ogg"
+  ],
+  "skeleton-step": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/skeleton_step_02.ogg"],
+  "skeleton-death": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/npc_die_02.ogg"],
   "princess-tower-attack": ["/audio/sfx/towers/princess-attack.ogg"],
   "king-tower-attack": ["/audio/sfx/towers/king-attack.ogg"],
   "elixir-gain": ["/audio/sfx/elixir/get-elixir.ogg"],
@@ -45,6 +55,11 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "giant-hit": 0.68,
   "giant-step": 0.42,
   "giant-death": 0.75,
+  "skeleton-deploy": 0.68,
+  "skeleton-attack": 0.48,
+  "skeleton-hit": 0.42,
+  "skeleton-step": 0.2,
+  "skeleton-death": 0.52,
   "princess-tower-attack": 0.42,
   "king-tower-attack": 0.48,
   "elixir-gain": 0.42,
@@ -61,6 +76,7 @@ export function createSoundEffects(): SoundEffects {
   const sources = new Map<AudioEvent, HTMLAudioElement[]>();
   const voices = new Map<AudioEvent, HTMLAudioElement[]>();
   const lastVariant = new Map<AudioEvent, number>();
+  const lastSkeletonSoundAt = new Map<AudioEvent, number>();
 
   for (const [event, paths] of Object.entries(SOUND_SOURCES) as [AudioEvent, readonly string[]][]) {
     sources.set(event, paths.map((path) => {
@@ -120,6 +136,18 @@ export function createSoundEffects(): SoundEffects {
       if (!enabled || !unlocked) return;
 
       const now = Date.now();
+      if (
+        event === "skeleton-attack"
+        || event === "skeleton-hit"
+        || event === "skeleton-step"
+        || event === "skeleton-death"
+      ) {
+        const previous = lastSkeletonSoundAt.get(event) ?? Number.NEGATIVE_INFINITY;
+        const minimumInterval = event === "skeleton-step" ? 115 : 95;
+        if (now - previous < minimumInterval) return;
+        lastSkeletonSoundAt.set(event, now);
+      }
+
       if (event === "mini-pekka-hit" || event === "giant-hit") {
         if (now - lastHitSoundAt < HIT_SOUND_MIN_INTERVAL_MS) return;
         lastHitSoundAt = now;
@@ -129,7 +157,12 @@ export function createSoundEffects(): SoundEffects {
       const active = voices.get(event);
       if (!source || !active) return;
 
-      const voiceLimit = event === "mini-pekka-hit" || event === "giant-hit"
+      const voiceLimit = event === "mini-pekka-hit"
+        || event === "giant-hit"
+        || event === "skeleton-hit"
+        || event === "skeleton-attack"
+        || event === "skeleton-death"
+        || event === "skeleton-step"
         ? MAX_HIT_VOICES
         : MAX_VOICES_PER_SOUND;
 
