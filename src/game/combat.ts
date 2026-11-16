@@ -105,7 +105,107 @@ function moveToward(unit: Unit, x: number, y: number, dt: number): void {
   unit.y += (dy / distance) * amount;
 }
 
-function moveTowardTarget(unit: Unit, x: number, y: number, dt: number): void {
+interface MovementObstacle {
+  id: number;
+  x: number;
+  y: number;
+  radius: number;
+}
+
+function findObstacleWaypoint(
+  state: GameState,
+  unit: Unit,
+  targetX: number,
+  targetY: number,
+  targetId: number
+): { x: number; y: number } | null {
+  if (unit.isAir) return null;
+
+  const dx = targetX - unit.x;
+  const dy = targetY - unit.y;
+  const pathLengthSquared = dx * dx + dy * dy;
+  if (pathLengthSquared < 1) return null;
+
+  const obstacles: MovementObstacle[] = [
+    ...state.units
+      .filter((candidate) =>
+        candidate.id !== targetId
+        && candidate.id !== unit.id
+        && candidate.kind === "building"
+        && candidate.hp > 0
+        && !candidate.isAir
+        && (candidate.appearanceDelayRemaining ?? 0) <= 0
+      )
+      .map((candidate) => ({
+        id: candidate.id,
+        x: candidate.x,
+        y: candidate.y,
+        radius: candidate.radius
+      })),
+    ...state.towers
+      .filter((tower) => tower.id !== targetId && tower.hp > 0)
+      .map((tower) => ({
+        id: tower.id,
+        x: tower.x,
+        y: tower.y,
+        radius: tower.radius
+      }))
+  ];
+
+  let firstObstacle: MovementObstacle | null = null;
+  let firstProjection = Number.POSITIVE_INFINITY;
+
+  for (const obstacle of obstacles) {
+    const projection = (
+      (obstacle.x - unit.x) * dx + (obstacle.y - unit.y) * dy
+    ) / pathLengthSquared;
+    if (projection <= 0 || projection >= 1 || projection >= firstProjection) continue;
+
+    const closestX = unit.x + dx * projection;
+    const closestY = unit.y + dy * projection;
+    const clearance = unit.radius + obstacle.radius + 7;
+    const offsetX = obstacle.x - closestX;
+    const offsetY = obstacle.y - closestY;
+    if (offsetX * offsetX + offsetY * offsetY >= clearance * clearance) continue;
+
+    firstObstacle = obstacle;
+    firstProjection = projection;
+  }
+
+  if (!firstObstacle) return null;
+
+  const pathLength = Math.sqrt(pathLengthSquared);
+  const perpendicularX = -dy / pathLength;
+  const perpendicularY = dx / pathLength;
+  const clearance = unit.radius + firstObstacle.radius + 9;
+  const left = {
+    x: firstObstacle.x + perpendicularX * clearance,
+    y: firstObstacle.y + perpendicularY * clearance
+  };
+  const right = {
+    x: firstObstacle.x - perpendicularX * clearance,
+    y: firstObstacle.y - perpendicularY * clearance
+  };
+  const leftDistance = Math.hypot(left.x - unit.x, left.y - unit.y)
+    + Math.hypot(targetX - left.x, targetY - left.y);
+  const rightDistance = Math.hypot(right.x - unit.x, right.y - unit.y)
+    + Math.hypot(targetX - right.x, targetY - right.y);
+
+  if (Math.abs(leftDistance - rightDistance) < 0.01) {
+    return unit.id % 2 === 0 ? left : right;
+  }
+
+  return leftDistance < rightDistance ? left : right;
+}
+
+function moveTowardTarget(
+  state: GameState,
+  unit: Unit,
+  x: number,
+  y: number,
+  dt: number,
+  targetId: number
+): void {
   if (unit.formationSlot !== undefined) {
     const dx = unit.x - x;
     const dy = unit.y - y;
@@ -118,7 +218,8 @@ function moveTowardTarget(unit: Unit, x: number, y: number, dt: number): void {
   }
 
   const target = movementTarget(unit, x, y);
-  moveToward(unit, target.x, target.y, dt);
+  const waypoint = findObstacleWaypoint(state, unit, target.x, target.y, targetId);
+  moveToward(unit, waypoint?.x ?? target.x, waypoint?.y ?? target.y, dt);
 }
 
 function keepGroundUnitsOnBridges(units: Unit[]): void {
@@ -337,7 +438,7 @@ export function updateUnits(state: GameState, dt: number): void {
       if (distance <= unit.range + enemy.radius) {
         if (unit.attackCooldown <= 0) attackUnit(state, unit, enemy);
       } else {
-        moveTowardTarget(unit, enemy.x, enemy.y, dt);
+        moveTowardTarget(state, unit, enemy.x, enemy.y, dt, enemy.id);
       }
       continue;
     }
@@ -349,7 +450,7 @@ export function updateUnits(state: GameState, dt: number): void {
     if (towerDistance <= unit.range + tower.radius) {
       if (unit.attackCooldown <= 0) attackUnit(state, unit, tower);
     } else {
-      moveTowardTarget(unit, tower.x, tower.y, dt);
+      moveTowardTarget(state, unit, tower.x, tower.y, dt, tower.id);
     }
   }
 
