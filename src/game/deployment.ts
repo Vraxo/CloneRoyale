@@ -28,6 +28,7 @@ function spawnCard(
   const baseY = placement?.y
     ?? (card.category === "building" ? (side === "blue" ? 690 : 270) : (side === "blue" ? 748 : 212));
 
+  const appearanceDelay = 1;
   const baseDeployTime = card.deployTime ?? 1;
   const staggerInterval = card.count > 1 ? Math.min(0.05, 0.45 / (card.count - 1)) : 0;
 
@@ -68,6 +69,7 @@ function spawnCard(
       targetsBuildingsOnly: definition.targetsBuildingsOnly,
       lifetime: definition.lifetime,
       age: 0,
+      appearanceDelayRemaining: appearanceDelay,
       deploymentDuration,
       deploymentRemaining: deploymentDuration,
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
@@ -75,27 +77,9 @@ function spawnCard(
       attackAnim: 0
     });
 
-    if (definition.type === "mini-pekka") {
-      state.audioEvents.push("mini-pekka-deploy");
-    } else if (definition.type === "giant") {
-      state.audioEvents.push("giant-deploy");
-    }
 
-    state.effects.push({
-      id: state.nextId++,
-      x,
-      y,
-      age: 0,
-      lifetime: 0.62,
-      radius: Math.max(22, definition.radius * 2.2),
-      style: "deployment",
-      side
-    });
   }
 
-  if (definition.type === "skeleton") {
-    state.audioEvents.push("skeleton-deploy");
-  }
 }
 
 export function canPlaceCard(

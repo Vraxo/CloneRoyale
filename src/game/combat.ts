@@ -14,7 +14,7 @@ function findEnemyUnit(
 
   for (const candidate of state.units) {
     if (candidate.side === unit.side || candidate.hp <= 0) continue;
-    if ((candidate.deploymentRemaining ?? 0) > 0) continue;
+    if ((candidate.appearanceDelayRemaining ?? 0) > 0) continue;
     if (buildingsOnly && candidate.kind !== "building") continue;
     if (!unit.canTargetAir && candidate.isAir) continue;
 
@@ -142,8 +142,10 @@ function separateUnits(units: Unit[]): void {
         const second = units[secondIndex];
         if (second.hp <= 0 || first.isAir !== second.isAir) continue;
 
-        const firstDeploying = (first.deploymentRemaining ?? 0) > 0;
-        const secondDeploying = (second.deploymentRemaining ?? 0) > 0;
+        const firstDeploying = (first.appearanceDelayRemaining ?? 0) > 0
+          || (first.deploymentRemaining ?? 0) > 0;
+        const secondDeploying = (second.appearanceDelayRemaining ?? 0) > 0
+          || (second.deploymentRemaining ?? 0) > 0;
         const firstCanMove = first.kind !== "building" && first.speed > 0;
         const secondCanMove = second.kind !== "building" && second.speed > 0;
         if (!firstCanMove && !secondCanMove) continue;
@@ -271,10 +273,33 @@ export function updateUnits(state: GameState, dt: number): void {
   for (const unit of state.units) {
     if (unit.hp <= 0) continue;
 
+    const appearanceDelay = unit.appearanceDelayRemaining ?? 0;
+    if (appearanceDelay > 0) {
+      const remaining = Math.max(0, appearanceDelay - dt);
+      unit.appearanceDelayRemaining = remaining;
+      if (remaining > 0) continue;
+
+      if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-deploy");
+      if (unit.type === "giant") state.audioEvents.push("giant-deploy");
+      if (unit.type === "skeleton") state.audioEvents.push("skeleton-deploy");
+
+      state.effects.push({
+        id: state.nextId++,
+        x: unit.x,
+        y: unit.y,
+        age: 0,
+        lifetime: 0.62,
+        radius: Math.max(22, unit.radius * 2.2),
+        style: "deployment",
+        side: unit.side
+      });
+
+      continue;
+    }
+
     const deploymentRemaining = unit.deploymentRemaining ?? 0;
     if (deploymentRemaining > 0) {
-      const remaining = Math.max(0, deploymentRemaining - dt);
-      unit.deploymentRemaining = remaining;
+      unit.deploymentRemaining = Math.max(0, deploymentRemaining - dt);
       continue;
     }
 
@@ -370,7 +395,7 @@ export function updateTowers(state: GameState, dt: number): void {
 
     for (const unit of state.units) {
       if (unit.side === tower.side || unit.hp <= 0) continue;
-      if ((unit.deploymentRemaining ?? 0) > 0) continue;
+      if ((unit.appearanceDelayRemaining ?? 0) > 0) continue;
 
       const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y);
       if (distance < nearestDistance) {
