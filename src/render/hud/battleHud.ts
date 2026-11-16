@@ -24,6 +24,16 @@ function formatClock(seconds: number): string {
   return minutes + ":" + rest;
 }
 
+function remainingMatchSeconds(state: GameState): number | null {
+  if (state.phase === "regulation") {
+    return MATCH_RULES.regulationSeconds - state.time;
+  }
+  if (state.phase === "overtime") {
+    return MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeSeconds - state.time;
+  }
+  return null;
+}
+
 function matchClock(state: GameState): string {
   switch (state.phase) {
     case "regulation":
@@ -262,14 +272,21 @@ export class BattleHud {
     const x = (width - clockWidth) / 2;
     const y = 12;
 
+    const remaining = remainingMatchSeconds(state);
+    const countdownActive = remaining !== null && remaining > 0 && remaining <= 10;
     graphics
       .roundRect(x, y, clockWidth, clockHeight, 9)
-      .fill({ color: 0x202923, alpha: 0.96 });
+      .fill({ color: countdownActive ? 0x4a2928 : 0x202923, alpha: 0.98 });
     graphics
       .roundRect(x, y, clockWidth, clockHeight, 9)
-      .stroke({ color: 0xc1a76e, alpha: 0.9, width: 1.5 });
+      .stroke({
+        color: countdownActive ? 0xe36b58 : 0xc1a76e,
+        alpha: 0.95,
+        width: countdownActive ? 2 : 1.5
+      });
 
     this.matchClockLabel.text = matchClock(state);
+    this.matchClockLabel.style.fill = countdownActive ? 0xff8b78 : 0xf4eedc;
     this.matchClockLabel.anchor.set(0.5);
     this.matchClockLabel.position.set(width / 2, y + clockHeight / 2);
   }

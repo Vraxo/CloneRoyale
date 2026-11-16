@@ -200,12 +200,37 @@ function elixirInterval(state: GameState): number {
   return state.time >= MATCH_RULES.doubleElixirStartsAt ? 2.8 / 2 : 2.8;
 }
 
+function emitCountdownEvents(
+  state: GameState,
+  previousTime: number,
+  currentTime: number,
+  endTime: number
+): void {
+  for (let seconds = 10; seconds >= 1; seconds -= 1) {
+    const triggerTime = endTime - seconds;
+    if (previousTime < triggerTime && currentTime >= triggerTime) {
+      state.audioEvents.push(`countdown-${seconds}` as import("./types").AudioEvent);
+    }
+  }
+}
+
 export function stepGame(state: GameState, dt: number, botSide: Side | null = null): void {
   if (state.gameOver) return;
 
   state.audioEvents = [];
   const previousTime = state.time;
   state.time += dt;
+
+  if (state.phase === "regulation") {
+    emitCountdownEvents(state, previousTime, state.time, MATCH_RULES.regulationSeconds);
+  } else if (state.phase === "overtime") {
+    emitCountdownEvents(
+      state,
+      previousTime,
+      state.time,
+      MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeSeconds
+    );
+  }
 
   if (
     previousTime < MATCH_RULES.doubleElixirStartsAt
