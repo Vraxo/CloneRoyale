@@ -273,7 +273,7 @@ export class BattleController {
     this.music.update(this.game.time, this.game.phase);
     for (const event of this.game.audioEvents) this.soundEffects.play(event);
     this.game.audioEvents = [];
-    this.history.record(this.game);
+    this.history?.record(this.game);
 
     if (this.game.gameOver) {
       this.selectedCard = null;
