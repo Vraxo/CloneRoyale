@@ -1,10 +1,10 @@
 import type { Unit } from "../../game/types";
-import { ArcherView } from "../../units/Archer/ArcherView";
-import { BabyDragonView } from "../../units/BabyDragon/BabyDragonView";
-import { CannonView } from "../../units/Cannon/CannonView";
-import { GiantView } from "../../units/Giant/GiantView";
-import { MiniPekkaView } from "../../units/MiniPekka/MiniPekkaView";
-import { SkeletonView } from "../../units/Skeleton/SkeletonView";
+import { ArcherView } from "../../cards/Archer/ArcherView";
+import { BabyDragonView } from "../../cards/BabyDragon/BabyDragonView";
+import { CannonView } from "../../cards/Cannon/CannonView";
+import { GiantView } from "../../cards/Giant/GiantView";
+import { MiniPekkaView } from "../../cards/MiniPekka/MiniPekkaView";
+import { SkeletonView } from "../../cards/Skeleton/SkeletonView";
 import type { UnitView } from "./unitView";
 
 type UnitViewConstructor = new (unit: Unit) => UnitView;

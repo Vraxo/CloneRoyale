@@ -1,12 +1,12 @@
 import type { CardDefinition, CardId } from "./types";
-import { ARCHERS_CARD } from "../units/Archer/ArcherCard";
+import { ARCHERS_CARD } from "../cards/Archer/ArcherCard";
 import { ARROWS_CARD } from "../cards/Arrows/ArrowsCard";
-import { BABY_DRAGON_CARD } from "../units/BabyDragon/BabyDragonCard";
-import { CANNON_CARD } from "../units/Cannon/CannonCard";
+import { BABY_DRAGON_CARD } from "../cards/BabyDragon/BabyDragonCard";
+import { CANNON_CARD } from "../cards/Cannon/CannonCard";
 import { FIREBALL_CARD } from "../cards/Fireball/FireballCard";
-import { GIANT_CARD } from "../units/Giant/GiantCard";
-import { MINI_PEKKA_CARD } from "../units/MiniPekka/MiniPekkaCard";
-import { SKELETON_ARMY_CARD } from "../units/Skeleton/SkeletonArmyCard";
+import { GIANT_CARD } from "../cards/Giant/GiantCard";
+import { MINI_PEKKA_CARD } from "../cards/MiniPekka/MiniPekkaCard";
+import { SKELETON_ARMY_CARD } from "../cards/Skeleton/SkeletonArmyCard";
 
 export const STARTER_DECK: CardId[] = [
   "giant",
