@@ -14,6 +14,20 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "mini-pekka-attack": ["/audio/sfx/mini-pekka/attack.ogg"],
   "mini-pekka-hit": ["/audio/sfx/mini-pekka/hit.ogg"],
   "mini-pekka-step": ["/audio/sfx/mini-pekka/step.ogg"],
+  "giant-deploy": ["/audio/sfx/giant/deploy.ogg"],
+  "giant-attack": [
+    "/audio/sfx/giant/attack-1.ogg",
+    "/audio/sfx/giant/attack-2.ogg",
+    "/audio/sfx/giant/attack-3.ogg"
+  ],
+  "giant-hit": ["/audio/sfx/giant/hit.ogg"],
+  "giant-step": [
+    "/audio/sfx/giant/step-1.ogg",
+    "/audio/sfx/giant/step-2.ogg",
+    "/audio/sfx/giant/step-3.ogg",
+    "/audio/sfx/giant/step-4.ogg"
+  ],
+  "giant-death": ["/audio/sfx/giant/death.ogg"],
   "princess-tower-attack": ["/audio/sfx/towers/princess-attack.ogg"],
   "king-tower-attack": ["/audio/sfx/towers/king-attack.ogg"],
   "elixir-gain": ["/audio/sfx/elixir/get-elixir.ogg"],
@@ -26,6 +40,11 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "mini-pekka-attack": 0.8,
   "mini-pekka-hit": 0.65,
   "mini-pekka-step": 0.28,
+  "giant-deploy": 0.8,
+  "giant-attack": 0.72,
+  "giant-hit": 0.68,
+  "giant-step": 0.42,
+  "giant-death": 0.75,
   "princess-tower-attack": 0.42,
   "king-tower-attack": 0.48,
   "elixir-gain": 0.42,
@@ -101,7 +120,7 @@ export function createSoundEffects(): SoundEffects {
       if (!enabled || !unlocked) return;
 
       const now = Date.now();
-      if (event === "mini-pekka-hit") {
+      if (event === "mini-pekka-hit" || event === "giant-hit") {
         if (now - lastHitSoundAt < HIT_SOUND_MIN_INTERVAL_MS) return;
         lastHitSoundAt = now;
       }
@@ -110,7 +129,7 @@ export function createSoundEffects(): SoundEffects {
       const active = voices.get(event);
       if (!source || !active) return;
 
-      const voiceLimit = event === "mini-pekka-hit"
+      const voiceLimit = event === "mini-pekka-hit" || event === "giant-hit"
         ? MAX_HIT_VOICES
         : MAX_VOICES_PER_SOUND;
 

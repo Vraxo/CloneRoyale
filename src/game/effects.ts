@@ -4,7 +4,11 @@ import { addEvent } from "./state";
 export function damageTarget(state: GameState, targetId: number, damage: number): void {
   const unit = state.units.find((candidate) => candidate.id === targetId);
   if (unit) {
+    const wasAlive = unit.hp > 0;
     unit.hp -= damage;
+    if (wasAlive && unit.hp <= 0 && unit.type === "giant") {
+      state.audioEvents.push("giant-death");
+    }
     unit.attackAnim = Math.max(unit.attackAnim, 0.09);
     state.effects.push({
       id: state.nextId++,

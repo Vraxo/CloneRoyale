@@ -72,6 +72,8 @@ function spawnCard(
 
     if (definition.type === "mini-pekka") {
       state.audioEvents.push("mini-pekka-deploy");
+    } else if (definition.type === "giant") {
+      state.audioEvents.push("giant-deploy");
     }
 
     state.effects.push({
