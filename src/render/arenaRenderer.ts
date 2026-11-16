@@ -1,5 +1,6 @@
 import { Application, Container, Graphics } from "pixi.js";
 import type { CardId, GameState } from "../game/types";
+import { cardById } from "../game/cards";
 import { EffectView } from "./entities/effectView";
 import { ProjectileView } from "./entities/projectileView";
 import { TowerView } from "./entities/towerView";
@@ -9,6 +10,7 @@ import { synchronizeViews } from "./entities/synchronizeViews";
 import { createArenaView } from "./arena/arenaView";
 import { WorldViewport, HUD_HEIGHT } from "./arena/worldViewport";
 import { BattleHud } from "./hud/battleHud";
+import { WORLD_HEIGHT, WORLD_WIDTH } from "./arena/arenaView";
 
 export class ArenaRenderer {
   public readonly app = new Application();
@@ -17,6 +19,7 @@ export class ArenaRenderer {
   private readonly arena = createArenaView();
   private readonly entities = new Container();
   private readonly placementOverlay = new Graphics();
+  private readonly invalidDeploymentOverlay = new Graphics();
   private readonly hud = new BattleHud();
   private readonly unitViews = new Map<number, UnitView>();
   private readonly towerViews = new Map<number, TowerView>();
@@ -36,7 +39,12 @@ export class ArenaRenderer {
 
     host.replaceChildren(this.app.canvas);
     this.entities.sortableChildren = true;
-    this.world.addChild(this.arena, this.entities, this.placementOverlay);
+    this.world.addChild(
+      this.arena,
+      this.invalidDeploymentOverlay,
+      this.entities,
+      this.placementOverlay
+    );
     this.app.stage.addChild(this.world, this.hud.container);
     this.viewport = new WorldViewport(this.app.renderer, this.app.canvas, this.world);
     this.initialized = true;
@@ -52,23 +60,42 @@ export class ArenaRenderer {
   }
 
   public setPlacementPreview(
-    point: { x: number; y: number } | null,
-    valid = false,
-    radius = 22
+    _point: { x: number; y: number } | null,
+    _valid = false,
+    _radius = 22
   ): void {
     this.placementOverlay.clear();
-    if (!point) return;
+  }
 
-    const color = valid ? 0x9ecb79 : 0xd56f68;
-    this.placementOverlay
-      .circle(point.x, point.y, radius)
-      .fill({ color, alpha: 0.2 });
-    this.placementOverlay
-      .circle(point.x, point.y, radius)
-      .stroke({ color, alpha: 0.92, width: 2 });
-    this.placementOverlay
-      .circle(point.x, point.y, 3)
-      .fill({ color, alpha: 0.95 });
+  public setDeploymentArea(cardId: CardId | null): void {
+    const overlay = this.invalidDeploymentOverlay;
+    overlay.clear();
+    if (!cardId) return;
+
+    const card = cardById(cardId);
+    const color = 0xd94f4f;
+    const alpha = 0.3;
+
+    if (card.category === "spell") {
+      const margin = 12;
+      overlay.rect(0, 0, WORLD_WIDTH, margin).fill({ color, alpha });
+      overlay.rect(0, WORLD_HEIGHT - margin, WORLD_WIDTH, margin).fill({ color, alpha });
+      overlay.rect(0, margin, margin, WORLD_HEIGHT - margin * 2).fill({ color, alpha });
+      overlay.rect(WORLD_WIDTH - margin, margin, margin, WORLD_HEIGHT - margin * 2)
+        .fill({ color, alpha });
+      return;
+    }
+
+    const radius = card.unit.radius;
+    const minX = radius + 12;
+    const maxX = WORLD_WIDTH - radius - 12;
+    const minY = 512 + radius + 8;
+    const maxY = WORLD_HEIGHT - radius - 12;
+
+    overlay.rect(0, 0, WORLD_WIDTH, minY).fill({ color, alpha });
+    overlay.rect(0, minY, minX, maxY - minY).fill({ color, alpha });
+    overlay.rect(maxX, minY, WORLD_WIDTH - maxX, maxY - minY).fill({ color, alpha });
+    overlay.rect(0, maxY, WORLD_WIDTH, WORLD_HEIGHT - maxY).fill({ color, alpha });
   }
 
   public updateBattleHud(

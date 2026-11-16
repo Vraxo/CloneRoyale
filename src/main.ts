@@ -74,6 +74,7 @@ function setPaused(value: boolean): void {
   music.setPaused(paused || game.gameOver);
   if (paused) {
     renderer.setPlacementPreview(null);
+    renderer.setDeploymentArea(null);
     renderer.setHeldCardPreview(null, 0, 0);
   }
 }
@@ -84,6 +85,7 @@ function startNewBattle(): void {
   selectedCard = null;
   placementMessage = "Choose a card, then deploy on your side.";
   renderer.setPlacementPreview(null);
+  renderer.setDeploymentArea(null);
   renderer.setHeldCardPreview(null, 0, 0);
   accumulator = 0;
   history.reset(game);
@@ -133,6 +135,7 @@ function selectCard(cardId: CardId): void {
   }
 
   renderer.setPlacementPreview(null);
+  renderer.setDeploymentArea(selectedCard);
   renderer.setHeldCardPreview(null, 0, 0);
   updateHud();
 }
@@ -236,6 +239,7 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
 function updatePlacementPreview(event: PointerEvent): void {
   if (!selectedCard || paused || game.gameOver) {
     renderer.setPlacementPreview(null);
+    renderer.setDeploymentArea(null);
     renderer.setHeldCardPreview(null, 0, 0);
     return;
   }
@@ -254,7 +258,7 @@ function updatePlacementPreview(event: PointerEvent): void {
   const radius = card.category === "spell"
     ? Math.max(18, Math.min(60, card.effect.radius))
     : Math.max(18, card.unit.radius);
-  renderer.setPlacementPreview(point, valid, radius);
+  renderer.setPlacementPreview(null);
 }
 
 function advanceOneStep(): void {
@@ -273,6 +277,7 @@ function advanceOneStep(): void {
   if (game.gameOver) {
     selectedCard = null;
     renderer.setPlacementPreview(null);
+    renderer.setDeploymentArea(null);
     renderer.setHeldCardPreview(null, 0, 0);
     music.stop();
     previousGameOver = true;
