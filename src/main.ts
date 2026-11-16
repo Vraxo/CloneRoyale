@@ -84,6 +84,7 @@ function startNewBattle(): void {
   selectedCard = null;
   placementMessage = "Choose a card, then deploy on your side.";
   renderer.setPlacementPreview(null);
+  renderer.setHeldCardPreview(null, 0, 0);
   accumulator = 0;
   history.reset(game);
   previousGameOver = false;
