@@ -253,11 +253,6 @@ function updatePlacementPreview(event: PointerEvent): void {
     return;
   }
 
-  const card = cardById(selectedCard);
-  const valid = canPlaceCard(game, "blue", selectedCard, point.x, point.y);
-  const radius = card.category === "spell"
-    ? Math.max(18, Math.min(60, card.effect.radius))
-    : Math.max(18, card.unit.radius);
   renderer.setPlacementPreview(null);
 }
 
