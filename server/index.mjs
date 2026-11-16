@@ -51,7 +51,10 @@ function leaveRoom(client) {
   if (!room) return;
   room.players.delete(client.id); client.room = null; client.side = null;
   if (room.players.size === 0 || room.state) { rooms.delete(room.code); }
-  if (room.players.size > 0) { broadcast(room, { type: "opponent-left" }); sendRoom(room); }
+  if (room.players.size > 0) {
+    broadcast(room, { type: "opponent-left" });
+    if (!room.state) sendRoom(room);
+  }
 }
 function handleMessage(client, message) {
   if (!message || typeof message.type !== "string") return;

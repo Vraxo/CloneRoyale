@@ -82,7 +82,11 @@ try {
   assert.equal(deployed.state.sides.blue.cardsPlayed, 1);
   assert.equal(opponentView.state.sides.blue.cardsPlayed, 1, "Both clients must receive the same authoritative deployment.");
 
-  console.log("Multiplayer smoke test passed: room creation, joining, shared simulation, no AI, and server-validated card deployment.");
+  const disconnectNotice = nextMessage(second, message => message.type === "opponent-left");
+  first.close();
+  await disconnectNotice;
+
+  console.log("Multiplayer smoke test passed: room creation, joining, shared simulation, no AI, deployment validation, and disconnect handling.");
 } finally {
   for (const socket of sockets) socket.close();
   server.kill("SIGTERM");
