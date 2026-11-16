@@ -18,7 +18,7 @@ interface HudElements {
 }
 
 export interface BattleHud {
-  update(game: GameState, selectedCard: CardId | null, paused: boolean, placementMessage: string, canStepBack: boolean): void;
+  update(game: GameState, selectedCard: CardId | null, paused: boolean, placementMessage: string, canStepBack: boolean, playerSide?: Side): void;
   setPaused(paused: boolean, game: GameState): void;
 }
 
@@ -68,16 +68,18 @@ function crownCount(game: GameState, side: Side): number {
   ).length;
 }
 
-function updateStatistics(elements: HudElements, game: GameState): void {
-  const blue = game.sides.blue;
-  const red = game.sides.red;
-
-  elements.blueUnitsLabel.textContent = game.units.filter((unit) => unit.side === "blue").length.toString();
-  elements.redUnitsLabel.textContent = game.units.filter((unit) => unit.side === "red").length.toString();
-  elements.blueTowersLabel.textContent = towerHealth(game, "blue").toString();
-  elements.redTowersLabel.textContent = towerHealth(game, "red").toString();
-  elements.bluePlayedLabel.textContent = blue.cardsPlayed.toString();
-  elements.redPlayedLabel.textContent = red.cardsPlayed.toString();
+function updateStatistics(elements: HudElements, game: GameState, playerSide: Side): void {
+  const opponentSide = playerSide === "blue" ? "red" : "blue";
+  elements.blueUnitsLabel.textContent = game.units.filter((unit) => unit.side === playerSide).length.toString();
+  elements.redUnitsLabel.textContent = game.units.filter((unit) => unit.side === opponentSide).length.toString();
+  elements.blueTowersLabel.textContent = towerHealth(game, playerSide).toString();
+  elements.redTowersLabel.textContent = towerHealth(game, opponentSide).toString();
+  elements.bluePlayedLabel.textContent = game.sides[playerSide].cardsPlayed.toString();
+  elements.redPlayedLabel.textContent = game.sides[opponentSide].cardsPlayed.toString();
+  const yourLabel = document.getElementById("your-side-label");
+  const opponentLabel = document.getElementById("opponent-side-label");
+  if (yourLabel) yourLabel.textContent = playerSide.toUpperCase() + (playerSide === "blue" ? " · SOUTH" : " · NORTH");
+  if (opponentLabel) opponentLabel.textContent = opponentSide.toUpperCase() + (opponentSide === "blue" ? " · SOUTH" : " · NORTH");
 }
 
 function updateEventFeed(elements: HudElements, game: GameState): void {
@@ -88,7 +90,7 @@ function updateEventFeed(elements: HudElements, game: GameState): void {
   }));
 }
 
-function updateMatchResult(elements: HudElements, game: GameState, paused: boolean): void {
+function updateMatchResult(elements: HudElements, game: GameState, paused: boolean, playerSide: Side): void {
   if (!game.gameOver) {
     if (!paused) elements.statusLabel.textContent = phaseLabel(game);
     elements.matchResult.hidden = true;
@@ -100,8 +102,8 @@ function updateMatchResult(elements: HudElements, game: GameState, paused: boole
     : (game.winner === "blue" ? "Blue" : "Red") + " wins";
   elements.resultTitle.textContent = game.winner === "draw"
     ? "Draw"
-    : game.winner === "blue" ? "Victory" : "Defeat";
-  elements.resultSummary.textContent = "Crowns " + crownCount(game, "blue") + " – " + crownCount(game, "red");
+    : game.winner === playerSide ? "Victory" : "Defeat";
+  elements.resultSummary.textContent = "Crowns " + crownCount(game, playerSide) + " – " + crownCount(game, playerSide === "blue" ? "red" : "blue");
   elements.matchResult.hidden = false;
 }
 
@@ -122,14 +124,14 @@ export function createBattleHud(renderer: ArenaRenderer): BattleHud {
         : paused ? "Paused" : phaseLabel(game);
     },
 
-    update(game, selectedCard, paused, placementMessage, canStepBack): void {
+    update(game, selectedCard, paused, placementMessage, canStepBack, playerSide = "blue"): void {
       elements.stepBackButton.disabled = !canStepBack || game.gameOver;
 
-      updateStatistics(elements, game);
+      updateStatistics(elements, game, playerSide);
       updateEventFeed(elements, game);
-      updateMatchResult(elements, game, paused);
+      updateMatchResult(elements, game, paused, playerSide);
 
-      renderer.updateBattleHud(game, selectedCard, placementStatus(game, paused, placementMessage));
+      renderer.updateBattleHud(game, selectedCard, placementStatus(game, paused, placementMessage), playerSide);
     }
   };
 }

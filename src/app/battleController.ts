@@ -6,7 +6,7 @@ import { createGameHistory } from "../game/history";
 import { cardById } from "../game/cards";
 import { playCard } from "../game/deployment";
 import { canPlaceCard, snapToArenaTile } from "../game/placement";
-import type { CardId, GameState, Lane } from "../game/types";
+import type { CardId, GameState, Lane, Side } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
 import { createBattleHud, type BattleHud } from "./battleHud";
@@ -153,7 +153,7 @@ export class BattleController {
     this.selectedCard = null;
     this.placementMessage = "Choose a card, then deploy on your side.";
     this.renderer.setPlacementPreview(null);
-    this.renderer.setDeploymentArea(this.game, "blue", null);
+    this.renderer.setDeploymentArea(this.game, this.playerSide, null);
     this.renderer.clearUnitPreview();
     this.accumulator = 0;
     this.history?.reset(this.game);
@@ -188,7 +188,7 @@ export class BattleController {
     }
 
     this.renderer.setPlacementPreview(null);
-    this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
+    this.renderer.setDeploymentArea(this.game, this.playerSide, this.selectedCard);
     this.renderer.clearUnitPreview();
     this.updateHud();
   }
