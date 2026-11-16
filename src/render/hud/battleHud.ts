@@ -66,6 +66,24 @@ function cardGlyph(cardId: CardId | undefined): string {
   }
 }
 
+function fitCardArt(
+  sprite: Sprite,
+  texture: Texture,
+  centerX: number,
+  centerY: number,
+  maxWidth: number,
+  maxHeight: number
+): void {
+  const aspectRatio = texture.width / texture.height;
+  const width = Math.min(maxWidth, maxHeight * aspectRatio);
+  const height = width / aspectRatio;
+
+  sprite.texture = texture;
+  sprite.position.set(centerX, centerY);
+  sprite.width = width;
+  sprite.height = height;
+}
+
 export class BattleHud {
   public readonly container = new Container();
 
@@ -186,16 +204,17 @@ export class BattleHud {
     this.nextCardLabel.text = "NEXT";
     this.nextCardLabel.anchor.set(0.5);
     this.nextCardLabel.position.set(nextX + layout.nextWidth / 2, layout.cardY + 6);
-    this.nextCardArt.texture = nextCard ? this.cardTextures.get(nextCard.id) ?? Texture.EMPTY : Texture.EMPTY;
-    this.nextCardArt.visible = nextCard !== null && this.cardTextures.has(nextCard.id);
-    if (this.nextCardArt.visible) {
-      const artHeight = layout.cardHeight - 24;
-      this.nextCardArt.position.set(
+    const nextTexture = nextCard ? this.cardTextures.get(nextCard.id) : undefined;
+    this.nextCardArt.visible = nextTexture !== undefined;
+    if (nextTexture) {
+      fitCardArt(
+        this.nextCardArt,
+        nextTexture,
         nextX + layout.nextWidth / 2,
-        nextY + artHeight / 2 + 3
+        nextY + (layout.cardHeight - 24) / 2 + 3,
+        layout.nextWidth - 10,
+        layout.cardHeight - 24
       );
-      this.nextCardArt.width = artHeight * 0.68;
-      this.nextCardArt.height = artHeight;
     }
     this.nextCardName.visible = false;
     this.nextCardName.text = nextCard?.name ?? "—";
@@ -269,10 +288,14 @@ export class BattleHud {
       .stroke({ color: 0xe4d7ad, alpha: 0.32, width: 1 });
 
     if (texture) {
-      this.heldCardArt.texture = texture;
-      this.heldCardArt.position.set(point.x, y + height * 0.47);
-      this.heldCardArt.width = Math.min(width - 12, (height - 20) * 0.68);
-      this.heldCardArt.height = height - 20;
+      fitCardArt(
+        this.heldCardArt,
+        texture,
+        point.x,
+        y + height * 0.47,
+        width - 12,
+        height - 20
+      );
       this.heldCardArt.visible = true;
     }
 
@@ -387,14 +410,20 @@ export class BattleHud {
 
       const art = this.cardArts[index];
       const texture = card ? this.cardTextures.get(card.id) : undefined;
-      art.texture = texture ?? Texture.EMPTY;
       art.visible = texture !== undefined;
       if (texture) {
         const artHeight = Math.min(62, rect.height - 21);
-        art.position.set(rect.x + rect.width / 2, rect.y + artHeight / 2 + 3);
-        art.width = Math.min(rect.width - 12, artHeight * 0.68);
-        art.height = artHeight;
+        fitCardArt(
+          art,
+          texture,
+          rect.x + rect.width / 2,
+          rect.y + artHeight / 2 + 3,
+          rect.width - 12,
+          artHeight
+        );
         art.alpha = affordable ? 1 : 0.5;
+      } else {
+        art.texture = Texture.EMPTY;
       }
 
       const glyph = this.cardGlyphs[index];
