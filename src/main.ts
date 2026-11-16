@@ -269,14 +269,12 @@ function advanceOneStep(): void {
 }
 
 function stepForward(): void {
-  soundEffects.play("ui-click");
   advanceOneStep();
   renderer.render(game);
   updateHud();
 }
 
 function stepBackward(): void {
-  soundEffects.play("ui-click");
   const previousState = history.stepBack();
   if (!previousState) return;
 
@@ -328,6 +326,7 @@ function bindHoldControl(
     event.preventDefault();
     activePointer = event.pointerId;
     button.setPointerCapture(event.pointerId);
+    soundEffects.play("ui-click");
     action();
 
     delayTimer = window.setTimeout(() => {
@@ -343,7 +342,10 @@ function bindHoldControl(
   button.addEventListener("lostpointercapture", stopHolding);
 
   button.addEventListener("click", (event: MouseEvent) => {
-    if (event.detail === 0 && !button.disabled) action();
+    if (event.detail === 0 && !button.disabled) {
+      soundEffects.play("ui-click");
+      action();
+    }
   });
 
   window.addEventListener("blur", stopHolding);
