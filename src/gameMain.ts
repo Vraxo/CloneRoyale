@@ -2,6 +2,7 @@ import { ArenaRenderer } from "./render/arenaRenderer";
 import { BattleController } from "./app/battleController";
 import { bindBattleInput } from "./app/battleInput";
 import { startBattleLoop } from "./app/battleLoop";
+import { OnlineClient, type OnlineMessage } from "./net/onlineClient";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -24,6 +25,82 @@ const battle = new BattleController(renderer, developerMode);
 bindBattleInput(battle);
 startBattleLoop(renderer.app, battle);
 battle.initialize();
+
+const onlineClient = new OnlineClient();
+let onlineUnsubscribe: (() => void) | null = null;
+const lobby = document.getElementById("online-lobby");
+const lobbyStatus = document.getElementById("online-status");
+const roomCode = document.getElementById("room-code");
+const joinCode = document.getElementById("join-code");
+const createRoomButton = document.getElementById("create-room");
+const joinRoomButton = document.getElementById("join-room");
+const closeLobbyButton = document.getElementById("close-lobby");
+const onlineButton = document.getElementById("online-play");
+const leaveOnlineButton = document.getElementById("leave-online");
+
+function setLobbyStatus(message: string): void {
+  if (lobbyStatus) lobbyStatus.textContent = message;
+}
+
+function openLobby(): void {
+  if (lobby instanceof HTMLDivElement) lobby.hidden = false;
+  setLobbyStatus("Connect to the game server to create or join a room.");
+}
+
+async function connectOnline(): Promise<boolean> {
+  setLobbyStatus("Connecting to multiplayer server…");
+  try {
+    await onlineClient.connect();
+    if (!onlineUnsubscribe) {
+      onlineUnsubscribe = onlineClient.subscribe((message: OnlineMessage) => {
+        if (message.type === "assigned") {
+          document.body.dataset.onlineSide = message.side;
+          if (roomCode) roomCode.textContent = message.code;
+          setLobbyStatus("Room " + message.code + " created. Share the code and wait for your opponent.");
+        } else if (message.type === "room") {
+          if (roomCode) roomCode.textContent = message.code;
+          setLobbyStatus(message.status === "playing" ? "Opponent connected. Starting match…" : "Waiting for another player…");
+        } else if (message.type === "match-start") {
+          const side = document.body.dataset.onlineSide === "red" ? "red" : "blue";
+          battle.activateOnline(side, message.state, onlineClient);
+          if (lobby instanceof HTMLDivElement) lobby.hidden = true;
+          setLobbyStatus("Match in progress.");
+        } else if (message.type === "state") {
+          battle.applyOnlineState(message.state);
+        } else if (message.type === "opponent-left") {
+          if (battle.isOnline) setLobbyStatus("Opponent disconnected. Leave the room to start another match.");
+        } else if (message.type === "action-error" || message.type === "error") {
+          setLobbyStatus(message.message);
+        }
+      });
+    }
+    return true;
+  } catch (error) {
+    setLobbyStatus(error instanceof Error ? error.message : "Could not connect to the game server.");
+    return false;
+  }
+}
+
+onlineButton?.addEventListener("click", openLobby);
+closeLobbyButton?.addEventListener("click", () => { if (lobby instanceof HTMLDivElement) lobby.hidden = true; });
+createRoomButton?.addEventListener("click", async () => {
+  if (!(await connectOnline())) return;
+  onlineClient.createRoom();
+  setLobbyStatus("Creating room…");
+});
+joinRoomButton?.addEventListener("click", async () => {
+  if (!(await connectOnline())) return;
+  const code = joinCode instanceof HTMLInputElement ? joinCode.value.trim().toUpperCase() : "";
+  if (code.length !== 5) { setLobbyStatus("Enter the five-character room code."); return; }
+  onlineClient.joinRoom(code);
+  setLobbyStatus("Joining room…");
+});
+leaveOnlineButton?.addEventListener("click", () => {
+  onlineUnsubscribe?.();
+  onlineUnsubscribe = null;
+  battle.leaveOnline();
+  if (lobby instanceof HTMLDivElement) lobby.hidden = true;
+});
 
 const modeButton = document.getElementById("mode-toggle");
 if (modeButton instanceof HTMLButtonElement) {

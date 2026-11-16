@@ -40,7 +40,7 @@ export function bindBattleInput(controller: BattleController): void {
     if (event.button !== 0) return;
     const handIndex = renderer.handCardAt(event.clientX, event.clientY, controller.currentSelectedCard);
     if (handIndex !== null) {
-      const cardId = controller.state.sides.blue.hand[handIndex];
+      const cardId = controller.state.sides[controller.side].hand[handIndex];
       if (cardId) controller.selectCard(cardId);
       controller.clearPointerPreview();
       return;
