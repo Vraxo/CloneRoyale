@@ -5,7 +5,8 @@ import { createGame, SIMULATION_STEP, stepGame } from "./game/simulation";
 import { MATCH_RULES } from "./game/matchRules";
 import { createGameHistory } from "./game/history";
 import { cardById } from "./game/cards";
-import { canPlaceCard, playCard } from "./game/deployment";
+import { playCard } from "./game/deployment";
+import { canPlaceCard } from "./game/placement";
 import type { CardId, GameState, Lane, Side } from "./game/types";
 import "./style.css";
 
@@ -74,7 +75,7 @@ function setPaused(value: boolean): void {
   music.setPaused(paused || game.gameOver);
   if (paused) {
     renderer.setPlacementPreview(null);
-    renderer.setDeploymentArea(null);
+    renderer.setDeploymentArea(game, "blue", null);
     renderer.setHeldCardPreview(null, 0, 0);
   }
 }
@@ -85,7 +86,7 @@ function startNewBattle(): void {
   selectedCard = null;
   placementMessage = "Choose a card, then deploy on your side.";
   renderer.setPlacementPreview(null);
-  renderer.setDeploymentArea(null);
+  renderer.setDeploymentArea(game, "blue", null);
   renderer.setHeldCardPreview(null, 0, 0);
   accumulator = 0;
   history.reset(game);
@@ -135,7 +136,7 @@ function selectCard(cardId: CardId): void {
   }
 
   renderer.setPlacementPreview(null);
-  renderer.setDeploymentArea(selectedCard);
+  renderer.setDeploymentArea(game, "blue", selectedCard);
   renderer.setHeldCardPreview(null, 0, 0);
   updateHud();
 }
@@ -210,7 +211,7 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
     soundEffects.play("ui-invalid");
     placementMessage = cardById(cardId).category === "spell"
       ? "That spell target is outside the arena or the card is unavailable."
-      : "Invalid deployment. Ground troops and buildings must be placed on your side of the river.";
+      : "Invalid deployment. Place troops and buildings in an unlocked deployment area.";
     updateHud();
     renderer.setPlacementPreview(point, false);
     return;
@@ -232,6 +233,7 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
   placementMessage = `${cardById(cardId).name} deployed.`;
   renderer.setPlacementPreview(null);
   renderer.setHeldCardPreview(null, 0, 0);
+  renderer.setDeploymentArea(game, "blue", null);
   renderer.render(game);
   updateHud();
 }
@@ -239,11 +241,12 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
 function updatePlacementPreview(event: PointerEvent): void {
   if (!selectedCard || paused || game.gameOver) {
     renderer.setPlacementPreview(null);
-    renderer.setDeploymentArea(null);
+    renderer.setDeploymentArea(game, "blue", null);
     renderer.setHeldCardPreview(null, 0, 0);
     return;
   }
 
+  renderer.setDeploymentArea(game, "blue", selectedCard);
   renderer.setHeldCardPreview(selectedCard, event.clientX, event.clientY);
 
   const point = renderer.screenToWorld(event.clientX, event.clientY);
@@ -261,6 +264,7 @@ function advanceOneStep(): void {
 
   const previousTime = game.time;
   stepGame(game, SIMULATION_STEP, "red");
+  renderer.setDeploymentArea(game, "blue", selectedCard);
   if (game.time === previousTime) return;
 
   music.update(game.time, game.phase);
@@ -272,7 +276,7 @@ function advanceOneStep(): void {
   if (game.gameOver) {
     selectedCard = null;
     renderer.setPlacementPreview(null);
-    renderer.setDeploymentArea(null);
+    renderer.setDeploymentArea(game, "blue", null);
     renderer.setHeldCardPreview(null, 0, 0);
     music.stop();
     previousGameOver = true;

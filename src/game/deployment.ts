@@ -82,32 +82,6 @@ function spawnCard(
 
 }
 
-export function canPlaceCard(
-  state: GameState,
-  side: Side,
-  cardId: CardId,
-  x: number,
-  y: number
-): boolean {
-  const card = cardById(cardId);
-  const runtime = state.sides[side];
-  if (!runtime.hand.includes(cardId) || runtime.elixir < card.cost) return false;
-  if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
-
-  if (card.category === "spell") {
-    return x >= 12 && x <= FIELD_WIDTH - 12 && y >= 12 && y <= FIELD_HEIGHT - 12;
-  }
-
-  const radius = card.unit.radius;
-  if (x < radius + 12 || x > FIELD_WIDTH - radius - 12) return false;
-
-  if (side === "blue") {
-    return y >= 512 + radius + 8 && y <= FIELD_HEIGHT - radius - 12;
-  }
-
-  return y >= radius + 12 && y <= 448 - radius - 8;
-}
-
 export function playCard(
   state: GameState,
   side: Side,

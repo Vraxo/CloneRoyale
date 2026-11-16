@@ -1,6 +1,7 @@
 import { Application, Container, Graphics } from "pixi.js";
-import type { CardId, GameState } from "../game/types";
+import type { CardId, GameState, Side } from "../game/types";
 import { cardById } from "../game/cards";
+import { getGroundDeploymentZones } from "../game/placement";
 import { EffectView } from "./entities/effectView";
 import { ProjectileView } from "./entities/projectileView";
 import { TowerView } from "./entities/towerView";
@@ -67,7 +68,11 @@ export class ArenaRenderer {
     this.placementOverlay.clear();
   }
 
-  public setDeploymentArea(cardId: CardId | null): void {
+  public setDeploymentArea(
+    state: GameState,
+    side: Side,
+    cardId: CardId | null
+  ): void {
     const overlay = this.invalidDeploymentOverlay;
     overlay.clear();
     if (!cardId) return;
@@ -86,16 +91,45 @@ export class ArenaRenderer {
       return;
     }
 
-    const radius = card.unit.radius;
-    const minX = radius + 12;
-    const maxX = WORLD_WIDTH - radius - 12;
-    const minY = 512 + radius + 8;
-    const maxY = WORLD_HEIGHT - radius - 12;
+    const zones = getGroundDeploymentZones(state, side, card.unit.radius);
+    const boundaries = [...new Set([
+      0,
+      WORLD_HEIGHT,
+      ...zones.flatMap((zone) => [zone.minY, zone.maxY])
+    ])].sort((first, second) => first - second);
 
-    overlay.rect(0, 0, WORLD_WIDTH, minY).fill({ color, alpha });
-    overlay.rect(0, minY, minX, maxY - minY).fill({ color, alpha });
-    overlay.rect(maxX, minY, WORLD_WIDTH - maxX, maxY - minY).fill({ color, alpha });
-    overlay.rect(0, maxY, WORLD_WIDTH, WORLD_HEIGHT - maxY).fill({ color, alpha });
+    for (let index = 0; index < boundaries.length - 1; index += 1) {
+      const top = boundaries[index];
+      const bottom = boundaries[index + 1];
+      if (bottom <= top) continue;
+
+      const middleY = (top + bottom) / 2;
+      const validIntervals = zones
+        .filter((zone) => middleY >= zone.minY && middleY <= zone.maxY)
+        .sort((first, second) => first.minX - second.minX);
+
+      let blockedStart = 0;
+      for (const zone of validIntervals) {
+        if (zone.minX > blockedStart) {
+          overlay.rect(
+            blockedStart,
+            top,
+            zone.minX - blockedStart,
+            bottom - top
+          ).fill({ color, alpha });
+        }
+        blockedStart = Math.max(blockedStart, zone.maxX);
+      }
+
+      if (blockedStart < WORLD_WIDTH) {
+        overlay.rect(
+          blockedStart,
+          top,
+          WORLD_WIDTH - blockedStart,
+          bottom - top
+        ).fill({ color, alpha });
+      }
+    }
   }
 
   public updateBattleHud(
