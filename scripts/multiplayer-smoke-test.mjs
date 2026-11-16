@@ -85,6 +85,7 @@ try {
   const [opponentEmote, senderEmote] = await Promise.all([emoteReceivedByOpponent, emoteEchoedToSender]);
   assert.deepEqual(opponentEmote, { type: "emote", side: "blue", emoteId: 3, name: "BluePlayer" });
   assert.deepEqual(senderEmote, opponentEmote);
+  await delay(1200);
   const visualEmoteReceived = nextMessage(second, message => message.type === "emote");
   const visualEmoteEchoed = nextMessage(first, message => message.type === "emote");
   first.send(JSON.stringify({ type: "emote", emoteId: 10 }));
