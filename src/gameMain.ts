@@ -185,7 +185,8 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "opponent-reconnected") {
           battle.setOnlineNotice("Opponent reconnected. The battle is resuming.");
         } else if (message.type === "queue-status") {
-          setLobbyStatus("Searching for an opponent…");
+          const position = message.position ? " · Position " + message.position + " of " + message.waiting : "";
+          setLobbyStatus("Searching for an opponent… " + message.waiting + " player" + (message.waiting === 1 ? "" : "s") + " in queue" + position + ".");
         } else if (message.type === "queue-cancelled") {
           setLobbyStatus("Matchmaking cancelled.");
         } else if (message.type === "room") {

@@ -9,7 +9,7 @@ export type OnlineMessage =
   | { type: "connection-lost" }
   | { type: "opponent-disconnected"; graceSeconds: number }
   | { type: "opponent-reconnected"; side: Side }
-  | { type: "queue-status"; waiting: number }
+  | { type: "queue-status"; waiting: number; position?: number }
   | { type: "queue-cancelled" }
   | { type: "room"; code: string; players: { side: Side; name: string }[]; status: "waiting" | "playing" }
   | { type: "match-start"; state: GameState; players?: { side: Side; name: string }[] }

@@ -12,6 +12,7 @@ const matchmakingQueue = [];
 const PORT = Number(process.env.PORT ?? 3001);
 const MAX_MESSAGE_BYTES = 16_384;
 const RECONNECT_GRACE_SECONDS = 30;
+const MAX_MATCHMAKING_QUEUE = 200;
 const reconnectTimers = new Map();
 
 function send(client, payload) {
@@ -46,6 +47,21 @@ function attachPlayer(room, client, side) {
     broadcast(room, { type: "match-start", state: room.state, players: playerSummaries(room) });
   }
 }
+function isSocketUsable(client) {
+  return !client.closed && Boolean(client.socket) && !client.socket.destroyed && client.socket.writable;
+}
+function pruneMatchmakingQueue() {
+  let changed = false;
+  for (let index = matchmakingQueue.length - 1; index >= 0; index -= 1) {
+    const client = matchmakingQueue[index];
+    if (isSocketUsable(client) && !client.room) continue;
+    matchmakingQueue.splice(index, 1);
+    client.queued = false;
+    changed = true;
+  }
+  if (changed) broadcastQueueStatus();
+  return changed;
+}
 function removeFromQueue(client, notify = false) {
   const index = matchmakingQueue.indexOf(client);
   if (index < 0) return false;
@@ -56,33 +72,60 @@ function removeFromQueue(client, notify = false) {
   return true;
 }
 function broadcastQueueStatus() {
-  const status = { type: "queue-status", waiting: matchmakingQueue.length };
-  for (const client of matchmakingQueue) send(client, status);
+  const waiting = matchmakingQueue.length;
+  matchmakingQueue.forEach((client, index) => {
+    send(client, { type: "queue-status", waiting, position: index + 1 });
+  });
 }
 function startMatchedRoom(first, second) {
+  if (!isSocketUsable(first) || !isSocketUsable(second) || first.room || second.room) return false;
+  first.queued = false;
+  second.queued = false;
   const room = { code: "PUBLIC-" + randomBytes(8).toString("hex"), players: new Map(), state: null, lastUpdate: Date.now(), accumulator: 0, publicMatch: true };
   rooms.set(room.code, room);
   attachPlayer(room, first, "blue");
   attachPlayer(room, second, "red");
+  return true;
 }
 function joinMatchmaking(client) {
-  if (client.room) leaveRoom(client);
-  if (client.queued) return;
+  if (!isSocketUsable(client)) return;
+  if (client.room) {
+    send(client, { type: "error", message: "Leave your current room before searching for another match." });
+    return;
+  }
+  pruneMatchmakingQueue();
+  if (client.queued) {
+    const index = matchmakingQueue.indexOf(client);
+    send(client, { type: "queue-status", waiting: matchmakingQueue.length, position: index + 1 });
+    return;
+  }
   let opponent = null;
   while (matchmakingQueue.length > 0 && !opponent) {
     const candidate = matchmakingQueue.shift();
-    if (!candidate.closed) opponent = candidate;
+    candidate.queued = false;
+    if (isSocketUsable(candidate) && !candidate.room) opponent = candidate;
   }
   if (opponent) {
-    opponent.queued = false;
     client.queued = false;
-    startMatchedRoom(opponent, client);
+    if (!startMatchedRoom(opponent, client)) {
+      if (isSocketUsable(opponent) && !opponent.room) {
+        matchmakingQueue.unshift(opponent);
+        opponent.queued = true;
+      }
+      if (matchmakingQueue.length < MAX_MATCHMAKING_QUEUE) {
+        matchmakingQueue.push(client);
+        client.queued = true;
+      } else send(client, { type: "error", message: "The matchmaking queue is full. Please try again shortly." });
+    }
     broadcastQueueStatus();
+    return;
+  }
+  if (matchmakingQueue.length >= MAX_MATCHMAKING_QUEUE) {
+    send(client, { type: "error", message: "The matchmaking queue is full. Please try again shortly." });
     return;
   }
   matchmakingQueue.push(client);
   client.queued = true;
-  send(client, { type: "queue-status", waiting: matchmakingQueue.length });
   broadcastQueueStatus();
 }
 function createRoom(client) {
@@ -124,8 +167,16 @@ function handleMessage(client, message) {
   if (message.type === "join-room") {
     const room = rooms.get(String(message.code ?? "").trim().toUpperCase());
     if (!room) { send(client, { type: "error", message: "Room not found. Check the code and try again." }); return; }
+    if (client.room === room) { sendRoom(room); return; }
     if (room.players.size >= 2 || room.state) { send(client, { type: "error", message: "That room is already full." }); return; }
-    removeFromQueue(client); if (client.room) leaveRoom(client); attachPlayer(room, client, "red"); return;
+    removeFromQueue(client);
+    if (client.room) leaveRoom(client);
+    if (rooms.get(room.code) !== room || room.players.size >= 2 || room.state) {
+      send(client, { type: "error", message: "That room is no longer available." });
+      return;
+    }
+    attachPlayer(room, client, "red");
+    return;
   }
   if (message.type === "leave-room") { removeFromQueue(client); leaveRoom(client); return; }
   if (message.type !== "play-card" || !client.room?.state || !client.side) return;
@@ -231,6 +282,18 @@ function contentType(path) {
 }
 const server = createServer(async (request, response) => {
   if (request.url === "/healthz") { response.writeHead(200, { "content-type": "text/plain" }).end("ok"); return; }
+  if (request.url === "/matchmaking-status") {
+    pruneMatchmakingQueue();
+    const publicMatches = [...rooms.values()].filter(room => room.publicMatch && room.state && !room.state.gameOver).length;
+    const privateRooms = [...rooms.values()].filter(room => !room.publicMatch).length;
+    response.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }).end(JSON.stringify({
+      connectedClients: [...clients].filter(isSocketUsable).length,
+      queuedPlayers: matchmakingQueue.length,
+      activePublicMatches: publicMatches,
+      privateRooms
+    }));
+    return;
+  }
   const pathname = decodeURIComponent(new URL(request.url ?? "/", "http://localhost").pathname);
   let filePath = resolve(root, "." + pathname);
   if (!filePath.startsWith(root + sep) && filePath !== root) { response.writeHead(403).end("Forbidden"); return; }
