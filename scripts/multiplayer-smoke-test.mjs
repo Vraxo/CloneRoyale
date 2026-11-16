@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
+import { createGame, playCard, stepGame } from "../dist-server/simulation.js";
 
 const port = 31771;
 const baseUrl = "http://127.0.0.1:" + port;
@@ -49,6 +50,27 @@ function nextMessage(socket, predicate, timeoutMs = 5000) {
 }
 
 try {
+  const pathfindingState = createGame(42);
+  pathfindingState.sides.blue.hand = ["cannon", "mini-pekka"];
+  pathfindingState.sides.blue.elixir = 10;
+  assert.equal(playCard(pathfindingState, "blue", "cannon", "left", undefined, undefined, { x: 205, y: 700 }), true);
+  assert.equal(playCard(pathfindingState, "blue", "mini-pekka", "left", undefined, undefined, { x: 205, y: 770 }), true);
+
+  let miniPekkaMovedAroundCannon = false;
+  for (let frame = 0; frame < 600; frame += 1) {
+    stepGame(pathfindingState, 1 / 30, null, true);
+    const miniPekka = pathfindingState.units.find(unit => unit.type === "mini-pekka");
+    if (miniPekka && Math.abs(miniPekka.x - 205) > 28 && miniPekka.y < 700) {
+      miniPekkaMovedAroundCannon = true;
+      break;
+    }
+  }
+  assert.equal(
+    miniPekkaMovedAroundCannon,
+    true,
+    "A Mini P.E.K.K.A. must route around its own Cannon instead of remaining trapped behind it."
+  );
+
   await waitForServer();
   const first = await connect();
   first.send(JSON.stringify({ type: "set-profile", guestId: "11111111-1111-4111-8111-111111111111", name: "BluePlayer" }));
@@ -177,7 +199,7 @@ try {
   const disconnectedQueueMetrics = await (await fetch(baseUrl + "/matchmaking-status")).json();
   assert.equal(disconnectedQueueMetrics.queuedPlayers, 0, "Disconnected players must be removed from the queue.");
 
-  console.log("Multiplayer smoke test passed: private rooms, idempotent room joins, active-room matchmaking protection, FIFO public matchmaking, duplicate queue protection, cancellation, queue disconnect cleanup and metrics, shared simulation, no AI, deployment validation, and 30-second reconnect/resume.");
+  console.log("Simulation pathfinding regression passed: Mini P.E.K.K.A. routes around its own Cannon. Multiplayer smoke test passed: private rooms, idempotent room joins, active-room matchmaking protection, FIFO public matchmaking, duplicate queue protection, cancellation, queue disconnect cleanup and metrics, shared simulation, no AI, deployment validation, and 30-second reconnect/resume.");
 } finally {
   for (const socket of sockets) socket.close();
   server.kill("SIGTERM");
