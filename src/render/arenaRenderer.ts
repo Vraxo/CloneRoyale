@@ -166,18 +166,28 @@ export class ArenaRenderer {
       return;
     }
 
+    const spacing = Math.max(18, card.unit.radius * 2 + 8);
+    const columns = Math.min(card.count, 5);
+    const rows = Math.ceil(card.count / columns);
+    const getOffset = (index: number): { x: number; y: number } => ({
+      x: (index % columns - (columns - 1) / 2) * spacing,
+      y: (Math.floor(index / columns) - (rows - 1) / 2) * spacing
+    });
+
     if (this.unitPreviewCardId !== cardId) {
       this.clearUnitPreview();
       this.unitPreviewCardId = cardId;
 
       for (let index = 0; index < card.count; index += 1) {
-        const column = index % 5;
-        const row = Math.floor(index / 5);
-        const offsetX = card.count === 1 ? 0 : (column - (Math.min(card.count, 5) - 1) / 2)
-          * Math.min(11, card.unit.radius * 0.85);
-        const offsetY = card.count === 1 ? 0 : row * 11;
-        const unit = this.createPreviewUnit(cardId, card.category, card.unit, index,
-          point.x + offsetX, point.y + offsetY);
+        const offset = getOffset(index);
+        const unit = this.createPreviewUnit(
+          cardId,
+          card.category,
+          card.unit,
+          index,
+          point.x + offset.x,
+          point.y + offset.y
+        );
         const view = createUnitView(unit);
         view.container.alpha = 0.58;
         this.unitPreviewLayer.addChild(view.container);
@@ -187,16 +197,16 @@ export class ArenaRenderer {
 
     const time = performance.now() / 1000;
     for (let index = 0; index < this.unitPreviewViews.length; index += 1) {
-      const view = this.unitPreviewViews[index];
+      const offset = getOffset(index);
       const unit = this.createPreviewUnit(
         cardId,
         card.category,
         card.unit,
         index,
-        point.x + (card.count === 1 ? 0 : (index % 5 - (Math.min(card.count, 5) - 1) / 2)
-          * Math.min(11, card.unit.radius * 0.85)),
-        point.y + (card.count === 1 ? 0 : Math.floor(index / 5) * 11)
+        point.x + offset.x,
+        point.y + offset.y
       );
+      const view = this.unitPreviewViews[index];
       view.update(unit, time);
       view.container.alpha = 0.58;
     }
