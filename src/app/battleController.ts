@@ -88,11 +88,19 @@ export class BattleController {
     this.accumulator = 0;
     this.previousGameOver = state.gameOver;
     document.body.dataset.online = "true";
+    const modeDescription = document.getElementById("mode-description");
+    if (modeDescription) modeDescription.textContent = "Online match · " + side.toUpperCase();
     this.music.start(state.time, state.phase);
     this.renderer.setDeploymentArea(state, side, null);
     this.renderer.render(state);
     this.updateHud();
     this.hud.setPaused(false, state);
+  }
+
+  public setOnlineNotice(message: string): void {
+    if (!this.isOnline) return;
+    this.placementMessage = message;
+    this.updateHud();
   }
 
   public applyOnlineState(state: GameState): void {
@@ -117,6 +125,8 @@ export class BattleController {
     this.onlineClient = null;
     this.playerSide = "blue";
     document.body.dataset.online = "false";
+    const modeDescription = document.getElementById("mode-description");
+    if (modeDescription) modeDescription.textContent = "Player vs AI · Live match";
     this.startNewBattle();
   }
 

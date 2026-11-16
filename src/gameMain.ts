@@ -68,9 +68,13 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "state") {
           battle.applyOnlineState(message.state);
         } else if (message.type === "opponent-left") {
-          if (battle.isOnline) setLobbyStatus("Opponent disconnected. Leave the room to start another match.");
+          if (battle.isOnline) {
+            setLobbyStatus("Opponent disconnected. Leave the room to start another match.");
+            battle.setOnlineNotice("Opponent disconnected. Leave the match to return to solo play.");
+          }
         } else if (message.type === "action-error" || message.type === "error") {
           setLobbyStatus(message.message);
+          battle.setOnlineNotice(message.message);
         }
       });
     }
@@ -82,7 +86,14 @@ async function connectOnline(): Promise<boolean> {
 }
 
 onlineButton?.addEventListener("click", openLobby);
-closeLobbyButton?.addEventListener("click", () => { if (lobby instanceof HTMLDivElement) lobby.hidden = true; });
+closeLobbyButton?.addEventListener("click", () => {
+  if (!battle.isOnline) {
+    onlineUnsubscribe?.();
+    onlineUnsubscribe = null;
+    onlineClient.leave();
+  }
+  if (lobby instanceof HTMLDivElement) lobby.hidden = true;
+});
 createRoomButton?.addEventListener("click", async () => {
   if (!(await connectOnline())) return;
   onlineClient.createRoom();

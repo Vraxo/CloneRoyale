@@ -551,3 +551,6 @@ body[data-online="true"] #leave-online { display: block; width: 100%; margin-top
 }
 .join-room-row input:focus { border-color: var(--gold); }
 .online-status { min-height: 32px; margin: 15px 0 0; color: #b9c3b2; font-size: 11px; line-height: 1.45; }
+
+#online-play { width: 100%; }
+body[data-online="true"] #play-again { display: none; }
