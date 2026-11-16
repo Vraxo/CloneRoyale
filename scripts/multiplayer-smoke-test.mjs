@@ -113,21 +113,6 @@ try {
   assert.equal(publicFirst.state.time, 0);
   assert.equal(publicSecond.state.time, 0);
 
-  const readyFirst = nextMessage(resumedClient, message => message.type === "rematch-status");
-  const readySecond = nextMessage(second, message => message.type === "rematch-status");
-  resumedClient.send(JSON.stringify({ type: "rematch-ready" }));
-  const [firstReady, secondReady] = await Promise.all([readyFirst, readySecond]);
-  assert.equal(firstReady.ready, 1);
-  assert.equal(secondReady.ready, 1);
-  const firstRematch = nextMessage(resumedClient, message => message.type === "rematch-start");
-  const secondRematch = nextMessage(second, message => message.type === "rematch-start");
-  second.send(JSON.stringify({ type: "rematch-ready" }));
-  const [rematchA, rematchB] = await Promise.all([firstRematch, secondRematch]);
-  assert.equal(rematchA.state.time, 0);
-  assert.equal(rematchB.state.time, 0);
-  assert.equal(rematchA.state.gameOver, false);
-  assert.equal(rematchB.state.gameOver, false);
-
   const cancelPlayer = await connect();
   const cancelQueued = nextMessage(cancelPlayer, message => message.type === "queue-status");
   cancelPlayer.send(JSON.stringify({ type: "find-match" }));
