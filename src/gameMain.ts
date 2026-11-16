@@ -152,6 +152,7 @@ const BATTLE_EMOTES = [
   { label: "King laughing", image: "/emotes/emote-king-laugh.png", audio: "emote-laugh" }
 ] as const;
 const emoteUi = document.getElementById("emote-ui");
+if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
 const emoteToggle = document.getElementById("emote-toggle");
 const emotePicker = document.getElementById("emote-picker");
 const emoteBubbles = {
@@ -200,8 +201,12 @@ emotePicker?.addEventListener("click", event => {
   const button = target.closest<HTMLButtonElement>("button[data-emote-id]");
   if (!button) return;
   const emoteId = Number(button.dataset.emoteId);
-  if (!Number.isInteger(emoteId) || emoteId < 0 || emoteId >= BATTLE_EMOTES.length || !battle.isOnline) return;
-  onlineClient.sendEmote(emoteId);
+  if (!Number.isInteger(emoteId) || emoteId < 0 || emoteId >= BATTLE_EMOTES.length) return;
+  if (battle.isOnline) {
+    onlineClient.sendEmote(emoteId);
+  } else {
+    showBattleEmote("blue", emoteId, guestProfile.name);
+  }
   if (emotePicker instanceof HTMLElement) emotePicker.hidden = true;
   emoteToggle?.setAttribute("aria-expanded", "false");
 });
@@ -401,7 +406,7 @@ joinRoomButton?.addEventListener("click", async () => {
   setLobbyStatus("Joining room…");
 });
 function leaveOnlineMatch(): void {
-  if (emoteUi instanceof HTMLElement) emoteUi.hidden = true;
+  if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
   if (emotePicker instanceof HTMLElement) emotePicker.hidden = true;
   emoteToggle?.setAttribute("aria-expanded", "false");
   for (const item of Object.values(emoteBubbles)) if (item) item.hidden = true;
