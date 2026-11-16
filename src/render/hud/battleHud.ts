@@ -88,15 +88,11 @@ export class BattleHud {
   public readonly container = new Container();
 
   private readonly graphics = new Graphics();
-  private readonly heldCardGraphics = new Graphics();
   private readonly cardOverlayGraphics = new Graphics();
-  private readonly heldCardArt = new Sprite(Texture.EMPTY);
   private readonly cardArts = Array.from({ length: 4 }, () => new Sprite(Texture.EMPTY));
   private readonly nextCardArt = new Sprite(Texture.EMPTY);
-  private readonly cardTextures = new Map<CardId, Texture>();\n  private lastHandCardIds: (CardId | undefined)[] = [];
-  private readonly heldCardGlyph = createHudText(34, 0xf0dfb6, "Supercell Magic");
-  private readonly heldCardName = createHudText(12, 0xf4eedc, "Supercell Magic");
-  private readonly heldCardCost = createHudText(13, 0xffffff, "Supercell Magic");
+  private readonly cardTextures = new Map<CardId, Texture>();
+  private lastHandCardIds: (CardId | undefined)[] = [];
   private readonly cardGlyphs = Array.from({ length: 4 }, () => createHudText(25, 0xf0dfb6, "Supercell Magic"));
   private readonly cardNames = Array.from({ length: 4 }, () => createHudText(11, 0xf4eedc, "Supercell Magic"));
   private readonly cardCosts = Array.from({ length: 4 }, () => createHudText(12, 0xffffff, "Supercell Magic"));
@@ -115,7 +111,6 @@ export class BattleHud {
       this.nextCardArt,
       ...this.cardArts,
       this.cardOverlayGraphics,
-      this.heldCardArt,
       ...this.cardGlyphs,
       ...this.cardNames,
       ...this.cardCosts,
@@ -126,10 +121,6 @@ export class BattleHud {
       this.elixirMax,
       this.placementHint,
       this.matchClockLabel,
-      this.heldCardGraphics,
-      this.heldCardGlyph,
-      this.heldCardName,
-      this.heldCardCost
     );
 
     this.nextCardArt.eventMode = "none";
@@ -140,13 +131,6 @@ export class BattleHud {
     });
     this.nextCardArt.anchor.set(0.5);
     this.nextCardArt.visible = false;
-    this.heldCardArt.anchor.set(0.5);
-    this.heldCardArt.eventMode = "none";
-    this.heldCardArt.visible = false;
-    this.heldCardGraphics.eventMode = "none";
-    this.heldCardGlyph.alpha = 0.88;
-    this.heldCardName.alpha = 0.9;
-    this.heldCardCost.alpha = 0.95;
   }
 
   public async loadCardArt(): Promise<void> {
@@ -176,7 +160,8 @@ export class BattleHud {
     const layout = calculateHudLayout(width, height);
     const graphics = this.graphics;
     const blue = state.sides.blue;
-    const nextCardId = blue.drawPile[0];\n    this.lastHandCardIds = [...blue.hand];
+    const nextCardId = blue.drawPile[0];
+    this.lastHandCardIds = [...blue.hand];
     const nextCard = nextCardId ? cardById(nextCardId) : null;
 
     graphics.clear();
@@ -248,83 +233,6 @@ export class BattleHud {
     this.placementHint.style.wordWrapWidth = layout.width - 28;
   }
 
-  public setHeldCardPreview(
-    cardId: CardId | null,
-    clientX: number,
-    clientY: number,
-    canvas: HTMLCanvasElement,
-    screenWidth: number,
-    screenHeight: number
-  ): void {
-    this.heldCardGraphics.clear();
-    this.heldCardArt.visible = false;
-    this.heldCardGlyph.visible = false;
-    this.heldCardName.visible = false;
-    this.heldCardCost.visible = false;
-
-    if (!cardId) return;
-
-    const point = this.clientToScreen(clientX, clientY, canvas, screenWidth, screenHeight);
-    if (!point) return;
-
-    const card = cardById(cardId);
-    const width = Math.max(82, Math.min(104, screenWidth * 0.13));
-    const height = width * 1.22;
-    const x = point.x - width / 2;
-    const y = point.y - height / 2;
-    const texture = this.cardTextures.get(cardId);
-    const fill = card.category === "spell"
-      ? 0x4b4662
-      : card.category === "building" ? 0x55513e : 0x35473d;
-
-    this.heldCardGraphics
-      .roundRect(x, y, width, height, 10)
-      .fill({ color: fill, alpha: texture ? 0 : 0.72 });
-    this.heldCardGraphics
-      .roundRect(x, y, width, height, 10)
-      .stroke({ color: 0xe3c77d, alpha: 0.95, width: 2.5 });
-    this.heldCardGraphics
-      .roundRect(x + 6, y + 6, width - 12, height - 12, 6)
-      .stroke({ color: 0xe4d7ad, alpha: 0.32, width: 1 });
-
-    if (texture) {
-      fitCardArt(
-        this.heldCardArt,
-        texture,
-        point.x,
-        y + height * 0.47,
-        width - 12,
-        height - 20
-      );
-      this.heldCardArt.visible = true;
-    }
-
-    this.heldCardGlyph.visible = !this.heldCardArt.visible;
-    this.heldCardGlyph.text = cardGlyph(cardId);
-    this.heldCardGlyph.anchor.set(0.5);
-    this.heldCardGlyph.position.set(point.x, y + height * 0.38);
-    this.heldCardGlyph.style.fontSize = Math.max(24, Math.min(38, width * 0.38));
-
-    this.heldCardName.text = card.name;
-    this.heldCardName.anchor.set(0.5);
-    this.heldCardName.position.set(point.x, y + height - 8);
-    this.heldCardName.style.fontSize = Math.max(8, Math.min(10, width * 0.1));
-    this.heldCardName.style.wordWrap = true;
-    this.heldCardName.style.wordWrapWidth = width - 12;
-    this.heldCardName.visible = true;
-
-    this.heldCardGraphics
-      .circle(x + width - 15, y + 16, 11)
-      .fill({ color: 0x76569a, alpha: 0.88 });
-    this.heldCardGraphics
-      .circle(x + width - 15, y + 16, 11)
-      .stroke({ color: 0xc2a4df, alpha: 0.9, width: 1 });
-    this.heldCardCost.text = card.cost.toString();
-    this.heldCardCost.anchor.set(0.5);
-    this.heldCardCost.position.set(x + width - 15, y + 16);
-    this.heldCardCost.visible = true;
-  }
-
   public handCardAt(
     clientX: number,
     clientY: number,
@@ -365,7 +273,10 @@ export class BattleHud {
     this.matchClockLabel.anchor.set(0.5);
     this.matchClockLabel.position.set(width / 2, y + clockHeight / 2);
   }
-  private drawCardBadges(\n    layout: ReturnType<typeof calculateHudLayout>,\n    selectedCard: CardId | null\n  ): void {
+  private drawCardBadges(
+    layout: ReturnType<typeof calculateHudLayout>,
+    selectedCard: CardId | null
+  ): void {
     const graphics = this.cardOverlayGraphics;
     graphics.clear();
 
