@@ -52,6 +52,13 @@ const closeProfileButton = document.getElementById("close-profile");
 const modeDescription = document.getElementById("mode-description");
 
 type GuestProfile = { id: string; name: string };
+function createGuestId(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, character => {
+    const value = Math.floor(Math.random() * 16);
+    return (character === "x" ? value : (value & 0x3) | 0x8).toString(16);
+  });
+}
 function loadGuestProfile(): GuestProfile {
   try {
     const stored = JSON.parse(localStorage.getItem("cloneroyale.profile") ?? "null") as Partial<GuestProfile> | null;
@@ -60,7 +67,7 @@ function loadGuestProfile(): GuestProfile {
       return { id: stored.id, name: stored.name.trim().slice(0, 16) };
     }
   } catch { /* Replace invalid local profile data. */ }
-  const profile = { id: crypto.randomUUID(), name: "Guest" };
+  const profile = { id: createGuestId(), name: "Guest" };
   localStorage.setItem("cloneroyale.profile", JSON.stringify(profile));
   return profile;
 }
