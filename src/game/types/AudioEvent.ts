@@ -24,7 +24,6 @@ export type AudioEvent =
   | "baby-dragon-wing"
   | "princess-tower-attack"
   | "king-tower-attack"
-  | "elixir-gain"
   | "double-elixir"
   | "triple-elixir"
   | "cannon-deploy"

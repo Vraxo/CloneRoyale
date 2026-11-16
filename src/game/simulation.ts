@@ -229,14 +229,7 @@ export function stepGame(state: GameState, dt: number, botSide: Side | null = nu
 
   for (const side of ["blue", "red"] as const) {
     const runtime = state.sides[side];
-    const previousElixir = runtime.elixir;
     runtime.elixir = Math.min(MAX_ELIXIR, runtime.elixir + dt / regenerationInterval);
-    if (
-      side === "blue"
-      && Math.floor(runtime.elixir + 0.000001) > Math.floor(previousElixir + 0.000001)
-    ) {
-      state.audioEvents.push("elixir-gain");
-    }
     if (botSide !== null && side !== botSide) continue;
 
     runtime.thinkIn -= dt;
