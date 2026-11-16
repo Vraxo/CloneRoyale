@@ -17,8 +17,7 @@ function makeSideState(): SideState {
   return {
     elixir: 5,
     hand: STARTER_DECK.slice(0, 4),
-    drawPile: [...STARTER_DECK],
-    drawIndex: 4,
+    drawPile: STARTER_DECK.slice(4),
     thinkIn: 0.55,
     cardsPlayed: 0
   };

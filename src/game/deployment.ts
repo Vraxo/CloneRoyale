@@ -8,8 +8,10 @@ function rotateCard(state: GameState, side: Side, cardId: CardId): void {
   const index = runtime.hand.indexOf(cardId);
   if (index < 0) return;
   runtime.hand.splice(index, 1);
-  runtime.hand.push(runtime.drawPile[runtime.drawIndex % runtime.drawPile.length]);
-  runtime.drawIndex += 1;
+  const nextCard = runtime.drawPile.shift();
+  if (nextCard === undefined) return;
+  runtime.hand.push(nextCard);
+  runtime.drawPile.push(cardId);
   runtime.cardsPlayed += 1;
 }
 
