@@ -147,7 +147,7 @@ function leaveRoom(client) {
     if (!room.state) sendRoom(room);
   }
 }
-const MATCH_EMOTE_COUNT = 8;
+const MATCH_EMOTE_COUNT = 12;
 const EMOTE_COOLDOWN_MS = 1200;
 function handleEmote(client, message) {
   const room = client.room;

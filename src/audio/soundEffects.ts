@@ -78,7 +78,11 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "overtime-start": ["/audio/sfx/ui/overtime-start.ogg"],
   "match-victory": ["/audio/sfx/ui/match-victory.ogg"],
   "match-defeat": ["/audio/sfx/ui/match-defeat.ogg"],
-  "match-draw": ["/audio/sfx/ui/match-draw.ogg"]
+  "match-draw": ["/audio/sfx/ui/match-draw.ogg"],
+  "emote-thumbs-up": ["/audio/sfx/emotes/king-thumbs-up.ogg"],
+  "emote-angry": ["/audio/sfx/emotes/king-angry.ogg"],
+  "emote-cry": ["/audio/sfx/emotes/king-cry.ogg"],
+  "emote-laugh": ["/audio/sfx/emotes/king-laugh.ogg"]
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
@@ -136,7 +140,11 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "overtime-start": 0.85,
   "match-victory": 0.9,
   "match-defeat": 0.85,
-  "match-draw": 0.8
+  "match-draw": 0.8,
+  "emote-thumbs-up": 0.9,
+  "emote-angry": 0.9,
+  "emote-cry": 0.9,
+  "emote-laugh": 0.9
 };
 
 const MAX_VOICES_PER_SOUND = 6;

@@ -53,4 +53,8 @@ export type AudioEvent =
   | "overtime-start"
   | "match-victory"
   | "match-defeat"
-  | "match-draw";
+  | "match-draw"
+  | "emote-thumbs-up"
+  | "emote-angry"
+  | "emote-cry"
+  | "emote-laugh";

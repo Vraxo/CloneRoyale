@@ -3,6 +3,7 @@ import { BattleController } from "./app/battleController";
 import { bindBattleInput } from "./app/battleInput";
 import { startBattleLoop } from "./app/battleLoop";
 import { OnlineClient, type OnlineMessage } from "./net/onlineClient";
+import type { AudioEvent } from "./game/types";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -136,7 +137,20 @@ function updateOpponentLabel(players: { side: "blue" | "red"; name: string }[]):
 }
 renderProfile();
 
-const BATTLE_EMOTES = ["Good game!", "Well played!", "Oops!", "Thanks!", "Wow!", "Good luck!", "Nice!", "Let's go!"];
+const BATTLE_EMOTES = [
+  { label: "Good game!" },
+  { label: "Well played!" },
+  { label: "Oops!" },
+  { label: "Thanks!" },
+  { label: "Wow!" },
+  { label: "Good luck!" },
+  { label: "Nice!" },
+  { label: "Let's go!" },
+  { label: "King thumbs up", image: "/emotes/emote-king-thumbs-up.png", audio: "emote-thumbs-up" },
+  { label: "King angry", image: "/emotes/emote-king-angry.png", audio: "emote-angry" },
+  { label: "King crying", image: "/emotes/emote-king-cry.png", audio: "emote-cry" },
+  { label: "King laughing", image: "/emotes/emote-king-laugh.png", audio: "emote-laugh" }
+] as const;
 const emoteUi = document.getElementById("emote-ui");
 const emoteToggle = document.getElementById("emote-toggle");
 const emotePicker = document.getElementById("emote-picker");
@@ -147,11 +161,27 @@ const emoteBubbles = {
 let emoteHideTimer: ReturnType<typeof setTimeout> | null = null;
 function showBattleEmote(side: "blue" | "red", emoteId: number, name: string): void {
   const bubble = emoteBubbles[side];
-  if (!(bubble instanceof HTMLElement) || !BATTLE_EMOTES[emoteId]) return;
+  const emote = BATTLE_EMOTES[emoteId];
+  if (!(bubble instanceof HTMLElement) || !emote) return;
   const nameLabel = bubble.querySelector("span");
   const emoteLabel = bubble.querySelector("strong");
+  const emoteImage = bubble.querySelector("img");
   if (nameLabel) nameLabel.textContent = name;
-  if (emoteLabel) emoteLabel.textContent = BATTLE_EMOTES[emoteId];
+  if (emoteLabel) {
+    emoteLabel.textContent = emote.label;
+    emoteLabel.hidden = "image" in emote;
+  }
+  if (emoteImage) {
+    if ("image" in emote) {
+      emoteImage.src = emote.image;
+      emoteImage.alt = emote.label;
+      emoteImage.hidden = false;
+    } else {
+      emoteImage.hidden = true;
+      emoteImage.removeAttribute("src");
+    }
+  }
+  if ("audio" in emote) battle.soundEffects.play(emote.audio as AudioEvent);
   bubble.hidden = false;
   if (emoteHideTimer) clearTimeout(emoteHideTimer);
   emoteHideTimer = setTimeout(() => {
@@ -166,8 +196,10 @@ emoteToggle?.addEventListener("click", () => {
 });
 emotePicker?.addEventListener("click", event => {
   const target = event.target;
-  if (!(target instanceof HTMLButtonElement)) return;
-  const emoteId = Number(target.dataset.emoteId);
+  if (!(target instanceof Element)) return;
+  const button = target.closest<HTMLButtonElement>("button[data-emote-id]");
+  if (!button) return;
+  const emoteId = Number(button.dataset.emoteId);
   if (!Number.isInteger(emoteId) || emoteId < 0 || emoteId >= BATTLE_EMOTES.length || !battle.isOnline) return;
   onlineClient.sendEmote(emoteId);
   if (emotePicker instanceof HTMLElement) emotePicker.hidden = true;
