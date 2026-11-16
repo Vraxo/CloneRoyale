@@ -330,16 +330,20 @@ export class BattleHud {
     clientY: number,
     canvas: HTMLCanvasElement,
     screenWidth: number,
-    screenHeight: number
+    screenHeight: number,
+    selectedCard: CardId | null = null
   ): number | null {
     const point = this.clientToScreen(clientX, clientY, canvas, screenWidth, screenHeight);
     if (!point) return null;
 
     const layout = calculateHudLayout(screenWidth, screenHeight);
-    const index = layout.cards.findIndex((card) =>
-      point.x >= card.x && point.x <= card.x + card.width
-      && point.y >= card.y && point.y <= card.y + card.height
-    );
+    const index = layout.cards.findIndex((card, cardIndex) => {
+      const isSelected = selectedCard !== null
+        && this.lastHandCardIds[cardIndex] === selectedCard;
+      const top = card.y - (isSelected ? 8 : 0);
+      return point.x >= card.x && point.x <= card.x + card.width
+        && point.y >= top && point.y <= top + card.height;
+    });
 
     return index >= 0 ? index : null;
   }
@@ -371,9 +375,10 @@ export class BattleHud {
     graphics.circle(nextCostX, nextCostY, 9).fill({ color: 0x76569a });
     graphics.circle(nextCostX, nextCostY, 9).stroke({ color: 0xc2a4df, width: 1 });
 
-    for (const rect of layout.cards) {
+    for (let index = 0; index < layout.cards.length; index += 1) {
+      const rect = layout.cards[index];
       const badgeX = rect.x + rect.width - 14;
-      const badgeY = rect.y + 14;
+      const badgeY = rect.y + (this.lastHandCardIds[index] === selectedCard ? 6 : 14);
       graphics.circle(badgeX, badgeY, 12).fill({ color: 0x76569a, alpha: 0.98 });
       graphics.circle(badgeX, badgeY, 12).stroke({ color: 0xc2a4df, width: 1 });
     }
@@ -390,9 +395,10 @@ export class BattleHud {
     for (let index = 0; index < 4; index += 1) {
       const cardId = blue.hand[index];
       const card = cardId ? cardById(cardId) : null;
-      const rect = cards[index];
-      const affordable = card !== null && blue.elixir >= card.cost;
+      const baseRect = cards[index];
       const isSelected = cardId !== undefined && cardId === selectedCard;
+      const rect = isSelected ? { ...baseRect, y: baseRect.y - 8 } : baseRect;
+      const affordable = card !== null && blue.elixir >= card.cost;
       const fill = card?.category === "spell"
         ? 0x4b4662
         : card?.category === "building" ? 0x55513e : 0x35473d;

@@ -42,11 +42,7 @@ export function bindBattleInput(controller: BattleController): void {
     if (handIndex !== null) {
       const cardId = controller.state.sides.blue.hand[handIndex];
       if (cardId) controller.selectCard(cardId);
-      renderer.setHeldCardPreview(
-        controller.currentSelectedCard,
-        event.clientX,
-        event.clientY
-      );
+      controller.clearPointerPreview();
       return;
     }
     controller.playSelectedCardAt(event.clientX, event.clientY);

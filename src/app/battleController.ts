@@ -168,7 +168,7 @@ export class BattleController {
     this.selectedCard = null;
     this.placementMessage = `${cardById(cardId).name} deployed.`;
     this.renderer.setPlacementPreview(null);
-    this.renderer.setHeldCardPreview(null, 0, 0);
+    this.renderer.clearUnitPreview();
     this.renderer.setDeploymentArea(this.game, "blue", null);
     this.renderer.render(this.game);
     this.updateHud();
@@ -183,11 +183,10 @@ export class BattleController {
     }
 
     this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
-    this.renderer.setHeldCardPreview(this.selectedCard, event.clientX, event.clientY);
     const point = this.renderer.screenToWorld(event.clientX, event.clientY);
     if (!point) {
       this.renderer.setPlacementPreview(null);
-      this.renderer.setHeldCardPreview(null, 0, 0);
+      this.renderer.clearUnitPreview();
       return;
     }
     this.renderer.setPlacementPreview(null);
@@ -195,7 +194,7 @@ export class BattleController {
 
   public clearPointerPreview(): void {
     this.renderer.setPlacementPreview(null);
-    this.renderer.setHeldCardPreview(null, 0, 0);
+    this.renderer.clearUnitPreview();
   }
 
   public stepForward(): void {
@@ -274,7 +273,7 @@ export class BattleController {
       this.selectedCard = null;
       this.renderer.setPlacementPreview(null);
       this.renderer.setDeploymentArea(this.game, "blue", null);
-      this.renderer.setHeldCardPreview(null, 0, 0);
+      this.renderer.clearUnitPreview();
       this.music.stop();
       this.previousGameOver = true;
       this.accumulator = 0;
