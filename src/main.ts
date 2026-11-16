@@ -7,3 +7,5 @@ if (mode === "simulation") {
   await import("./style.css");
   await import("./gameMain");
 }
+
+export {};
