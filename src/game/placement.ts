@@ -1,17 +1,30 @@
 import type { CardId, GameState, Side } from "./types";
 import { cardById } from "./cards";
-import { FIELD_HEIGHT, FIELD_WIDTH } from "./state";
+import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH } from "./state";
 
 const RIVER_TOP = 448;
 const RIVER_BOTTOM = 512;
-const ARENA_ROWS = 32;
-const POCKET_DEPTH = FIELD_HEIGHT / ARENA_ROWS * 3;
+const DESTROYED_TOWER_LANE_DEPTH = 9 * ARENA_TILE_SIZE;
 
 export interface DeploymentZone {
   minX: number;
   maxX: number;
   minY: number;
   maxY: number;
+}
+
+export function snapToArenaTile(point: { x: number; y: number }): { x: number; y: number } {
+  const halfTile = ARENA_TILE_SIZE / 2;
+  return {
+    x: Math.max(halfTile, Math.min(
+      FIELD_WIDTH - halfTile,
+      Math.floor(point.x / ARENA_TILE_SIZE) * ARENA_TILE_SIZE + halfTile
+    )),
+    y: Math.max(halfTile, Math.min(
+      FIELD_HEIGHT - halfTile,
+      Math.floor(point.y / ARENA_TILE_SIZE) * ARENA_TILE_SIZE + halfTile
+    ))
+  };
 }
 
 export function getGroundDeploymentZones(
@@ -49,11 +62,11 @@ export function getGroundDeploymentZones(
       minX: isLeftLane ? minX : FIELD_WIDTH / 2,
       maxX: isLeftLane ? FIELD_WIDTH / 2 : maxX,
       minY: side === "blue"
-        ? RIVER_TOP - POCKET_DEPTH + radius
-        : RIVER_BOTTOM + radius,
+        ? RIVER_TOP - DESTROYED_TOWER_LANE_DEPTH + radius
+        : ownMinY,
       maxY: side === "blue"
-        ? RIVER_TOP - radius
-        : RIVER_BOTTOM + POCKET_DEPTH - radius
+        ? ownMaxY
+        : RIVER_BOTTOM + DESTROYED_TOWER_LANE_DEPTH - radius
     });
   }
 

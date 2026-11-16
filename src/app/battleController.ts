@@ -5,7 +5,7 @@ import { SimulationRuntime } from "../runtime/simulationRuntime";
 import { createGameHistory } from "../game/history";
 import { cardById } from "../game/cards";
 import { playCard } from "../game/deployment";
-import { canPlaceCard } from "../game/placement";
+import { canPlaceCard, snapToArenaTile } from "../game/placement";
 import type { CardId, GameState, Lane } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
 import { createBattleHud, type BattleHud } from "./battleHud";
@@ -143,8 +143,9 @@ export class BattleController {
 
   public playSelectedCardAt(clientX: number, clientY: number): void {
     if (this.paused || this.game.gameOver) return;
-    const point = this.renderer.screenToWorld(clientX, clientY);
-    if (!point) return;
+    const worldPoint = this.renderer.screenToWorld(clientX, clientY);
+    if (!worldPoint) return;
+    const point = snapToArenaTile(worldPoint);
 
     if (!this.selectedCard) {
       this.soundEffects.play("ui-invalid");
@@ -199,7 +200,7 @@ export class BattleController {
       this.renderer.clearUnitPreview();
       return;
     }
-    this.renderer.setUnitPreview(this.selectedCard, point);
+    this.renderer.setUnitPreview(this.selectedCard, snapToArenaTile(point));
     this.renderer.setPlacementPreview(null);
   }
 

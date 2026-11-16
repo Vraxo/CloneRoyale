@@ -2,6 +2,7 @@ import type { GameState, Lane, Side } from "./types";
 
 export const FIELD_WIDTH = 720;
 export const FIELD_HEIGHT = 960;
+export const ARENA_TILE_SIZE = 30;
 export const LANE_X: Record<Lane, number> = { left: 205, right: 515 };
 export const MAX_ELIXIR = 10;
 export const MATCH_LENGTH = 180;

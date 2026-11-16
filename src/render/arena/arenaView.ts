@@ -1,4 +1,5 @@
 import { Graphics } from "pixi.js";
+import { ARENA_TILE_SIZE } from "../../game/state";
 
 export const WORLD_WIDTH = 720;
 export const WORLD_HEIGHT = 960;
@@ -32,6 +33,15 @@ export function createArenaView(): Graphics {
   g.rect(16, 16, WORLD_WIDTH - 32, 928).fill(0x69845b);
   g.rect(24, 24, WORLD_WIDTH - 48, 420).fill(0x70895e);
   g.rect(24, 516, WORLD_WIDTH - 48, 420).fill(0x637f55);
+
+  for (let y = 0; y < WORLD_HEIGHT; y += ARENA_TILE_SIZE) {
+    for (let x = 0; x < WORLD_WIDTH; x += ARENA_TILE_SIZE) {
+      if ((x / ARENA_TILE_SIZE + y / ARENA_TILE_SIZE) % 2 === 0) {
+        g.rect(x, y, ARENA_TILE_SIZE, ARENA_TILE_SIZE)
+          .fill({ color: 0x9bb58a, alpha: 0.035 });
+      }
+    }
+  }
 
   for (let row = 0; row < 15; row += 1) {
     for (let column = 0; column < 10; column += 1) {
@@ -93,6 +103,26 @@ export function createArenaView(): Graphics {
     }
     g.moveTo(x - 48, 435).lineTo(x - 48, 525).stroke({ color: 0xc0a070, width: 4 });
     g.moveTo(x + 48, 435).lineTo(x + 48, 525).stroke({ color: 0xc0a070, width: 4 });
+  }
+
+  for (let column = 1; column < WORLD_WIDTH / ARENA_TILE_SIZE; column += 1) {
+    const x = column * ARENA_TILE_SIZE;
+    const major = column % 3 === 0;
+    g.moveTo(x, 0).lineTo(x, WORLD_HEIGHT).stroke({
+      color: major ? 0x263b2d : 0x304733,
+      alpha: major ? 0.2 : 0.105,
+      width: major ? 1.2 : 0.7
+    });
+  }
+
+  for (let row = 1; row < WORLD_HEIGHT / ARENA_TILE_SIZE; row += 1) {
+    const y = row * ARENA_TILE_SIZE;
+    const major = row % 3 === 0;
+    g.moveTo(0, y).lineTo(WORLD_WIDTH, y).stroke({
+      color: major ? 0x263b2d : 0x304733,
+      alpha: major ? 0.2 : 0.105,
+      width: major ? 1.2 : 0.7
+    });
   }
 
   g.roundRect(12, 12, WORLD_WIDTH - 24, WORLD_HEIGHT - 24, 24)
