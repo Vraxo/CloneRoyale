@@ -77,6 +77,8 @@ function setPaused(value: boolean): void {
     renderer.setPlacementPreview(null);
     renderer.setDeploymentArea(game, "blue", null);
     renderer.setHeldCardPreview(null, 0, 0);
+  } else {
+    renderer.setDeploymentArea(game, "blue", selectedCard);
   }
 }
 
@@ -132,7 +134,7 @@ function selectCard(cardId: CardId): void {
     selectedCard = cardId;
     placementMessage = card.category === "spell"
       ? `Click anywhere on the arena to cast ${card.name}.`
-      : `Place ${card.name} anywhere on your side of the river.`;
+      : `Place ${card.name} in your deployment area.`;
   }
 
   renderer.setPlacementPreview(null);
