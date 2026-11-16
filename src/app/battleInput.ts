@@ -12,7 +12,7 @@ function updateVolumeLabel(output: HTMLOutputElement, value: number): void {
 }
 
 export function bindBattleInput(controller: BattleController): void {
-  const renderer = (controller as unknown as { renderer: import("../render/arenaRenderer").ArenaRenderer }).renderer;
+  const renderer = controller.renderer;
   const pauseButton = element<HTMLButtonElement>("pause");
   const speedButton = element<HTMLButtonElement>("speed");
   const musicVolume = element<HTMLInputElement>("music-volume");
@@ -43,7 +43,7 @@ export function bindBattleInput(controller: BattleController): void {
       const cardId = controller.state.sides.blue.hand[handIndex];
       if (cardId) controller.selectCard(cardId);
       renderer.setHeldCardPreview(
-        controller.state.sides.blue.hand[handIndex] ?? null,
+        controller.currentSelectedCard,
         event.clientX,
         event.clientY
       );
