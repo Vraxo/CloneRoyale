@@ -24,7 +24,7 @@ export class BattleController {
   public readonly music: BattleMusic;
   public readonly soundEffects: SoundEffects;
 
-  public constructor(private readonly renderer: ArenaRenderer) {
+  public constructor(public readonly renderer: ArenaRenderer) {
     this.game = createGame(Date.now() >>> 0);
     this.history = createGameHistory(this.game);
     this.music = createBattleMusic();
@@ -38,6 +38,10 @@ export class BattleController {
       capture: true,
       once: true
     });
+  }
+
+  public get currentSelectedCard(): CardId | null {
+    return this.selectedCard;
   }
 
   public get state(): GameState {
