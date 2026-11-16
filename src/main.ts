@@ -463,6 +463,6 @@ renderer.app.ticker.add((ticker) => {
   }
 });
 
-music.start(game.time);
+music.start(game.time, game.phase);
 renderer.render(game);
 updateHud();
