@@ -38,6 +38,10 @@ export class BattleHud {
   public readonly container = new Container();
 
   private readonly graphics = new Graphics();
+  private readonly heldCardGraphics = new Graphics();
+  private readonly heldCardGlyph = createHudText(34, 0xf0dfb6);
+  private readonly heldCardName = createHudText(12, 0xf4eedc);
+  private readonly heldCardCost = createHudText(13, 0xffffff);
   private readonly cardGlyphs = Array.from({ length: 4 }, () => createHudText(25, 0xf0dfb6));
   private readonly cardNames = Array.from({ length: 4 }, () => createHudText(11, 0xf4eedc));
   private readonly cardCosts = Array.from({ length: 4 }, () => createHudText(12, 0xffffff));
@@ -60,8 +64,17 @@ export class BattleHud {
       this.nextCardCost,
       this.elixirValue,
       this.elixirMax,
-      this.placementHint
+      this.placementHint,
+      this.heldCardGraphics,
+      this.heldCardGlyph,
+      this.heldCardName,
+      this.heldCardCost
     );
+
+    this.heldCardGraphics.eventMode = "none";
+    this.heldCardGlyph.alpha = 0.88;
+    this.heldCardName.alpha = 0.9;
+    this.heldCardCost.alpha = 0.95;
   }
 
   public update(
@@ -129,6 +142,69 @@ export class BattleHud {
     this.placementHint.style.fontSize = Math.max(8, Math.min(10, layout.width * 0.014));
     this.placementHint.style.wordWrap = true;
     this.placementHint.style.wordWrapWidth = layout.width - 28;
+  }
+
+  public setHeldCardPreview(
+    cardId: CardId | null,
+    clientX: number,
+    clientY: number,
+    canvas: HTMLCanvasElement,
+    screenWidth: number,
+    screenHeight: number
+  ): void {
+    this.heldCardGraphics.clear();
+    this.heldCardGlyph.visible = false;
+    this.heldCardName.visible = false;
+    this.heldCardCost.visible = false;
+
+    if (!cardId) return;
+
+    const point = this.clientToScreen(clientX, clientY, canvas, screenWidth, screenHeight);
+    if (!point) return;
+
+    const card = cardById(cardId);
+    const width = Math.max(82, Math.min(104, screenWidth * 0.13));
+    const height = width * 1.22;
+    const x = point.x - width / 2;
+    const y = point.y - height / 2;
+    const fill = card.category === "spell"
+      ? 0x4b4662
+      : card.category === "building" ? 0x55513e : 0x35473d;
+
+    this.heldCardGraphics
+      .roundRect(x, y, width, height, 10)
+      .fill({ color: fill, alpha: 0.72 });
+    this.heldCardGraphics
+      .roundRect(x, y, width, height, 10)
+      .stroke({ color: 0xe3c77d, alpha: 0.95, width: 2.5 });
+    this.heldCardGraphics
+      .roundRect(x + 6, y + 6, width - 12, height - 12, 6)
+      .stroke({ color: 0xe4d7ad, alpha: 0.32, width: 1 });
+
+    this.heldCardGlyph.text = cardGlyph(cardId);
+    this.heldCardGlyph.anchor.set(0.5);
+    this.heldCardGlyph.position.set(point.x, y + height * 0.38);
+    this.heldCardGlyph.style.fontSize = Math.max(24, Math.min(38, width * 0.38));
+    this.heldCardGlyph.visible = true;
+
+    this.heldCardName.text = card.name;
+    this.heldCardName.anchor.set(0.5);
+    this.heldCardName.position.set(point.x, y + height - 25);
+    this.heldCardName.style.fontSize = Math.max(9, Math.min(12, width * 0.12));
+    this.heldCardName.style.wordWrap = true;
+    this.heldCardName.style.wordWrapWidth = width - 12;
+    this.heldCardName.visible = true;
+
+    this.heldCardGraphics
+      .circle(x + width - 15, y + 16, 11)
+      .fill({ color: 0x76569a, alpha: 0.88 });
+    this.heldCardGraphics
+      .circle(x + width - 15, y + 16, 11)
+      .stroke({ color: 0xc2a4df, alpha: 0.9, width: 1 });
+    this.heldCardCost.text = card.cost.toString();
+    this.heldCardCost.anchor.set(0.5);
+    this.heldCardCost.position.set(x + width - 15, y + 16);
+    this.heldCardCost.visible = true;
   }
 
   public handCardAt(

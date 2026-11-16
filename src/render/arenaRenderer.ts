@@ -87,6 +87,23 @@ export class ArenaRenderer {
     );
   }
 
+  public setHeldCardPreview(
+    cardId: CardId | null,
+    clientX: number,
+    clientY: number
+  ): void {
+    if (!this.initialized) return;
+
+    this.hud.setHeldCardPreview(
+      cardId,
+      clientX,
+      clientY,
+      this.app.canvas,
+      this.app.screen.width,
+      this.app.screen.height
+    );
+  }
+
   public handCardAt(clientX: number, clientY: number): number | null {
     if (!this.initialized) return null;
 

@@ -72,7 +72,10 @@ function setPaused(value: boolean): void {
     ? phaseLabel(game)
     : paused ? "Paused" : phaseLabel(game);
   music.setPaused(paused || game.gameOver);
-  if (paused) renderer.setPlacementPreview(null);
+  if (paused) {
+    renderer.setPlacementPreview(null);
+    renderer.setHeldCardPreview(null, 0, 0);
+  }
 }
 
 function startNewBattle(): void {
@@ -129,6 +132,7 @@ function selectCard(cardId: CardId): void {
   }
 
   renderer.setPlacementPreview(null);
+  renderer.setHeldCardPreview(null, 0, 0);
   updateHud();
 }
 
@@ -223,6 +227,7 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
   selectedCard = null;
   placementMessage = `${cardById(cardId).name} deployed.`;
   renderer.setPlacementPreview(null);
+  renderer.setHeldCardPreview(null, 0, 0);
   renderer.render(game);
   updateHud();
 }
@@ -230,12 +235,16 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
 function updatePlacementPreview(event: PointerEvent): void {
   if (!selectedCard || paused || game.gameOver) {
     renderer.setPlacementPreview(null);
+    renderer.setHeldCardPreview(null, 0, 0);
     return;
   }
+
+  renderer.setHeldCardPreview(selectedCard, event.clientX, event.clientY);
 
   const point = renderer.screenToWorld(event.clientX, event.clientY);
   if (!point) {
     renderer.setPlacementPreview(null);
+    renderer.setHeldCardPreview(null, 0, 0);
     return;
   }
 
@@ -263,6 +272,7 @@ function advanceOneStep(): void {
   if (game.gameOver) {
     selectedCard = null;
     renderer.setPlacementPreview(null);
+    renderer.setHeldCardPreview(null, 0, 0);
     music.stop();
     previousGameOver = true;
     accumulator = 0;
@@ -371,7 +381,10 @@ pauseButton.addEventListener("click", () => {
 
 const canvas = renderer.app.canvas;
 canvas.addEventListener("pointermove", updatePlacementPreview);
-canvas.addEventListener("pointerleave", () => renderer.setPlacementPreview(null));
+canvas.addEventListener("pointerleave", () => {
+  renderer.setPlacementPreview(null);
+  renderer.setHeldCardPreview(null, 0, 0);
+});
 canvas.addEventListener("pointerdown", (event: PointerEvent) => {
   if (event.button !== 0) return;
 
@@ -379,6 +392,7 @@ canvas.addEventListener("pointerdown", (event: PointerEvent) => {
   if (handIndex !== null) {
     const cardId = game.sides.blue.hand[handIndex];
     if (cardId) selectCard(cardId);
+    renderer.setHeldCardPreview(selectedCard, event.clientX, event.clientY);
     return;
   }
 
