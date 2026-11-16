@@ -44,6 +44,7 @@ const playAgainButton = document.getElementById("play-again");
 const leaveResultButton = document.getElementById("leave-result");
 const profileButton = document.getElementById("profile-button");
 const profileNameLabel = document.getElementById("profile-name");
+const profileAvatar = document.getElementById("profile-avatar");
 const profilePanel = document.getElementById("profile-panel");
 const profileNameInput = document.getElementById("profile-name-input");
 const profileError = document.getElementById("profile-error");
@@ -72,16 +73,17 @@ function loadGuestProfile(): GuestProfile {
   return profile;
 }
 let guestProfile = loadGuestProfile();
+let opponentName: string | null = null;
 function renderProfile(): void {
   if (profileNameLabel) profileNameLabel.textContent = guestProfile.name;
+  if (profileAvatar) profileAvatar.textContent = guestProfile.name.charAt(0).toUpperCase();
   if (profileButton) profileButton.setAttribute("aria-label", "Player profile: " + guestProfile.name);
   if (profileNameInput instanceof HTMLInputElement) profileNameInput.value = guestProfile.name;
 }
 function updateOpponentLabel(players: { side: "blue" | "red"; name: string }[]): void {
   const opponent = players.find(player => player.side !== document.body.dataset.onlineSide);
-  if (modeDescription) modeDescription.textContent = opponent
-    ? guestProfile.name + " · vs " + opponent.name
-    : guestProfile.name + " · Online";
+  opponentName = opponent?.name ?? null;
+  if (modeDescription) modeDescription.textContent = guestProfile.name + (opponentName ? " · vs " + opponentName : " · Online");
 }
 renderProfile();
 
@@ -223,7 +225,7 @@ saveProfileButton?.addEventListener("click", () => {
   localStorage.setItem("cloneroyale.profile", JSON.stringify(guestProfile));
   renderProfile();
   if (onlineClient.isConnected) onlineClient.setProfile(guestProfile.id, guestProfile.name);
-  if (modeDescription) modeDescription.textContent = guestProfile.name + (battle.isOnline ? " · Online" : " · Live match");
+  if (modeDescription) modeDescription.textContent = guestProfile.name + (opponentName ? " · vs " + opponentName : battle.isOnline ? " · Online" : " · Live match");
   closeProfile();
 });
 profileNameInput?.addEventListener("keydown", event => {
@@ -273,6 +275,8 @@ function leaveOnlineMatch(): void {
   onlineUnsubscribe?.();
   onlineUnsubscribe = null;
   battle.leaveOnline();
+  opponentName = null;
+  if (modeDescription) modeDescription.textContent = guestProfile.name + " · Live match";
   if (lobby instanceof HTMLDivElement) lobby.hidden = true;
   if (playAgainButton instanceof HTMLButtonElement) {
     playAgainButton.disabled = false;
