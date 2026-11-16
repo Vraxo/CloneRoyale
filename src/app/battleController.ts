@@ -8,6 +8,7 @@ import { playCard } from "../game/deployment";
 import { canPlaceCard, snapToArenaTile } from "../game/placement";
 import type { CardId, GameState, Lane } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
+import type { OnlineClient } from "../net/onlineClient";
 import { createBattleHud, type BattleHud } from "./battleHud";
 
 export class BattleController {
@@ -20,6 +21,8 @@ export class BattleController {
   private lastHudUpdate = 0;
   private previousGameOver = false;
   private selectedCard: CardId | null = null;
+  private onlineClient: OnlineClient | null = null;
+  private playerSide: Side = "blue";
   private placementMessage = "Choose a card, then deploy on your side.";
   private readonly hud: BattleHud;
 
@@ -51,6 +54,10 @@ export class BattleController {
     this.history = createGameHistory(this.game);
   }
 
+  public get isOnline(): boolean { return this.onlineClient !== null; }
+
+  public get side(): Side { return this.playerSide; }
+
   public get currentSelectedCard(): CardId | null {
     return this.selectedCard;
   }
@@ -71,6 +78,48 @@ export class BattleController {
     return this.history?.canStepBack() === true && !this.game.gameOver;
   }
 
+  public activateOnline(side: Side, state: GameState, client: OnlineClient): void {
+    this.onlineClient = client;
+    this.playerSide = side;
+    this.game = state;
+    this.history = null;
+    this.selectedCard = null;
+    this.paused = false;
+    this.accumulator = 0;
+    this.previousGameOver = state.gameOver;
+    document.body.dataset.online = "true";
+    this.music.start(state.time, state.phase);
+    this.renderer.setDeploymentArea(state, side, null);
+    this.renderer.render(state);
+    this.updateHud();
+    this.hud.setPaused(false, state);
+  }
+
+  public applyOnlineState(state: GameState): void {
+    if (!this.onlineClient) return;
+    this.game = state;
+    this.music.update(state.time, state.phase);
+    for (const event of state.audioEvents) this.soundEffects.play(event);
+    if (state.gameOver && !this.previousGameOver) this.music.stop();
+    this.previousGameOver = state.gameOver;
+    if (state.gameOver) {
+      this.selectedCard = null;
+      this.renderer.setDeploymentArea(state, this.playerSide, null);
+      this.renderer.clearUnitPreview();
+    }
+    this.renderer.render(state);
+    this.updateHud();
+  }
+
+  public leaveOnline(): void {
+    if (!this.onlineClient) return;
+    this.onlineClient.leave();
+    this.onlineClient = null;
+    this.playerSide = "blue";
+    document.body.dataset.online = "false";
+    this.startNewBattle();
+  }
+
   public initialize(): void {
     this.music.start(this.game.time, this.game.phase);
     this.renderer.render(this.game);
@@ -78,23 +127,26 @@ export class BattleController {
   }
 
   public setPaused(value: boolean): void {
+    if (this.isOnline) return;
     this.paused = value;
     this.hud.setPaused(value, this.game);
     this.music.setPaused(this.paused || this.game.gameOver);
     if (value) {
       this.renderer.setPlacementPreview(null);
-      this.renderer.setDeploymentArea(this.game, "blue", null);
+      this.renderer.setDeploymentArea(this.game, this.playerSide, null);
       this.renderer.clearUnitPreview();
     } else {
-      this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
+      this.renderer.setDeploymentArea(this.game, this.playerSide, this.selectedCard);
     }
   }
 
   public togglePaused(): void {
+    if (this.isOnline) return;
     this.setPaused(!this.paused);
   }
 
   public startNewBattle(): void {
+    if (this.isOnline) return;
     this.soundEffects.stopAll();
     this.runtime.reset((Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0);
     this.game = this.runtime.state;
@@ -121,7 +173,7 @@ export class BattleController {
       this.placementMessage = "Choose a card, then deploy on your side.";
     } else {
       const card = cardById(cardId);
-      if (this.game.sides.blue.elixir < card.cost) {
+      if (this.game.sides[this.playerSide].elixir < card.cost) {
         this.soundEffects.play("ui-invalid");
         this.placementMessage = `You need ${card.cost} elixir to play ${card.name}.`;
         this.updateHud();
@@ -155,7 +207,7 @@ export class BattleController {
     }
 
     const cardId = this.selectedCard;
-    if (!canPlaceCard(this.game, "blue", cardId, point.x, point.y)) {
+    if (!canPlaceCard(this.game, this.playerSide, cardId, point.x, point.y)) {
       this.soundEffects.play("ui-invalid");
       this.placementMessage = cardById(cardId).category === "spell"
         ? "That spell target is outside the arena or the card is unavailable."
@@ -165,8 +217,19 @@ export class BattleController {
       return;
     }
 
+    if (this.onlineClient) {
+      this.onlineClient.playCard(cardId, point.x, point.y);
+      this.selectedCard = null;
+      this.placementMessage = `${cardById(cardId).name} deployed.`;
+      this.renderer.setPlacementPreview(null);
+      this.renderer.clearUnitPreview();
+      this.renderer.setDeploymentArea(this.game, this.playerSide, null);
+      this.updateHud();
+      return;
+    }
+
     const lane: Lane = point.x < 360 ? "left" : "right";
-    if (!playCard(this.game, "blue", cardId, lane, point.x, point.y, point)) {
+    if (!playCard(this.game, this.playerSide, cardId, lane, point.x, point.y, point)) {
       this.soundEffects.play("ui-invalid");
       this.placementMessage = "That card can no longer be played.";
       this.updateHud();
@@ -200,7 +263,7 @@ export class BattleController {
       this.renderer.clearUnitPreview();
       return;
     }
-    this.renderer.setUnitPreview(this.selectedCard, snapToArenaTile(point));
+    this.renderer.setUnitPreview(this.selectedCard, snapToArenaTile(point), this.playerSide);
     this.renderer.setPlacementPreview(null);
   }
 
@@ -239,7 +302,7 @@ export class BattleController {
   }
 
   public update(elapsedSeconds: number): void {
-    if (!this.paused && !this.game.gameOver) {
+    if (!this.isOnline && !this.paused && !this.game.gameOver) {
       this.accumulator += Math.min(elapsedSeconds, 0.1) * this.speed;
       while (this.accumulator >= SIMULATION_STEP) {
         this.advanceOneStep();
@@ -265,7 +328,8 @@ export class BattleController {
       this.selectedCard,
       this.paused,
       this.placementMessage,
-      this.history?.canStepBack() ?? false
+      this.history?.canStepBack() ?? false,
+      this.playerSide
     );
   }
 

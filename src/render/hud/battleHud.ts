@@ -1,5 +1,5 @@
 import { Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
-import type { CardId, GameState } from "../../game/types";
+import type { CardId, GameState, Side } from "../../game/types";
 import { cardById } from "../../game/cards";
 import { MATCH_RULES } from "../../game/matchRules";
 import { calculateHudLayout } from "./hudLayout";
@@ -165,13 +165,14 @@ export class BattleHud {
     selectedCard: CardId | null,
     message: string,
     width: number,
-    height: number
+    height: number,
+    side: Side = "blue"
   ): void {
     const layout = calculateHudLayout(width, height);
     const graphics = this.graphics;
-    const blue = state.sides.blue;
-    const nextCardId = blue.drawPile[0];
-    this.lastHandCardIds = [...blue.hand];
+    const player = state.sides[side];
+    const nextCardId = player.drawPile[0];
+    this.lastHandCardIds = [...player.hand];
     const nextCard = nextCardId ? cardById(nextCardId) : null;
 
     graphics.clear();
@@ -231,9 +232,9 @@ export class BattleHud {
     this.nextCardCost.position.set(nextCostX, nextCostY);
 
     this.drawMatchClock(state, layout.width, graphics);
-    this.drawCards(state, selectedCard, layout.cards, graphics);
+    this.drawCards(state, selectedCard, layout.cards, graphics, side);
     this.drawCardBadges(layout, selectedCard);
-    this.drawElixir(blue.elixir, layout, graphics);
+    this.drawElixir(player.elixir, layout, graphics);
 
     this.placementHint.text = message;
     this.placementHint.anchor.set(0.5);
@@ -316,17 +317,18 @@ export class BattleHud {
     state: GameState,
     selectedCard: CardId | null,
     cards: ReturnType<typeof calculateHudLayout>["cards"],
-    graphics: Graphics
+    graphics: Graphics,
+    side: Side
   ): void {
-    const blue = state.sides.blue;
+    const player = state.sides[side];
 
     for (let index = 0; index < 4; index += 1) {
-      const cardId = blue.hand[index];
+      const cardId = player.hand[index];
       const card = cardId ? cardById(cardId) : null;
       const baseRect = cards[index];
       const isSelected = cardId !== undefined && cardId === selectedCard;
       const rect = isSelected ? { ...baseRect, y: baseRect.y - 8 } : baseRect;
-      const affordable = card !== null && blue.elixir >= card.cost;
+      const affordable = card !== null && player.elixir >= card.cost;
       const fill = card?.category === "spell"
         ? 0x4b4662
         : card?.category === "building" ? 0x55513e : 0x35473d;

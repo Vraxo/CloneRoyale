@@ -143,7 +143,8 @@ export class ArenaRenderer {
   public updateBattleHud(
     state: GameState,
     selectedCard: CardId | null,
-    message: string
+    message: string,
+    side: Side = "blue"
   ): void {
     if (!this.initialized) return;
 
@@ -152,11 +153,12 @@ export class ArenaRenderer {
       selectedCard,
       message,
       this.app.screen.width,
-      this.app.screen.height
+      this.app.screen.height,
+      side
     );
   }
 
-  public setUnitPreview(cardId: CardId | null, point: { x: number; y: number } | null): void {
+  public setUnitPreview(cardId: CardId | null, point: { x: number; y: number } | null, side: Side = "blue"): void {
     if (!this.initialized || !point || !cardId) {
       this.clearUnitPreview();
       return;
@@ -197,7 +199,8 @@ export class ArenaRenderer {
           card.unit,
           index,
           point.x + offset.x,
-          point.y + offset.y
+          point.y + offset.y,
+          side
         );
         const view = createUnitView(unit);
         view.container.alpha = 0.58;
@@ -215,7 +218,8 @@ export class ArenaRenderer {
         card.unit,
         index,
         point.x + offset.x,
-        point.y + offset.y
+        point.y + offset.y,
+        side
       );
       const view = this.unitPreviewViews[index];
       view.update(unit, time);
@@ -239,11 +243,12 @@ export class ArenaRenderer {
     definition: import("../game/types").UnitDefinition,
     index: number,
     x: number,
-    y: number
+    y: number,
+    side: Side
   ): Unit {
     return {
       id: -1000 - index,
-      side: "blue",
+      side,
       cardId,
       type: definition.type,
       kind: category,
@@ -272,7 +277,7 @@ export class ArenaRenderer {
       appearanceDelayRemaining: 0,
       deploymentDuration: 0,
       deploymentRemaining: 0,
-      facing: -Math.PI / 2,
+      facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
       animationOffset: index * 0.37,
       attackAnim: 0
     };
