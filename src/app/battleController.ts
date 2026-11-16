@@ -1,6 +1,7 @@
 import { createBattleMusic, type BattleMusic } from "../audio/battleMusic";
 import { createSoundEffects, type SoundEffects } from "../audio/soundEffects";
-import { createGame, SIMULATION_STEP, stepGame } from "../game/simulation";
+import { SIMULATION_STEP } from "../game/simulation";
+import { SimulationRuntime } from "../runtime/simulationRuntime";
 import { createGameHistory } from "../game/history";
 import { cardById } from "../game/cards";
 import { playCard } from "../game/deployment";
@@ -11,6 +12,7 @@ import { createBattleHud, type BattleHud } from "./battleHud";
 
 export class BattleController {
   private game: GameState;
+  private readonly runtime: SimulationRuntime;
   private readonly history;
   private paused = false;
   private speed = 1;
@@ -24,9 +26,13 @@ export class BattleController {
   public readonly music: BattleMusic;
   public readonly soundEffects: SoundEffects;
 
-  public constructor(public readonly renderer: ArenaRenderer) {
-    this.game = createGame(Date.now() >>> 0);
-    this.history = createGameHistory(this.game);
+  public constructor(
+    public readonly renderer: ArenaRenderer,
+    enableDebugTools = false
+  ) {
+    this.runtime = new SimulationRuntime(Date.now() >>> 0);
+    this.game = this.runtime.state;
+    this.history = enableDebugTools ? createGameHistory(this.game) : null;
     this.music = createBattleMusic();
     this.soundEffects = createSoundEffects();
     this.hud = createBattleHud(renderer);
@@ -57,7 +63,7 @@ export class BattleController {
   }
 
   public get canStepBack(): boolean {
-    return this.history.canStepBack() && !this.game.gameOver;
+    return this.history?.canStepBack() === true && !this.game.gameOver;
   }
 
   public initialize(): void {
@@ -85,16 +91,15 @@ export class BattleController {
 
   public startNewBattle(): void {
     this.soundEffects.stopAll();
-    this.game = createGame(
-      (Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0
-    );
+    this.runtime.reset((Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0);
+    this.game = this.runtime.state;
     this.selectedCard = null;
     this.placementMessage = "Choose a card, then deploy on your side.";
     this.renderer.setPlacementPreview(null);
     this.renderer.setDeploymentArea(this.game, "blue", null);
     this.renderer.clearUnitPreview();
     this.accumulator = 0;
-    this.history.reset(this.game);
+    this.history?.reset(this.game);
     this.previousGameOver = false;
     this.setPaused(false);
     this.music.start(this.game.time, this.game.phase);
@@ -164,7 +169,7 @@ export class BattleController {
 
     for (const event of this.game.audioEvents) this.soundEffects.play(event);
     this.game.audioEvents = [];
-    this.history.record(this.game);
+    this.history?.record(this.game);
     this.selectedCard = null;
     this.placementMessage = `${cardById(cardId).name} deployed.`;
     this.renderer.setPlacementPreview(null);
@@ -205,7 +210,7 @@ export class BattleController {
   }
 
   public stepBackward(): void {
-    const previousState = this.history.stepBack();
+    const previousState = this.history?.stepBack() ?? null;
     if (!previousState) return;
     this.game = previousState;
     this.selectedCard = null;
@@ -254,14 +259,14 @@ export class BattleController {
       this.selectedCard,
       this.paused,
       this.placementMessage,
-      this.history.canStepBack()
+      this.history?.canStepBack() ?? false
     );
   }
 
   private advanceOneStep(): void {
     if (this.game.gameOver) return;
     const previousTime = this.game.time;
-    stepGame(this.game, SIMULATION_STEP, "red");
+    this.runtime.step(SIMULATION_STEP, "red");
     this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
     if (this.game.time === previousTime) return;
 

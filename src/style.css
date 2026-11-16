@@ -485,3 +485,26 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
     gap: 11px;
   }
 }
+
+
+/* Launch modes */
+.mode-toggle {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+.mode-toggle:hover { border-color: var(--gold); color: var(--text); }
+body[data-mode="player"] .debug-controls,
+body[data-mode="player"] .team-section,
+body[data-mode="player"] .event-section { display: none; }
+body[data-mode="player"] .control-panel { align-self: center; }
+body[data-mode="player"] .match-control-section { border-bottom: 0; }
+body[data-mode="developer"] .mode-toggle { color: var(--gold); border-color: #7e704e; }
+@media (max-width: 640px) {
+  body[data-mode="player"] .control-panel { display: block; }
+}
