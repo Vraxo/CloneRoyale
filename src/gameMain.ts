@@ -22,6 +22,55 @@ const renderer = new ArenaRenderer();
 await renderer.initialize(host);
 
 const battle = new BattleController(renderer, developerMode);
+
+type AudioSettings = { soundEffectsVolume: number; musicVolume: number };
+const AUDIO_SETTINGS_KEY = "cloneroyale.settings";
+function clampVolume(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.max(0, Math.min(1, value))
+    : fallback;
+}
+function loadAudioSettings(): AudioSettings {
+  try {
+    const stored = JSON.parse(localStorage.getItem(AUDIO_SETTINGS_KEY) ?? "null") as Partial<AudioSettings> | null;
+    return {
+      soundEffectsVolume: clampVolume(stored?.soundEffectsVolume, 1),
+      musicVolume: clampVolume(stored?.musicVolume, 1)
+    };
+  } catch {
+    return { soundEffectsVolume: 1, musicVolume: 1 };
+  }
+}
+const audioSettings = loadAudioSettings();
+const soundEffectsVolume = document.getElementById("sound-effects-volume");
+const soundEffectsValue = document.getElementById("sound-effects-value");
+const musicVolume = document.getElementById("music-volume");
+const musicValue = document.getElementById("music-value");
+function renderAudioSettings(): void {
+  if (soundEffectsVolume instanceof HTMLInputElement) soundEffectsVolume.value = String(audioSettings.soundEffectsVolume);
+  if (soundEffectsValue) soundEffectsValue.textContent = Math.round(audioSettings.soundEffectsVolume * 100) + "%";
+  if (musicVolume instanceof HTMLInputElement) musicVolume.value = String(audioSettings.musicVolume);
+  if (musicValue) musicValue.textContent = Math.round(audioSettings.musicVolume * 100) + "%";
+  battle.soundEffects.setVolume(audioSettings.soundEffectsVolume);
+  battle.music.setVolume(audioSettings.musicVolume);
+}
+function saveAudioSettings(): void {
+  localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify(audioSettings));
+}
+soundEffectsVolume?.addEventListener("input", () => {
+  if (!(soundEffectsVolume instanceof HTMLInputElement)) return;
+  audioSettings.soundEffectsVolume = clampVolume(Number(soundEffectsVolume.value), 1);
+  renderAudioSettings();
+  saveAudioSettings();
+});
+musicVolume?.addEventListener("input", () => {
+  if (!(musicVolume instanceof HTMLInputElement)) return;
+  audioSettings.musicVolume = clampVolume(Number(musicVolume.value), 1);
+  renderAudioSettings();
+  saveAudioSettings();
+});
+renderAudioSettings();
+
 bindBattleInput(battle);
 startBattleLoop(renderer.app, battle);
 battle.initialize();
