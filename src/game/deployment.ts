@@ -53,6 +53,9 @@ function spawnCard(
       maxHp: definition.hp,
       radius: definition.radius,
       collisionMass: definition.collisionMass ?? 1,
+      formationSlot: definition.type === "archer" && card.count === 2
+        ? (index === 0 ? -1 : 1)
+        : undefined,
       damage: definition.damage,
       speed: definition.speed,
       range: definition.range,

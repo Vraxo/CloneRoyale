@@ -24,6 +24,7 @@ export interface Unit {
   maxHp: number;
   radius: number;
   collisionMass?: number;
+  formationSlot?: -1 | 1;
   damage: number;
   speed: number;
   range: number;

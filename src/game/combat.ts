@@ -106,6 +106,17 @@ function moveToward(unit: Unit, x: number, y: number, dt: number): void {
 }
 
 function moveTowardTarget(unit: Unit, x: number, y: number, dt: number): void {
+  if (unit.formationSlot !== undefined) {
+    const dx = unit.x - x;
+    const dy = unit.y - y;
+    const distance = Math.hypot(dx, dy) || 1;
+    const offset = unit.formationSlot * (unit.radius + 3);
+    const perpendicularX = -dy / distance;
+    const perpendicularY = dx / distance;
+    x += perpendicularX * offset;
+    y += perpendicularY * offset;
+  }
+
   const target = movementTarget(unit, x, y);
   moveToward(unit, target.x, target.y, dt);
 }
