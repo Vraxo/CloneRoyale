@@ -26,7 +26,12 @@ startBattleLoop(renderer.app, battle);
 battle.initialize();
 
 const modeButton = document.getElementById("mode-toggle");
-modeButton?.addEventListener("click", () => {
-  const nextMode = developerMode ? "player" : "dev";
-  window.location.search = `?mode=${nextMode}`;
-});
+if (modeButton instanceof HTMLButtonElement) {
+  modeButton.textContent = developerMode ? "Player mode" : "Developer tools";
+  modeButton.addEventListener("click", () => {
+    const nextDeveloperMode = document.body.dataset.mode !== "developer";
+    if (nextDeveloperMode) battle.enableDebugTools();
+    document.body.dataset.mode = nextDeveloperMode ? "developer" : "player";
+    modeButton.textContent = nextDeveloperMode ? "Player mode" : "Developer tools";
+  });
+}

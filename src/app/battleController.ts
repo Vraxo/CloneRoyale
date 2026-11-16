@@ -13,7 +13,7 @@ import { createBattleHud, type BattleHud } from "./battleHud";
 export class BattleController {
   private game: GameState;
   private readonly runtime: SimulationRuntime;
-  private readonly history;
+  private history: ReturnType<typeof createGameHistory> | null;
   private paused = false;
   private speed = 1;
   private accumulator = 0;
@@ -44,6 +44,11 @@ export class BattleController {
       capture: true,
       once: true
     });
+  }
+
+  public enableDebugTools(): void {
+    if (this.history) return;
+    this.history = createGameHistory(this.game);
   }
 
   public get currentSelectedCard(): CardId | null {
