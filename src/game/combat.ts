@@ -33,9 +33,17 @@ function enemyTowerFor(state: GameState, unit: Unit): Tower | null {
   const princess = state.towers.find((tower) =>
     tower.side === enemySide && tower.kind === "princess" && tower.lane === unit.lane && tower.hp > 0
   );
-  if (princess) return princess;
+  const king = state.towers.find((tower) =>
+    tower.side === enemySide && tower.kind === "king" && tower.hp > 0
+  );
 
-  return state.towers.find((tower) => tower.side === enemySide && tower.kind === "king" && tower.hp > 0) ?? null;
+  if (!king) return princess ?? null;
+  if (!princess) return king;
+
+  const princessDistance = Math.hypot(princess.x - unit.x, princess.y - unit.y);
+  const kingDistance = Math.hypot(king.x - unit.x, king.y - unit.y);
+
+  return kingDistance < princessDistance ? king : princess;
 }
 
 const RIVER_TOP = 448;
