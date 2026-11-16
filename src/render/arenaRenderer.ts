@@ -20,6 +20,7 @@ export class ArenaRenderer {
   private readonly arena = createArenaView();
   private readonly entities = new Container();
   private readonly unitPreviewLayer = new Container();
+  private readonly spellPreview = new Graphics();
   private readonly unitPreviewViews: UnitView[] = [];
   private unitPreviewCardId: CardId | null = null;
   private readonly placementOverlay = new Graphics();
@@ -50,6 +51,7 @@ export class ArenaRenderer {
       this.invalidDeploymentOverlay,
       this.entities,
       this.unitPreviewLayer,
+      this.spellPreview,
       this.placementOverlay
     );
     this.app.stage.addChild(this.world, this.hud.container);
@@ -163,8 +165,17 @@ export class ArenaRenderer {
     const card = cardById(cardId);
     if (card.category === "spell") {
       this.clearUnitPreview();
+      this.spellPreview.clear();
+      const color = cardId === "fireball" ? 0xff8b3d : 0xd9e8ff;
+      const radius = card.effect.radius;
+      this.spellPreview
+        .circle(point.x, point.y, radius)
+        .fill({ color, alpha: 0.2 })
+        .stroke({ color, alpha: 0.85, width: 2 });
       return;
     }
+
+    this.spellPreview.clear();
 
     const spacing = Math.max(18, card.unit.radius * 2 + 8);
     const columns = Math.min(card.count, 5);
@@ -213,6 +224,7 @@ export class ArenaRenderer {
   }
 
   public clearUnitPreview(): void {
+    this.spellPreview.clear();
     for (const view of this.unitPreviewViews) {
       this.unitPreviewLayer.removeChild(view.container);
       view.destroy();
