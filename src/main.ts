@@ -9,6 +9,11 @@ if (!(host instanceof HTMLDivElement)) {
   throw new Error("Missing required element: #game");
 }
 
+await Promise.all([
+  document.fonts.load('16px "Supercell Magic"'),
+  document.fonts.load('16px "SC CCBackBeat"')
+]);
+
 const renderer = new ArenaRenderer();
 await renderer.initialize(host);
 
