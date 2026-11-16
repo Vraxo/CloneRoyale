@@ -73,7 +73,7 @@ export class BattleController {
     if (value) {
       this.renderer.setPlacementPreview(null);
       this.renderer.setDeploymentArea(this.game, "blue", null);
-      this.renderer.setHeldCardPreview(null, 0, 0);
+      this.renderer.clearUnitPreview();
     } else {
       this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
     }
@@ -92,7 +92,7 @@ export class BattleController {
     this.placementMessage = "Choose a card, then deploy on your side.";
     this.renderer.setPlacementPreview(null);
     this.renderer.setDeploymentArea(this.game, "blue", null);
-    this.renderer.setHeldCardPreview(null, 0, 0);
+    this.renderer.clearUnitPreview();
     this.accumulator = 0;
     this.history.reset(this.game);
     this.previousGameOver = false;
@@ -127,7 +127,7 @@ export class BattleController {
 
     this.renderer.setPlacementPreview(null);
     this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
-    this.renderer.setHeldCardPreview(null, 0, 0);
+    this.renderer.clearUnitPreview();
     this.updateHud();
   }
 
@@ -178,7 +178,7 @@ export class BattleController {
     if (!this.selectedCard || this.paused || this.game.gameOver) {
       this.renderer.setPlacementPreview(null);
       this.renderer.setDeploymentArea(this.game, "blue", null);
-      this.renderer.setHeldCardPreview(null, 0, 0);
+      this.renderer.clearUnitPreview();
       return;
     }
 

@@ -93,7 +93,7 @@ export class BattleHud {
   private readonly heldCardArt = new Sprite(Texture.EMPTY);
   private readonly cardArts = Array.from({ length: 4 }, () => new Sprite(Texture.EMPTY));
   private readonly nextCardArt = new Sprite(Texture.EMPTY);
-  private readonly cardTextures = new Map<CardId, Texture>();
+  private readonly cardTextures = new Map<CardId, Texture>();\n  private lastHandCardIds: (CardId | undefined)[] = [];
   private readonly heldCardGlyph = createHudText(34, 0xf0dfb6, "Supercell Magic");
   private readonly heldCardName = createHudText(12, 0xf4eedc, "Supercell Magic");
   private readonly heldCardCost = createHudText(13, 0xffffff, "Supercell Magic");
@@ -176,7 +176,7 @@ export class BattleHud {
     const layout = calculateHudLayout(width, height);
     const graphics = this.graphics;
     const blue = state.sides.blue;
-    const nextCardId = blue.drawPile[0];
+    const nextCardId = blue.drawPile[0];\n    this.lastHandCardIds = [...blue.hand];
     const nextCard = nextCardId ? cardById(nextCardId) : null;
 
     graphics.clear();
@@ -237,7 +237,7 @@ export class BattleHud {
 
     this.drawMatchClock(state, layout.width, graphics);
     this.drawCards(state, selectedCard, layout.cards, graphics);
-    this.drawCardBadges(layout);
+    this.drawCardBadges(layout, selectedCard);
     this.drawElixir(blue.elixir, layout, graphics);
 
     this.placementHint.text = message;
@@ -361,7 +361,7 @@ export class BattleHud {
     this.matchClockLabel.anchor.set(0.5);
     this.matchClockLabel.position.set(width / 2, y + clockHeight / 2);
   }
-  private drawCardBadges(layout: ReturnType<typeof calculateHudLayout>): void {
+  private drawCardBadges(\n    layout: ReturnType<typeof calculateHudLayout>,\n    selectedCard: CardId | null\n  ): void {
     const graphics = this.cardOverlayGraphics;
     graphics.clear();
 

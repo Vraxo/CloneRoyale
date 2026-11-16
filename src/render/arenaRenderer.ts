@@ -1,5 +1,5 @@
 import { Application, Container, Graphics } from "pixi.js";
-import type { CardId, GameState, Side } from "../game/types";
+import type { CardId, GameState, Side, Unit } from "../game/types";
 import { cardById } from "../game/cards";
 import { getGroundDeploymentZones } from "../game/placement";
 import { EffectView } from "./entities/effectView";
@@ -19,6 +19,9 @@ export class ArenaRenderer {
   private readonly world = new Container();
   private readonly arena = createArenaView();
   private readonly entities = new Container();
+  private readonly unitPreviewLayer = new Container();
+  private readonly unitPreviewViews: UnitView[] = [];
+  private unitPreviewCardId: CardId | null = null;
   private readonly placementOverlay = new Graphics();
   private readonly invalidDeploymentOverlay = new Graphics();
   private readonly hud = new BattleHud();
@@ -46,6 +49,7 @@ export class ArenaRenderer {
       this.arena,
       this.invalidDeploymentOverlay,
       this.entities,
+      this.unitPreviewLayer,
       this.placementOverlay
     );
     this.app.stage.addChild(this.world, this.hud.container);
@@ -150,24 +154,113 @@ export class ArenaRenderer {
     );
   }
 
-  public setHeldCardPreview(
-    cardId: CardId | null,
-    clientX: number,
-    clientY: number
-  ): void {
-    if (!this.initialized) return;
+  public setUnitPreview(cardId: CardId | null, point: { x: number; y: number } | null): void {
+    if (!this.initialized || !point || !cardId) {
+      this.clearUnitPreview();
+      return;
+    }
 
-    this.hud.setHeldCardPreview(
-      cardId,
-      clientX,
-      clientY,
-      this.app.canvas,
-      this.app.screen.width,
-      this.app.screen.height
-    );
+    const card = cardById(cardId);
+    if (card.category === "spell") {
+      this.clearUnitPreview();
+      return;
+    }
+
+    if (this.unitPreviewCardId !== cardId) {
+      this.clearUnitPreview();
+      this.unitPreviewCardId = cardId;
+
+      for (let index = 0; index < card.count; index += 1) {
+        const column = index % 5;
+        const row = Math.floor(index / 5);
+        const offsetX = card.count === 1 ? 0 : (column - (Math.min(card.count, 5) - 1) / 2)
+          * Math.min(11, card.unit.radius * 0.85);
+        const offsetY = card.count === 1 ? 0 : row * 11;
+        const unit = this.createPreviewUnit(cardId, card.category, card.unit, index,
+          point.x + offsetX, point.y + offsetY);
+        const view = createUnitView(unit);
+        view.container.alpha = 0.58;
+        this.unitPreviewLayer.addChild(view.container);
+        this.unitPreviewViews.push(view);
+      }
+    }
+
+    const time = performance.now() / 1000;
+    for (let index = 0; index < this.unitPreviewViews.length; index += 1) {
+      const view = this.unitPreviewViews[index];
+      const unit = this.createPreviewUnit(
+        cardId,
+        card.category,
+        card.unit,
+        index,
+        point.x + (card.count === 1 ? 0 : (index % 5 - (Math.min(card.count, 5) - 1) / 2)
+          * Math.min(11, card.unit.radius * 0.85)),
+        point.y + (card.count === 1 ? 0 : Math.floor(index / 5) * 11)
+      );
+      view.update(unit, time);
+      view.container.alpha = 0.58;
+    }
   }
 
-  public handCardAt(clientX: number, clientY: number): number | null {
+  public clearUnitPreview(): void {
+    for (const view of this.unitPreviewViews) {
+      this.unitPreviewLayer.removeChild(view.container);
+      view.destroy();
+    }
+    this.unitPreviewViews.length = 0;
+    this.unitPreviewCardId = null;
+  }
+
+  private createPreviewUnit(
+    cardId: CardId,
+    category: "troop" | "building",
+    definition: import("../game/types").UnitDefinition,
+    index: number,
+    x: number,
+    y: number
+  ): Unit {
+    return {
+      id: -1000 - index,
+      side: "blue",
+      cardId,
+      type: definition.type,
+      kind: category,
+      lane: x < 360 ? "left" : "right",
+      x,
+      y,
+      hp: definition.hp,
+      maxHp: definition.hp,
+      radius: definition.radius,
+      collisionMass: definition.collisionMass ?? 1,
+      formationSlot: definition.type === "archer" && index < 2
+        ? (index === 0 ? -1 : 1)
+        : undefined,
+      damage: definition.damage,
+      speed: definition.speed,
+      range: definition.range,
+      attackInterval: definition.attackInterval,
+      attackCooldown: 0,
+      attack: definition.attack,
+      splashRadius: definition.splashRadius,
+      isAir: definition.isAir,
+      canTargetAir: definition.canTargetAir,
+      targetsBuildingsOnly: definition.targetsBuildingsOnly,
+      lifetime: definition.lifetime,
+      age: 0,
+      appearanceDelayRemaining: 0,
+      deploymentDuration: 0,
+      deploymentRemaining: 0,
+      facing: -Math.PI / 2,
+      animationOffset: index * 0.37,
+      attackAnim: 0
+    };
+  }
+
+  public handCardAt(
+    clientX: number,
+    clientY: number,
+    selectedCard: CardId | null
+  ): number | null {
     if (!this.initialized) return null;
 
     return this.hud.handCardAt(
@@ -175,7 +268,8 @@ export class ArenaRenderer {
       clientY,
       this.app.canvas,
       this.app.screen.width,
-      this.app.screen.height
+      this.app.screen.height,
+      selectedCard
     );
   }
 
@@ -221,6 +315,7 @@ export class ArenaRenderer {
   }
 
   public destroy(): void {
+    this.clearUnitPreview();
     for (const view of this.unitViews.values()) view.destroy();
     for (const view of this.towerViews.values()) view.destroy();
     for (const view of this.projectileViews.values()) view.destroy();

@@ -38,7 +38,7 @@ export function bindBattleInput(controller: BattleController): void {
   canvas.addEventListener("pointerleave", () => controller.clearPointerPreview());
   canvas.addEventListener("pointerdown", (event: PointerEvent) => {
     if (event.button !== 0) return;
-    const handIndex = renderer.handCardAt(event.clientX, event.clientY);
+    const handIndex = renderer.handCardAt(event.clientX, event.clientY, controller.currentSelectedCard);
     if (handIndex !== null) {
       const cardId = controller.state.sides.blue.hand[handIndex];
       if (cardId) controller.selectCard(cardId);
