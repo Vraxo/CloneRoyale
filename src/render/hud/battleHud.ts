@@ -218,7 +218,7 @@ export class BattleHud {
 
     this.drawMatchClock(state, layout.width, graphics);
     this.drawCards(state, selectedCard, layout.cards, graphics);
-    this.drawCardBadges(state, layout);
+    this.drawCardBadges(layout);
     this.drawElixir(blue.elixir, layout, graphics);
 
     this.placementHint.text = message;
@@ -338,7 +338,7 @@ export class BattleHud {
     this.matchClockLabel.anchor.set(0.5);
     this.matchClockLabel.position.set(width / 2, y + clockHeight / 2);
   }
-  private drawCardBadges(state: GameState, layout: ReturnType<typeof calculateHudLayout>): void {
+  private drawCardBadges(layout: ReturnType<typeof calculateHudLayout>): void {
     const graphics = this.cardOverlayGraphics;
     graphics.clear();
 
