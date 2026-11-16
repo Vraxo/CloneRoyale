@@ -51,6 +51,7 @@ function nextMessage(socket, predicate, timeoutMs = 5000) {
 try {
   await waitForServer();
   const first = await connect();
+  first.send(JSON.stringify({ type: "set-profile", guestId: "11111111-1111-4111-8111-111111111111", name: "BluePlayer" }));
   const assignedPromise = nextMessage(first, message => message.type === "assigned");
   first.send(JSON.stringify({ type: "create-room" }));
   const assigned = await assignedPromise;
@@ -59,12 +60,15 @@ try {
   assert.equal(typeof assigned.resumeToken, "string");
 
   const second = await connect();
+  second.send(JSON.stringify({ type: "set-profile", guestId: "22222222-2222-4222-8222-222222222222", name: "RedPlayer" }));
   const firstStartPromise = nextMessage(first, message => message.type === "match-start");
   const secondStartPromise = nextMessage(second, message => message.type === "match-start");
   second.send(JSON.stringify({ type: "join-room", code: assigned.code }));
   const [firstStart, secondStart] = await Promise.all([firstStartPromise, secondStartPromise]);
   assert.equal(firstStart.state.time, 0);
   assert.equal(secondStart.state.time, 0);
+  assert.deepEqual(firstStart.players.map(player => player.name).sort(), ["BluePlayer", "RedPlayer"]);
+  assert.deepEqual(secondStart.players.map(player => player.name).sort(), ["BluePlayer", "RedPlayer"]);
 
   await delay(1200);
   const liveState = await nextMessage(first, message => message.type === "state");

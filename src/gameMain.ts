@@ -42,6 +42,41 @@ const onlineButton = document.getElementById("online-play");
 const leaveOnlineButton = document.getElementById("leave-online");
 const playAgainButton = document.getElementById("play-again");
 const leaveResultButton = document.getElementById("leave-result");
+const profileButton = document.getElementById("profile-button");
+const profileNameLabel = document.getElementById("profile-name");
+const profilePanel = document.getElementById("profile-panel");
+const profileNameInput = document.getElementById("profile-name-input");
+const profileError = document.getElementById("profile-error");
+const saveProfileButton = document.getElementById("save-profile");
+const closeProfileButton = document.getElementById("close-profile");
+const modeDescription = document.getElementById("mode-description");
+
+type GuestProfile = { id: string; name: string };
+function loadGuestProfile(): GuestProfile {
+  try {
+    const stored = JSON.parse(localStorage.getItem("cloneroyale.profile") ?? "null") as Partial<GuestProfile> | null;
+    if (stored && typeof stored.id === "string" && /^[a-f0-9-]{36}$/i.test(stored.id)
+      && typeof stored.name === "string" && stored.name.trim()) {
+      return { id: stored.id, name: stored.name.trim().slice(0, 16) };
+    }
+  } catch { /* Replace invalid local profile data. */ }
+  const profile = { id: crypto.randomUUID(), name: "Guest" };
+  localStorage.setItem("cloneroyale.profile", JSON.stringify(profile));
+  return profile;
+}
+let guestProfile = loadGuestProfile();
+function renderProfile(): void {
+  if (profileNameLabel) profileNameLabel.textContent = guestProfile.name;
+  if (profileButton) profileButton.setAttribute("aria-label", "Player profile: " + guestProfile.name);
+  if (profileNameInput instanceof HTMLInputElement) profileNameInput.value = guestProfile.name;
+}
+function updateOpponentLabel(players: { side: "blue" | "red"; name: string }[]): void {
+  const opponent = players.find(player => player.side !== document.body.dataset.onlineSide);
+  if (modeDescription) modeDescription.textContent = opponent
+    ? guestProfile.name + " · vs " + opponent.name
+    : guestProfile.name + " · Online";
+}
+renderProfile();
 
 function setLobbyStatus(message: string): void {
   if (lobbyStatus) lobbyStatus.textContent = message;
@@ -71,6 +106,7 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "resumed") {
           localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
           document.body.dataset.onlineSide = message.side;
+          if (message.players) updateOpponentLabel(message.players);
           if (message.state) {
             battle.activateOnline(message.side, message.state, onlineClient);
             if (playAgainButton instanceof HTMLButtonElement) {
@@ -95,8 +131,13 @@ async function connectOnline(): Promise<boolean> {
           setLobbyStatus("Matchmaking cancelled.");
         } else if (message.type === "room") {
           if (roomCode) roomCode.textContent = message.code;
-          setLobbyStatus(message.status === "playing" ? "Opponent connected. Starting match…" : "Waiting for another player…");
+          updateOpponentLabel(message.players);
+          const opponent = message.players.find(player => player.side !== document.body.dataset.onlineSide);
+          setLobbyStatus(opponent ? "Room " + message.code + " · " + opponent.name + " joined." : "Room " + message.code + " created. Share the code and wait for your opponent.");
+        } else if (message.type === "players-updated") {
+          updateOpponentLabel(message.players);
         } else if (message.type === "match-start") {
+          if (message.players) updateOpponentLabel(message.players);
           const side = document.body.dataset.onlineSide === "red" ? "red" : "blue";
           battle.activateOnline(side, message.state, onlineClient);
           if (playAgainButton instanceof HTMLButtonElement) {
@@ -115,6 +156,7 @@ async function connectOnline(): Promise<boolean> {
           }
           setLobbyStatus("Rematch requested. Waiting for your opponent…");
         } else if (message.type === "rematch-start") {
+          if (message.players) updateOpponentLabel(message.players);
           if (playAgainButton instanceof HTMLButtonElement) {
             playAgainButton.disabled = false;
             playAgainButton.textContent = "Rematch";
@@ -137,6 +179,7 @@ async function connectOnline(): Promise<boolean> {
           battle.setOnlineNotice(message.message);
         }
       });
+      onlineClient.setProfile(guestProfile.id, guestProfile.name);
       onlineClient.resume();
     }
     return true;
@@ -145,6 +188,40 @@ async function connectOnline(): Promise<boolean> {
     return false;
   }
 }
+
+profileButton?.addEventListener("click", () => {
+  renderProfile();
+  if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = false;
+  if (profileNameInput instanceof HTMLInputElement) {
+    profileNameInput.focus();
+    profileNameInput.select();
+  }
+});
+function closeProfile(): void {
+  if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = true;
+  if (profileError) profileError.textContent = "";
+}
+closeProfileButton?.addEventListener("click", closeProfile);
+profilePanel?.addEventListener("click", event => {
+  if (event.target === profilePanel) closeProfile();
+});
+saveProfileButton?.addEventListener("click", () => {
+  const name = profileNameInput instanceof HTMLInputElement ? profileNameInput.value.trim() : "";
+  if (!name) {
+    if (profileError) profileError.textContent = "Enter a display name.";
+    return;
+  }
+  guestProfile = { ...guestProfile, name: name.replace(/[\\u0000-\\u001f\\u007f]/g, "").slice(0, 16) };
+  localStorage.setItem("cloneroyale.profile", JSON.stringify(guestProfile));
+  renderProfile();
+  if (onlineClient.isConnected) onlineClient.setProfile(guestProfile.id, guestProfile.name);
+  if (modeDescription) modeDescription.textContent = guestProfile.name + (battle.isOnline ? " · Online" : " · Live match");
+  closeProfile();
+});
+profileNameInput?.addEventListener("keydown", event => {
+  if (event.key === "Enter") saveProfileButton?.click();
+  if (event.key === "Escape") closeProfile();
+});
 
 onlineButton?.addEventListener("click", openLobby);
 findMatchButton?.addEventListener("click", async () => {

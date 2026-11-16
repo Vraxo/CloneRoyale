@@ -24,8 +24,11 @@ function send(client, payload) {
   client.socket.write(Buffer.concat([header, body]));
 }
 function broadcast(room, payload) { for (const player of room.players.values()) send(player, payload); }
+function playerSummaries(room) {
+  return [...room.players.values()].map(player => ({ side: player.side, name: player.name }));
+}
 function sendRoom(room) {
-  broadcast(room, { type: "room", code: room.code, players: [...room.players.values()].map(p => ({ side: p.side, name: p.name })), status: room.state ? "playing" : "waiting" });
+  broadcast(room, { type: "room", code: room.code, players: playerSummaries(room), status: room.state ? "playing" : "waiting" });
 }
 function makeCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -35,12 +38,12 @@ function makeCode() {
 }
 function attachPlayer(room, client, side) {
   client.room = room; client.side = side; room.players.set(client.id, client);
-  send(client, { type: "assigned", side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, resumeToken: client.resumeToken });
+  send(client, { type: "assigned", side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, resumeToken: client.resumeToken, name: client.name });
   if (!room.publicMatch) sendRoom(room);
   if (room.players.size === 2 && [...room.players.values()].every(player => !player.disconnected)) {
     room.state = createGame(randomBytes(4).readUInt32BE(0));
     room.lastUpdate = Date.now();
-    broadcast(room, { type: "match-start", state: room.state });
+    broadcast(room, { type: "match-start", state: room.state, players: playerSummaries(room) });
   }
 }
 function removeFromQueue(client, notify = false) {
@@ -104,6 +107,16 @@ function leaveRoom(client) {
 function handleMessage(client, message) {
   if (!message || typeof message.type !== "string") return;
   if (message.type === "resume") { resumePlayer(client, message.token); return; }
+  if (message.type === "set-profile") {
+    const rawName = typeof message.name === "string" ? message.name : "";
+    const name = rawName.replace(/[\\u0000-\\u001f\\u007f]/g, "").trim().slice(0, 16) || "Guest";
+    const guestId = typeof message.guestId === "string" && /^[a-f0-9-]{36}$/i.test(message.guestId)
+      ? message.guestId : client.guestId;
+    client.guestId = guestId;
+    client.name = name;
+    if (client.room) broadcast(client.room, { type: "players-updated", players: playerSummaries(client.room) });
+    return;
+  }
   if (message.type === "rematch-ready") { requestRematch(client); return; }
   if (message.type === "find-match") { joinMatchmaking(client); return; }
   if (message.type === "cancel-matchmaking") { removeFromQueue(client, true); return; }
@@ -138,7 +151,7 @@ function requestRematch(client) {
   room.state = createGame(randomBytes(4).readUInt32BE(0));
   room.lastUpdate = Date.now();
   room.accumulator = 0;
-  broadcast(room, { type: "rematch-start", state: room.state });
+  broadcast(room, { type: "rematch-start", state: room.state, players: playerSummaries(room) });
 }
 
 function resumePlayer(client, token) {
@@ -162,7 +175,7 @@ function resumePlayer(client, token) {
     client.rematchReady = false;
     room.players.set(client.id, client);
     clients.add(client);
-    send(client, { type: "resumed", side: client.side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, state: room.state, resumeToken: token });
+    send(client, { type: "resumed", side: client.side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, state: room.state, resumeToken: token, name: client.name, players: playerSummaries(room) });
     for (const opponent of room.players.values()) {
       if (opponent !== client && !opponent.disconnected) send(opponent, { type: "opponent-reconnected", side: client.side });
     }
@@ -236,7 +249,7 @@ server.on("upgrade", (request, socket) => {
   if (typeof key !== "string" || request.headers.upgrade?.toLowerCase() !== "websocket") { socket.destroy(); return; }
   const accept = createHash("sha1").update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest("base64");
   socket.write(["HTTP/1.1 101 Switching Protocols", "Upgrade: websocket", "Connection: Upgrade", "Sec-WebSocket-Accept: " + accept, "", ""].join("\r\n"));
-  const client = { id: randomBytes(12).toString("hex"), resumeToken: randomBytes(32).toString("hex"), socket, buffer: Buffer.alloc(0), room: null, side: null, name: "Guest", queued: false, closed: false, disconnected: false, rematchReady: false, lastSeen: Date.now() };
+  const client = { id: randomBytes(12).toString("hex"), guestId: null, resumeToken: randomBytes(32).toString("hex"), socket, buffer: Buffer.alloc(0), room: null, side: null, name: "Guest", queued: false, closed: false, disconnected: false, rematchReady: false, lastSeen: Date.now() };
   clients.add(client); socket.on("data", chunk => decodeFrames(client, chunk)); socket.on("close", () => closeClient(client)); socket.on("error", () => closeClient(client));
   send(client, { type: "connected" });
 });

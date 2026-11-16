@@ -2,8 +2,9 @@ import type { CardId, GameState, Side } from "../game/types";
 
 export type OnlineMessage =
   | { type: "connected" }
-  | { type: "assigned"; side: Side; code: string | null; publicMatch?: boolean; resumeToken?: string }
-  | { type: "resumed"; side: Side; code: string | null; publicMatch?: boolean; state: GameState | null; resumeToken: string }
+  | { type: "assigned"; side: Side; code: string | null; publicMatch?: boolean; resumeToken?: string; name?: string }
+  | { type: "players-updated"; players: { side: Side; name: string }[] }
+  | { type: "resumed"; side: Side; code: string | null; publicMatch?: boolean; state: GameState | null; resumeToken: string; name?: string; players?: { side: Side; name: string }[] }
   | { type: "resume-failed" }
   | { type: "connection-lost" }
   | { type: "opponent-disconnected"; graceSeconds: number }
@@ -11,9 +12,9 @@ export type OnlineMessage =
   | { type: "queue-status"; waiting: number }
   | { type: "queue-cancelled" }
   | { type: "room"; code: string; players: { side: Side; name: string }[]; status: "waiting" | "playing" }
-  | { type: "match-start"; state: GameState }
+  | { type: "match-start"; state: GameState; players?: { side: Side; name: string }[] }
   | { type: "rematch-status"; ready: number; total: number }
-  | { type: "rematch-start"; state: GameState }
+  | { type: "rematch-start"; state: GameState; players?: { side: Side; name: string }[] }
   | { type: "state"; state: GameState }
   | { type: "opponent-left" }
   | { type: "action-error"; message: string }
@@ -57,6 +58,12 @@ export class OnlineClient {
   public subscribe(listener: (message: OnlineMessage) => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
+  }
+
+  public get isConnected(): boolean { return this.socket?.readyState === WebSocket.OPEN; }
+
+  public setProfile(guestId: string, name: string): void {
+    this.send({ type: "set-profile", guestId, name });
   }
 
   public resume(): void {
