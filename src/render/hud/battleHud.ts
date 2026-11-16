@@ -44,7 +44,7 @@ function createHudText(fontSize: number, fill: number, fontFamily = "SC CCBackBe
       fontFamily,
       fontSize,
       fill,
-      fontWeight: "700",
+      fontWeight: "400",
       align: "center"
     }
   });
