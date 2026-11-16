@@ -79,6 +79,16 @@ try {
   assert.deepEqual(firstStart.players.map(player => player.name).sort(), ["BluePlayer", "RedPlayer"]);
   assert.deepEqual(secondStart.players.map(player => player.name).sort(), ["BluePlayer", "RedPlayer"]);
 
+  const emoteReceivedByOpponent = nextMessage(second, message => message.type === "emote");
+  const emoteEchoedToSender = nextMessage(first, message => message.type === "emote");
+  first.send(JSON.stringify({ type: "emote", emoteId: 3 }));
+  const [opponentEmote, senderEmote] = await Promise.all([emoteReceivedByOpponent, emoteEchoedToSender]);
+  assert.deepEqual(opponentEmote, { type: "emote", side: "blue", emoteId: 3, name: "BluePlayer" });
+  assert.deepEqual(senderEmote, opponentEmote);
+  const invalidEmoteNotice = nextMessage(second, message => message.type === "emote", 250);
+  first.send(JSON.stringify({ type: "emote", emoteId: 99 }));
+  await assert.rejects(invalidEmoteNotice, /Timed out/);
+
   await delay(1200);
   const liveState = await nextMessage(first, message => message.type === "state");
   assert.equal(liveState.state.sides.blue.cardsPlayed, 0, "Blue must not be controlled by an AI.");

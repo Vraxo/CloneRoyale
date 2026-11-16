@@ -147,8 +147,21 @@ function leaveRoom(client) {
     if (!room.state) sendRoom(room);
   }
 }
+const MATCH_EMOTE_COUNT = 8;
+const EMOTE_COOLDOWN_MS = 1200;
+function handleEmote(client, message) {
+  const room = client.room;
+  const emoteId = message.emoteId;
+  if (!room?.state || !client.side || client.disconnected) return;
+  if (!Number.isInteger(emoteId) || emoteId < 0 || emoteId >= MATCH_EMOTE_COUNT) return;
+  const now = Date.now();
+  if (now - (client.lastEmoteAt ?? 0) < EMOTE_COOLDOWN_MS) return;
+  client.lastEmoteAt = now;
+  broadcast(room, { type: "emote", side: client.side, emoteId, name: client.name });
+}
 function handleMessage(client, message) {
   if (!message || typeof message.type !== "string") return;
+  if (message.type === "emote") { handleEmote(client, message); return; }
   if (message.type === "resume") { resumePlayer(client, message.token); return; }
   if (message.type === "set-profile") {
     const rawName = typeof message.name === "string" ? message.name : "";

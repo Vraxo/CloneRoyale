@@ -197,6 +197,7 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "players-updated") {
           updateOpponentLabel(message.players);
         } else if (message.type === "match-start") {
+          if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
           if (message.players) updateOpponentLabel(message.players);
           const side = document.body.dataset.onlineSide === "red" ? "red" : "blue";
           battle.activateOnline(side, message.state, onlineClient);
