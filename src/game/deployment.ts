@@ -130,6 +130,7 @@ export function playCard(
     const x = targetX ?? defaultTower?.x ?? LANE_X[lane];
     const y = targetY ?? defaultTower?.y ?? (side === "blue" ? 180 : 780);
     const { damage, radius, projectile } = card.effect;
+    if (cardId === "fireball") state.audioEvents.push("fireball-launch");
 
     addProjectile(
       state,

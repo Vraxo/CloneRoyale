@@ -51,7 +51,10 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "double-elixir": ["/audio/sfx/elixir/double-elixir-start.ogg"],
   "triple-elixir": ["/audio/sfx/elixir/triple-elixir-start.ogg"],
   "cannon-deploy": ["/audio/sfx/cannon/cannon-deployment.ogg"],
-  "cannon-attack": ["/audio/sfx/cannon/cannon-fire.ogg"]
+  "cannon-attack": ["/audio/sfx/cannon/cannon-fire.ogg"],
+  "arrows-impact": ["/audio/sfx/spells/arrows-impact.ogg"],
+  "fireball-launch": ["/audio/sfx/spells/fireball-launch.ogg"],
+  "fireball-explosion": ["/audio/sfx/spells/fireball-explosion.ogg"]
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
@@ -82,7 +85,10 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "double-elixir": 0.72,
   "triple-elixir": 0.78,
   "cannon-deploy": 0.72,
-  "cannon-attack": 0.62
+  "cannon-attack": 0.62,
+  "arrows-impact": 0.62,
+  "fireball-launch": 0.64,
+  "fireball-explosion": 0.78
 };
 
 const MAX_VOICES_PER_SOUND = 6;

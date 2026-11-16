@@ -26,4 +26,7 @@ export type AudioEvent =
   | "double-elixir"
   | "triple-elixir"
   | "cannon-deploy"
-  | "cannon-attack";
+  | "cannon-attack"
+  | "arrows-impact"
+  | "fireball-launch"
+  | "fireball-explosion";
