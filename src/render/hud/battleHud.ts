@@ -1,9 +1,30 @@
 import { Container, Graphics, Text } from "pixi.js";
 import type { CardId, GameState } from "../../game/types";
 import { cardById } from "../../game/cards";
+import { MATCH_RULES } from "../../game/matchRules";
 import { calculateHudLayout } from "./hudLayout";
 
 const HUD_HEIGHT = 176;
+
+function formatClock(seconds: number): string {
+  const remaining = Math.max(0, Math.ceil(seconds));
+  const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
+  const rest = (remaining % 60).toString().padStart(2, "0");
+  return minutes + ":" + rest;
+}
+
+function matchClock(state: GameState): string {
+  switch (state.phase) {
+    case "regulation":
+      return formatClock(MATCH_RULES.regulationSeconds - state.time);
+    case "overtime":
+      return formatClock(MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeSeconds - state.time);
+    case "tiebreaker":
+      return "TIE";
+    case "finished":
+      return "00:00";
+  }
+}
 
 function createHudText(fontSize: number, fill: number): Text {
   const label = new Text({
@@ -51,6 +72,7 @@ export class BattleHud {
   private readonly elixirValue = createHudText(17, 0xf1d8ff);
   private readonly elixirMax = createHudText(8, 0xc1a5d8);
   private readonly placementHint = createHudText(9, 0xc9d1c2);
+  private readonly matchClockLabel = createHudText(19, 0xf4eedc);
 
   public constructor() {
     this.container.eventMode = "none";
@@ -65,6 +87,7 @@ export class BattleHud {
       this.elixirValue,
       this.elixirMax,
       this.placementHint,
+      this.matchClockLabel,
       this.heldCardGraphics,
       this.heldCardGlyph,
       this.heldCardName,
@@ -133,6 +156,7 @@ export class BattleHud {
     this.nextCardCost.anchor.set(0.5);
     this.nextCardCost.position.set(nextCostX, nextCostY);
 
+    this.drawMatchClock(state, layout.width, graphics);
     this.drawCards(state, selectedCard, layout.cards, graphics);
     this.drawElixir(blue.elixir, layout, graphics);
 
@@ -226,6 +250,23 @@ export class BattleHud {
     return index >= 0 ? index : null;
   }
 
+  private drawMatchClock(state: GameState, width: number, graphics: Graphics): void {
+    const clockWidth = 92;
+    const clockHeight = 34;
+    const x = (width - clockWidth) / 2;
+    const y = 12;
+
+    graphics
+      .roundRect(x, y, clockWidth, clockHeight, 9)
+      .fill({ color: 0x202923, alpha: 0.96 });
+    graphics
+      .roundRect(x, y, clockWidth, clockHeight, 9)
+      .stroke({ color: 0xc1a76e, alpha: 0.9, width: 1.5 });
+
+    this.matchClockLabel.text = matchClock(state);
+    this.matchClockLabel.anchor.set(0.5);
+    this.matchClockLabel.position.set(width / 2, y + clockHeight / 2);
+  }
   private drawCards(
     state: GameState,
     selectedCard: CardId | null,

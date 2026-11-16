@@ -1,4 +1,3 @@
-import { MATCH_RULES } from "../game/matchRules";
 import type { CardId, GameState, Side } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
 
@@ -6,7 +5,6 @@ interface HudElements {
   pauseButton: HTMLButtonElement;
   stepBackButton: HTMLButtonElement;
   statusLabel: HTMLSpanElement;
-  clockLabel: HTMLSpanElement;
   blueUnitsLabel: HTMLSpanElement;
   redUnitsLabel: HTMLSpanElement;
   blueTowersLabel: HTMLSpanElement;
@@ -35,7 +33,6 @@ function findElements(): HudElements {
     pauseButton: element<HTMLButtonElement>("pause"),
     stepBackButton: element<HTMLButtonElement>("step-back"),
     statusLabel: element<HTMLSpanElement>("match-status"),
-    clockLabel: element<HTMLSpanElement>("match-clock"),
     blueUnitsLabel: element<HTMLSpanElement>("blue-units"),
     redUnitsLabel: element<HTMLSpanElement>("red-units"),
     blueTowersLabel: element<HTMLSpanElement>("blue-towers"),
@@ -55,30 +52,6 @@ export function phaseLabel(state: GameState): string {
     case "overtime": return "Overtime";
     case "tiebreaker": return "Tiebreaker";
     case "finished": return "Battle complete";
-  }
-}
-
-function formatClock(seconds: number): string {
-  const remaining = Math.max(0, Math.ceil(seconds));
-  const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
-  const rest = (remaining % 60).toString().padStart(2, "0");
-  return minutes + ":" + rest;
-}
-
-function updateClock(elements: HudElements, game: GameState): void {
-  switch (game.phase) {
-    case "regulation":
-      elements.clockLabel.textContent = formatClock(MATCH_RULES.regulationSeconds - game.time);
-      break;
-    case "overtime":
-      elements.clockLabel.textContent = formatClock(MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeSeconds - game.time);
-      break;
-    case "tiebreaker":
-      elements.clockLabel.textContent = "TIE";
-      break;
-    case "finished":
-      elements.clockLabel.textContent = "00:00";
-      break;
   }
 }
 
@@ -152,7 +125,6 @@ export function createBattleHud(renderer: ArenaRenderer): BattleHud {
     update(game, selectedCard, paused, placementMessage, canStepBack): void {
       elements.stepBackButton.disabled = !canStepBack || game.gameOver;
 
-      updateClock(elements, game);
       updateStatistics(elements, game);
       updateEventFeed(elements, game);
       updateMatchResult(elements, game, paused);
