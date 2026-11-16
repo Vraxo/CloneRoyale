@@ -57,9 +57,10 @@ try {
   assert.equal(assigned.code.length, 5);
 
   const second = await connect();
+  const firstStartPromise = nextMessage(first, message => message.type === "match-start");
+  const secondStartPromise = nextMessage(second, message => message.type === "match-start");
   second.send(JSON.stringify({ type: "join-room", code: assigned.code }));
-  const firstStart = await nextMessage(first, message => message.type === "match-start");
-  const secondStart = await nextMessage(second, message => message.type === "match-start");
+  const [firstStart, secondStart] = await Promise.all([firstStartPromise, secondStartPromise]);
   assert.equal(firstStart.state.time, 0);
   assert.equal(secondStart.state.time, 0);
 
@@ -69,14 +70,15 @@ try {
   assert.equal(liveState.state.sides.red.cardsPlayed, 0, "Red must not be controlled by an AI.");
 
   const cardId = liveState.state.sides.blue.hand[0];
+  const deployedPromise = nextMessage(first, message =>
+    message.type === "state" && message.state.sides.blue.cardsPlayed === 1
+  );
+  const opponentViewPromise = nextMessage(second, message =>
+    message.type === "state" && message.state.sides.blue.cardsPlayed === 1
+  );
   first.send(JSON.stringify({ type: "play-card", cardId, x: 205, y: 700 }));
-  const deployed = await nextMessage(first, message =>
-    message.type === "state" && message.state.sides.blue.cardsPlayed === 1
-  );
+  const [deployed, opponentView] = await Promise.all([deployedPromise, opponentViewPromise]);
   assert.equal(deployed.state.sides.blue.cardsPlayed, 1);
-  const opponentView = await nextMessage(second, message =>
-    message.type === "state" && message.state.sides.blue.cardsPlayed === 1
-  );
   assert.equal(opponentView.state.sides.blue.cardsPlayed, 1, "Both clients must receive the same authoritative deployment.");
 
   console.log("Multiplayer smoke test passed: room creation, joining, shared simulation, no AI, and server-validated card deployment.");
