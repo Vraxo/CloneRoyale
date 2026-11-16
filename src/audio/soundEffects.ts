@@ -10,39 +10,39 @@ export interface SoundEffects {
 }
 
 const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
-  "mini-pekka-deploy": ["/audio/sfx/mini-pekka/deploy.ogg"],
-  "mini-pekka-attack": ["/audio/sfx/mini-pekka/attack.ogg"],
-  "mini-pekka-hit": ["/audio/sfx/mini-pekka/hit.ogg"],
-  "mini-pekka-step": ["/audio/sfx/mini-pekka/step.ogg"],
-  "giant-deploy": ["/audio/sfx/giant/deploy.ogg"],
+  "mini-pekka-deploy": ["/audio/sfx/mini-pekka/mini-pekka-deployment.ogg"],
+  "mini-pekka-attack": ["/audio/sfx/mini-pekka/mini-pekka-attack-swing.ogg"],
+  "mini-pekka-hit": ["/audio/sfx/mini-pekka/mini-pekka-hit-impact.ogg"],
+  "mini-pekka-step": ["/audio/sfx/mini-pekka/mini-pekka-footsteps.ogg"],
+  "giant-deploy": ["/audio/sfx/giant/giant-deployment.ogg"],
   "giant-attack": [
-    "/audio/sfx/giant/attack-1.ogg",
-    "/audio/sfx/giant/attack-2.ogg",
-    "/audio/sfx/giant/attack-3.ogg"
+    "/audio/sfx/giant/giant-attack-swing-01.ogg",
+    "/audio/sfx/giant/giant-attack-swing-02.ogg",
+    "/audio/sfx/giant/giant-attack-swing-03.ogg"
   ],
-  "giant-hit": ["/audio/sfx/giant/hit.ogg"],
+  "giant-hit": ["/audio/sfx/giant/giant-hit-impact.ogg"],
   "giant-step": [
-    "/audio/sfx/giant/step-1.ogg",
-    "/audio/sfx/giant/step-2.ogg",
-    "/audio/sfx/giant/step-3.ogg",
-    "/audio/sfx/giant/step-4.ogg"
+    "/audio/sfx/giant/giant-footstep-01.ogg",
+    "/audio/sfx/giant/giant-footstep-02.ogg",
+    "/audio/sfx/giant/giant-footstep-03.ogg",
+    "/audio/sfx/giant/giant-footstep-04.ogg"
   ],
-  "giant-death": ["/audio/sfx/giant/death.ogg"],
-  "skeleton-deploy": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/skeleton_deploy_03.ogg"],
-  "skeleton-attack": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/skeleton_atk_03.ogg"],
+  "giant-death": ["/audio/sfx/giant/giant-death.ogg"],
+  "skeleton-deploy": ["/audio/sfx/skeleton/skeleton-deployment.ogg"],
+  "skeleton-attack": ["/audio/sfx/skeleton/skeleton-attack-swing.ogg"],
   "skeleton-hit": [
-    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/footman_attack_hit_01.ogg",
-    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/footman_attack_hit_02.ogg",
-    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/footman_attack_hit_03.ogg",
-    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/footman_attack_hit_04.ogg"
+    "/audio/sfx/skeleton/skeleton-hit-impact-01.ogg",
+    "/audio/sfx/skeleton/skeleton-hit-impact-02.ogg",
+    "/audio/sfx/skeleton/skeleton-hit-impact-03.ogg",
+    "/audio/sfx/skeleton/skeleton-hit-impact-04.ogg"
   ],
-  "skeleton-step": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/skeleton_step_02.ogg"],
-  "skeleton-death": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Skeletons/npc_die_02.ogg"],
-  "princess-tower-attack": ["/audio/sfx/towers/princess-attack.ogg"],
-  "king-tower-attack": ["/audio/sfx/towers/king-attack.ogg"],
-  "elixir-gain": ["/audio/sfx/elixir/get-elixir.ogg"],
-  "double-elixir": ["/audio/sfx/elixir/double-elixir.ogg"],
-  "triple-elixir": ["/audio/sfx/elixir/triple-elixir.ogg"]
+  "skeleton-step": ["/audio/sfx/skeleton/skeleton-footsteps.ogg"],
+  "skeleton-death": ["/audio/sfx/skeleton/skeleton-death.ogg"],
+  "princess-tower-attack": ["/audio/sfx/towers/princess-tower-arrow-shot.ogg"],
+  "king-tower-attack": ["/audio/sfx/towers/king-tower-projectile-shot.ogg"],
+  "elixir-gain": ["/audio/sfx/elixir/elixir-pickup.ogg"],
+  "double-elixir": ["/audio/sfx/elixir/double-elixir-start.ogg"],
+  "triple-elixir": ["/audio/sfx/elixir/triple-elixir-start.ogg"]
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
