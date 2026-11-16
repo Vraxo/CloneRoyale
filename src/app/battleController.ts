@@ -189,6 +189,7 @@ export class BattleController {
       this.renderer.clearUnitPreview();
       return;
     }
+    this.renderer.setUnitPreview(this.selectedCard, point);
     this.renderer.setPlacementPreview(null);
   }
 
