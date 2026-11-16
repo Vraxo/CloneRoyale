@@ -47,6 +47,17 @@ npm run build
 
 The simulation does not import PixiJS or access the DOM. Keep that boundary intact: rendering must never decide whether an attack hits or how much damage is dealt.
 
+## Online multiplayer
+
+The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Rooms use five-character invite codes; players join as guests, with no account or password storage.
+
+```sh
+npm run build
+npm start
+```
+
+Open the app, choose **Online play**, create a room, and join from a second browser using its code. For deployment, the included `render.yaml` describes a Render web service. Import the repository into Render and deploy the Blueprint. The free instance may sleep when idle, and room state is in memory, so active rooms are lost if the service restarts.
+
 ## Next milestones
 
 1. Validate and improve the battle simulation with repeatable AI-vs-AI matches.
