@@ -554,3 +554,18 @@ body[data-online="true"] #leave-online { display: block; width: 100%; margin-top
 
 #online-play { width: 100%; }
 body[data-online="true"] #play-again { display: none; }
+
+
+/* Public matchmaking */
+#find-match { margin-bottom: 9px; }
+.cancel-match-button { width: 100%; margin-bottom: 10px; }
+.cancel-match-button[hidden] { display: none; }
+.lobby-divider {
+  display: flex; align-items: center; gap: 10px; margin: 17px 0;
+  color: #849083; font-size: 8px; letter-spacing: .12em; white-space: nowrap;
+}
+.lobby-divider::before, .lobby-divider::after {
+  content: ""; height: 1px; flex: 1; background: rgba(112,129,112,.24);
+}
+#private-room-section[hidden] { display: none; }
+#private-room-section > #create-room { width: 100%; }

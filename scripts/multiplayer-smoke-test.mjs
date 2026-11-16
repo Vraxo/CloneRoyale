@@ -86,7 +86,28 @@ try {
   first.close();
   await disconnectNotice;
 
-  console.log("Multiplayer smoke test passed: room creation, joining, shared simulation, no AI, deployment validation, and disconnect handling.");
+  const queuedPlayer = await connect();
+  const waitingNotice = nextMessage(queuedPlayer, message => message.type === "queue-status");
+  queuedPlayer.send(JSON.stringify({ type: "find-match" }));
+  assert.equal((await waitingNotice).waiting, 1);
+
+  const publicOpponent = await connect();
+  const firstPublicStart = nextMessage(queuedPlayer, message => message.type === "match-start");
+  const secondPublicStart = nextMessage(publicOpponent, message => message.type === "match-start");
+  publicOpponent.send(JSON.stringify({ type: "find-match" }));
+  const [publicFirst, publicSecond] = await Promise.all([firstPublicStart, secondPublicStart]);
+  assert.equal(publicFirst.state.time, 0);
+  assert.equal(publicSecond.state.time, 0);
+
+  const cancelPlayer = await connect();
+  const cancelQueued = nextMessage(cancelPlayer, message => message.type === "queue-status");
+  cancelPlayer.send(JSON.stringify({ type: "find-match" }));
+  assert.equal((await cancelQueued).waiting, 1);
+  const cancelled = nextMessage(cancelPlayer, message => message.type === "queue-cancelled");
+  cancelPlayer.send(JSON.stringify({ type: "cancel-matchmaking" }));
+  await cancelled;
+
+  console.log("Multiplayer smoke test passed: private rooms, FIFO public matchmaking, queue cancellation, shared simulation, no AI, deployment validation, and disconnect handling.");
 } finally {
   for (const socket of sockets) socket.close();
   server.kill("SIGTERM");

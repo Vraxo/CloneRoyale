@@ -49,19 +49,18 @@ The simulation does not import PixiJS or access the DOM. Keep that boundary inta
 
 ## Online multiplayer
 
-The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Rooms use five-character invite codes; players join as guests, with no account or password storage.
+The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Players can enter a public FIFO matchmaking queue and be paired automatically, or create private rooms with five-character invite codes. Players join as guests, with no account or password storage.
 
 ```sh
 npm run build
 npm start
 ```
 
-Open the app, choose **Online play**, create a room, and join from a second browser using its code. For deployment, the included `render.yaml` describes a Render web service. Import the repository into Render and deploy the Blueprint. The free instance may sleep when idle, and room state is in memory, so active rooms are lost if the service restarts.
+Open the app and choose **Online play**. Use **Find match** in two browser sessions to be paired automatically, or use **Create private room** and share its code. For deployment, the included `render.yaml` describes a Render web service. Import the repository into Render and deploy the Blueprint. The free instance may sleep when idle, and room state is in memory, so active rooms are lost if the service restarts.
 
 ## Next milestones
 
-1. Validate and improve the battle simulation with repeatable AI-vs-AI matches.
-2. Refine the first articulated skeleton and humanoid rig.
-3. Add human card placement and a playable human-vs-AI mode.
-4. Improve pathing, unit separation, targeting rules, and balance.
-5. Add multiplayer only after local battles are reliable.
+1. Add reconnection and safe handling for interrupted public matches.
+2. Add matchmaking protections and queue observability.
+3. Add persistent player accounts, profiles, and match history.
+4. Introduce skill-based matchmaking once enough real matches exist.

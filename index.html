@@ -119,13 +119,18 @@
     <div id="online-lobby" class="online-lobby" hidden>
       <section class="online-lobby-panel" role="dialog" aria-modal="true" aria-labelledby="online-title">
         <div class="section-heading"><span class="eyebrow">MULTIPLAYER</span><button id="close-lobby" class="lobby-close" type="button" aria-label="Close">×</button></div>
-        <h2 id="online-title">Play with a friend</h2>
-        <p class="lobby-description">Create a private room or join one with a five-character code. No account required.</p>
-        <button id="create-room" class="primary-button" type="button">Create room</button>
+        <h2 id="online-title">Find a battle</h2>
+        <p class="lobby-description">Join the public queue and get paired with another player automatically. No account required.</p>
+        <button id="find-match" class="primary-button" type="button">Find match</button>
+        <button id="cancel-match" class="secondary-button cancel-match-button" type="button" hidden>Cancel search</button>
+        <p class="lobby-divider"><span>OR PLAY WITH A FRIEND</span></p>
+        <div id="private-room-section">
+        <button id="create-room" class="secondary-button" type="button">Create private room</button>
         <div class="room-code-panel"><span class="eyebrow">YOUR ROOM CODE</span><strong id="room-code">— — — — —</strong></div>
         <label class="lobby-label" for="join-code">JOIN A ROOM</label>
         <div class="join-room-row"><input id="join-code" maxlength="5" autocomplete="off" spellcheck="false" placeholder="ENTER CODE" /><button id="join-room" class="secondary-button" type="button">Join</button></div>
-        <p id="online-status" class="online-status" aria-live="polite">Connect to the game server to create or join a room.</p>
+        </div>
+        <p id="online-status" class="online-status" aria-live="polite">Ready to find an opponent.</p>
       </section>
     </div>
     <script type="module" src="/src/main.ts"></script>

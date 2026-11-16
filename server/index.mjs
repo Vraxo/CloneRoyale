@@ -8,6 +8,7 @@ import { createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, p
 const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
 const rooms = new Map();
 const clients = new Set();
+const matchmakingQueue = [];
 const PORT = Number(process.env.PORT ?? 3001);
 const MAX_MESSAGE_BYTES = 16_384;
 
@@ -32,18 +33,56 @@ function makeCode() {
 }
 function attachPlayer(room, client, side) {
   client.room = room; client.side = side; room.players.set(client.id, client);
-  send(client, { type: "assigned", side, code: room.code });
-  sendRoom(room);
+  send(client, { type: "assigned", side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch });
+  if (!room.publicMatch) sendRoom(room);
   if (room.players.size === 2) {
     room.state = createGame(randomBytes(4).readUInt32BE(0));
     room.lastUpdate = Date.now();
     broadcast(room, { type: "match-start", state: room.state });
   }
 }
+function removeFromQueue(client, notify = false) {
+  const index = matchmakingQueue.indexOf(client);
+  if (index < 0) return false;
+  matchmakingQueue.splice(index, 1);
+  client.queued = false;
+  if (notify) send(client, { type: "queue-cancelled" });
+  broadcastQueueStatus();
+  return true;
+}
+function broadcastQueueStatus() {
+  const status = { type: "queue-status", waiting: matchmakingQueue.length };
+  for (const client of matchmakingQueue) send(client, status);
+}
+function startMatchedRoom(first, second) {
+  const room = { code: "PUBLIC", players: new Map(), state: null, lastUpdate: Date.now(), accumulator: 0, publicMatch: true };
+  attachPlayer(room, first, "blue");
+  attachPlayer(room, second, "red");
+}
+function joinMatchmaking(client) {
+  if (client.room) leaveRoom(client);
+  if (client.queued) return;
+  let opponent = null;
+  while (matchmakingQueue.length > 0 && !opponent) {
+    const candidate = matchmakingQueue.shift();
+    if (!candidate.closed) opponent = candidate;
+  }
+  if (opponent) {
+    opponent.queued = false;
+    client.queued = false;
+    startMatchedRoom(opponent, client);
+    broadcastQueueStatus();
+    return;
+  }
+  matchmakingQueue.push(client);
+  client.queued = true;
+  send(client, { type: "queue-status", waiting: matchmakingQueue.length });
+  broadcastQueueStatus();
+}
 function createRoom(client) {
   let code;
   do { code = makeCode(); } while (rooms.has(code));
-  const room = { code, players: new Map(), state: null, lastUpdate: Date.now(), accumulator: 0 };
+  const room = { code, players: new Map(), state: null, lastUpdate: Date.now(), accumulator: 0, publicMatch: false };
   rooms.set(code, room); attachPlayer(room, client, "blue");
 }
 function leaveRoom(client) {
@@ -58,14 +97,16 @@ function leaveRoom(client) {
 }
 function handleMessage(client, message) {
   if (!message || typeof message.type !== "string") return;
-  if (message.type === "create-room") { if (client.room) leaveRoom(client); createRoom(client); return; }
+  if (message.type === "find-match") { joinMatchmaking(client); return; }
+  if (message.type === "cancel-matchmaking") { removeFromQueue(client, true); return; }
+  if (message.type === "create-room") { removeFromQueue(client); if (client.room) leaveRoom(client); createRoom(client); return; }
   if (message.type === "join-room") {
     const room = rooms.get(String(message.code ?? "").trim().toUpperCase());
     if (!room) { send(client, { type: "error", message: "Room not found. Check the code and try again." }); return; }
     if (room.players.size >= 2 || room.state) { send(client, { type: "error", message: "That room is already full." }); return; }
-    if (client.room) leaveRoom(client); attachPlayer(room, client, "red"); return;
+    removeFromQueue(client); if (client.room) leaveRoom(client); attachPlayer(room, client, "red"); return;
   }
-  if (message.type === "leave-room") { leaveRoom(client); return; }
+  if (message.type === "leave-room") { removeFromQueue(client); leaveRoom(client); return; }
   if (message.type !== "play-card" || !client.room?.state || !client.side) return;
   const state = client.room.state; const side = client.side;
   if (state.gameOver) return;
@@ -80,7 +121,7 @@ function handleMessage(client, message) {
 }
 function closeClient(client) {
   if (client.closed) return;
-  client.closed = true; leaveRoom(client); clients.delete(client); client.socket.end();
+  client.closed = true; removeFromQueue(client); leaveRoom(client); clients.delete(client); client.socket.end();
 }
 function decodeFrames(client, chunk) {
   client.buffer = Buffer.concat([client.buffer, chunk]);
@@ -125,7 +166,7 @@ server.on("upgrade", (request, socket) => {
   if (typeof key !== "string" || request.headers.upgrade?.toLowerCase() !== "websocket") { socket.destroy(); return; }
   const accept = createHash("sha1").update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest("base64");
   socket.write(["HTTP/1.1 101 Switching Protocols", "Upgrade: websocket", "Connection: Upgrade", "Sec-WebSocket-Accept: " + accept, "", ""].join("\r\n"));
-  const client = { id: randomBytes(12).toString("hex"), socket, buffer: Buffer.alloc(0), room: null, side: null, name: "Guest", closed: false };
+  const client = { id: randomBytes(12).toString("hex"), socket, buffer: Buffer.alloc(0), room: null, side: null, name: "Guest", queued: false, closed: false };
   clients.add(client); socket.on("data", chunk => decodeFrames(client, chunk)); socket.on("close", () => closeClient(client)); socket.on("error", () => closeClient(client));
   send(client, { type: "connected" });
 });

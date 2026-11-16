@@ -2,7 +2,9 @@ import type { CardId, GameState, Side } from "../game/types";
 
 export type OnlineMessage =
   | { type: "connected" }
-  | { type: "assigned"; side: Side; code: string }
+  | { type: "assigned"; side: Side; code: string | null; publicMatch?: boolean }
+  | { type: "queue-status"; waiting: number }
+  | { type: "queue-cancelled" }
   | { type: "room"; code: string; players: { side: Side; name: string }[]; status: "waiting" | "playing" }
   | { type: "match-start"; state: GameState }
   | { type: "state"; state: GameState }
@@ -43,11 +45,14 @@ export class OnlineClient {
     return () => this.listeners.delete(listener);
   }
 
+  public findMatch(): void { this.send({ type: "find-match" }); }
+  public cancelMatchmaking(): void { this.send({ type: "cancel-matchmaking" }); }
   public createRoom(): void { this.send({ type: "create-room" }); }
   public joinRoom(code: string): void { this.send({ type: "join-room", code }); }
   public playCard(cardId: CardId, x: number, y: number): void { this.send({ type: "play-card", cardId, x, y }); }
 
   public leave(): void {
+    this.send({ type: "cancel-matchmaking" });
     this.send({ type: "leave-room" });
     this.socket?.close();
     this.socket = null;

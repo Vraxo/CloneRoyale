@@ -32,6 +32,9 @@ const lobby = document.getElementById("online-lobby");
 const lobbyStatus = document.getElementById("online-status");
 const roomCode = document.getElementById("room-code");
 const joinCode = document.getElementById("join-code");
+const findMatchButton = document.getElementById("find-match");
+const cancelMatchButton = document.getElementById("cancel-match");
+const privateRoomSection = document.getElementById("private-room-section");
 const createRoomButton = document.getElementById("create-room");
 const joinRoomButton = document.getElementById("join-room");
 const closeLobbyButton = document.getElementById("close-lobby");
@@ -55,14 +58,26 @@ async function connectOnline(): Promise<boolean> {
       onlineUnsubscribe = onlineClient.subscribe((message: OnlineMessage) => {
         if (message.type === "assigned") {
           document.body.dataset.onlineSide = message.side;
-          if (roomCode) roomCode.textContent = message.code;
-          setLobbyStatus("Room " + message.code + " created. Share the code and wait for your opponent.");
+          if (message.publicMatch) {
+            if (lobby instanceof HTMLDivElement) lobby.hidden = true;
+            setLobbyStatus("Opponent found. Preparing your match…");
+          } else {
+            if (roomCode) roomCode.textContent = message.code ?? "— — — — —";
+            setLobbyStatus("Room " + message.code + " created. Share the code and wait for your opponent.");
+          }
+        } else if (message.type === "queue-status") {
+          setLobbyStatus("Searching for an opponent…");
+        } else if (message.type === "queue-cancelled") {
+          setLobbyStatus("Matchmaking cancelled.");
         } else if (message.type === "room") {
           if (roomCode) roomCode.textContent = message.code;
           setLobbyStatus(message.status === "playing" ? "Opponent connected. Starting match…" : "Waiting for another player…");
         } else if (message.type === "match-start") {
           const side = document.body.dataset.onlineSide === "red" ? "red" : "blue";
           battle.activateOnline(side, message.state, onlineClient);
+          if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = true;
+          if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = false;
+          if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = false;
           if (lobby instanceof HTMLDivElement) lobby.hidden = true;
           setLobbyStatus("Match in progress.");
         } else if (message.type === "state") {
@@ -86,11 +101,28 @@ async function connectOnline(): Promise<boolean> {
 }
 
 onlineButton?.addEventListener("click", openLobby);
+findMatchButton?.addEventListener("click", async () => {
+  if (!(await connectOnline())) return;
+  if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = true;
+  if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = false;
+  if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = true;
+  setLobbyStatus("Searching for an opponent…");
+  onlineClient.findMatch();
+});
+cancelMatchButton?.addEventListener("click", () => {
+  onlineClient.cancelMatchmaking();
+  if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = true;
+  if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = false;
+  if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = false;
+});
 closeLobbyButton?.addEventListener("click", () => {
   if (!battle.isOnline) {
     onlineUnsubscribe?.();
     onlineUnsubscribe = null;
     onlineClient.leave();
+    if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = true;
+    if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = false;
+    if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = false;
   }
   if (lobby instanceof HTMLDivElement) lobby.hidden = true;
 });
