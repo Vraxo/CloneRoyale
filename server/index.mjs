@@ -11,9 +11,11 @@ const clients = new Set();
 const matchmakingQueue = [];
 const PORT = Number(process.env.PORT ?? 3001);
 const MAX_MESSAGE_BYTES = 16_384;
+const RECONNECT_GRACE_SECONDS = 30;
+const reconnectTimers = new Map();
 
 function send(client, payload) {
-  if (client.closed) return;
+  if (client.closed || !client.socket) return;
   const body = Buffer.from(JSON.stringify(payload));
   let header;
   if (body.length < 126) header = Buffer.from([0x81, body.length]);
@@ -33,9 +35,9 @@ function makeCode() {
 }
 function attachPlayer(room, client, side) {
   client.room = room; client.side = side; room.players.set(client.id, client);
-  send(client, { type: "assigned", side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch });
+  send(client, { type: "assigned", side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, resumeToken: client.resumeToken });
   if (!room.publicMatch) sendRoom(room);
-  if (room.players.size === 2) {
+  if (room.players.size === 2 && [...room.players.values()].every(player => !player.disconnected)) {
     room.state = createGame(randomBytes(4).readUInt32BE(0));
     room.lastUpdate = Date.now();
     broadcast(room, { type: "match-start", state: room.state });
@@ -55,7 +57,8 @@ function broadcastQueueStatus() {
   for (const client of matchmakingQueue) send(client, status);
 }
 function startMatchedRoom(first, second) {
-  const room = { code: "PUBLIC", players: new Map(), state: null, lastUpdate: Date.now(), accumulator: 0, publicMatch: true };
+  const room = { code: "PUBLIC-" + randomBytes(8).toString("hex"), players: new Map(), state: null, lastUpdate: Date.now(), accumulator: 0, publicMatch: true };
+  rooms.set(room.code, room);
   attachPlayer(room, first, "blue");
   attachPlayer(room, second, "red");
 }
@@ -88,6 +91,9 @@ function createRoom(client) {
 function leaveRoom(client) {
   const room = client.room;
   if (!room) return;
+  const timer = reconnectTimers.get(client.resumeToken);
+  if (timer) clearTimeout(timer);
+  reconnectTimers.delete(client.resumeToken);
   room.players.delete(client.id); client.room = null; client.side = null;
   if (room.players.size === 0 || room.state) { rooms.delete(room.code); }
   if (room.players.size > 0) {
@@ -97,6 +103,7 @@ function leaveRoom(client) {
 }
 function handleMessage(client, message) {
   if (!message || typeof message.type !== "string") return;
+  if (message.type === "resume") { resumePlayer(client, message.token); return; }
   if (message.type === "find-match") { joinMatchmaking(client); return; }
   if (message.type === "cancel-matchmaking") { removeFromQueue(client, true); return; }
   if (message.type === "create-room") { removeFromQueue(client); if (client.room) leaveRoom(client); createRoom(client); return; }
@@ -119,9 +126,56 @@ function handleMessage(client, message) {
   broadcast(client.room, { type: "state", state });
   state.audioEvents = [];
 }
+function resumePlayer(client, token) {
+  if (typeof token !== "string" || token.length < 24 || token.length > 128) {
+    send(client, { type: "resume-failed" });
+    return;
+  }
+  for (const room of rooms.values()) {
+    const player = [...room.players.values()].find(candidate => candidate.resumeToken === token);
+    if (!player || !player.disconnected) continue;
+    const timer = reconnectTimers.get(token);
+    if (timer) clearTimeout(timer);
+    reconnectTimers.delete(token);
+    room.players.delete(player.id);
+    client.room = room;
+    client.side = player.side;
+    client.resumeToken = token;
+    client.name = player.name;
+    client.disconnected = false;
+    client.queued = false;
+    room.players.set(client.id, client);
+    clients.add(client);
+    send(client, { type: "resumed", side: client.side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, state: room.state, resumeToken: token });
+    for (const opponent of room.players.values()) {
+      if (opponent !== client && !opponent.disconnected) send(opponent, { type: "opponent-reconnected", side: client.side });
+    }
+    if (room.state && room.players.size === 2) room.lastUpdate = Date.now();
+    else sendRoom(room);
+    return;
+  }
+  send(client, { type: "resume-failed" });
+}
 function closeClient(client) {
   if (client.closed) return;
-  client.closed = true; removeFromQueue(client); leaveRoom(client); clients.delete(client); client.socket.end();
+  client.closed = true;
+  removeFromQueue(client);
+  clients.delete(client.id);
+  if (client.room && client.room.state && !client.room.state.gameOver) {
+    const room = client.room;
+    client.disconnected = true;
+    client.socket = null;
+    broadcast(room, { type: "opponent-disconnected", graceSeconds: RECONNECT_GRACE_SECONDS });
+    const timer = setTimeout(() => {
+      reconnectTimers.delete(client.resumeToken);
+      if (!client.disconnected || client.room !== room) return;
+      leaveRoom(client);
+    }, RECONNECT_GRACE_SECONDS * 1000);
+    reconnectTimers.set(client.resumeToken, timer);
+    return;
+  }
+  leaveRoom(client);
+  client.socket?.end();
 }
 function decodeFrames(client, chunk) {
   client.buffer = Buffer.concat([client.buffer, chunk]);
@@ -166,13 +220,13 @@ server.on("upgrade", (request, socket) => {
   if (typeof key !== "string" || request.headers.upgrade?.toLowerCase() !== "websocket") { socket.destroy(); return; }
   const accept = createHash("sha1").update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest("base64");
   socket.write(["HTTP/1.1 101 Switching Protocols", "Upgrade: websocket", "Connection: Upgrade", "Sec-WebSocket-Accept: " + accept, "", ""].join("\r\n"));
-  const client = { id: randomBytes(12).toString("hex"), socket, buffer: Buffer.alloc(0), room: null, side: null, name: "Guest", queued: false, closed: false };
+  const client = { id: randomBytes(12).toString("hex"), resumeToken: randomBytes(32).toString("hex"), socket, buffer: Buffer.alloc(0), room: null, side: null, name: "Guest", queued: false, closed: false, disconnected: false, lastSeen: Date.now() };
   clients.add(client); socket.on("data", chunk => decodeFrames(client, chunk)); socket.on("close", () => closeClient(client)); socket.on("error", () => closeClient(client));
   send(client, { type: "connected" });
 });
 setInterval(() => {
   for (const room of rooms.values()) {
-    if (!room.state || room.state.gameOver || room.players.size !== 2) continue;
+    if (!room.state || room.state.gameOver || room.players.size !== 2 || [...room.players.values()].some(player => player.disconnected)) continue;
     const now = Date.now(); const elapsed = Math.min((now - room.lastUpdate) / 1000, 0.1); room.lastUpdate = now;
     room.accumulator += elapsed;
     while (room.accumulator >= SIMULATION_STEP) { stepGame(room.state, SIMULATION_STEP, null, true); room.accumulator -= SIMULATION_STEP; }

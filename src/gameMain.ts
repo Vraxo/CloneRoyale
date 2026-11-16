@@ -57,6 +57,7 @@ async function connectOnline(): Promise<boolean> {
     if (!onlineUnsubscribe) {
       onlineUnsubscribe = onlineClient.subscribe((message: OnlineMessage) => {
         if (message.type === "assigned") {
+          if (message.resumeToken) localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
           document.body.dataset.onlineSide = message.side;
           if (message.publicMatch) {
             if (lobby instanceof HTMLDivElement) lobby.hidden = true;
@@ -65,6 +66,23 @@ async function connectOnline(): Promise<boolean> {
             if (roomCode) roomCode.textContent = message.code ?? "— — — — —";
             setLobbyStatus("Room " + message.code + " created. Share the code and wait for your opponent.");
           }
+        } else if (message.type === "resumed") {
+          localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
+          document.body.dataset.onlineSide = message.side;
+          if (message.state) {
+            battle.activateOnline(message.side, message.state, onlineClient);
+            if (lobby instanceof HTMLDivElement) lobby.hidden = true;
+            setLobbyStatus("Connection restored. Back in the match.");
+          } else setLobbyStatus("Connection restored. Waiting for your opponent…");
+        } else if (message.type === "resume-failed") {
+          localStorage.removeItem("cloneroyale.resume-token");
+          setLobbyStatus("Your previous match is no longer available. You can find a new match.");
+        } else if (message.type === "connection-lost") {
+          if (battle.isOnline) battle.setOnlineNotice("Connection lost. Reconnecting…");
+        } else if (message.type === "opponent-disconnected") {
+          battle.setOnlineNotice("Opponent disconnected. Pausing for up to " + message.graceSeconds + " seconds while they reconnect.");
+        } else if (message.type === "opponent-reconnected") {
+          battle.setOnlineNotice("Opponent reconnected. The battle is resuming.");
         } else if (message.type === "queue-status") {
           setLobbyStatus("Searching for an opponent…");
         } else if (message.type === "queue-cancelled") {
@@ -92,6 +110,7 @@ async function connectOnline(): Promise<boolean> {
           battle.setOnlineNotice(message.message);
         }
       });
+      onlineClient.resume();
     }
     return true;
   } catch (error) {

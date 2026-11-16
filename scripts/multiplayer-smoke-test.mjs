@@ -56,6 +56,7 @@ try {
   const assigned = await assignedPromise;
   assert.equal(assigned.side, "blue");
   assert.equal(assigned.code.length, 5);
+  assert.equal(typeof assigned.resumeToken, "string");
 
   const second = await connect();
   const firstStartPromise = nextMessage(first, message => message.type === "match-start");
@@ -82,9 +83,22 @@ try {
   assert.equal(deployed.state.sides.blue.cardsPlayed, 1);
   assert.equal(opponentView.state.sides.blue.cardsPlayed, 1, "Both clients must receive the same authoritative deployment.");
 
-  const disconnectNotice = nextMessage(second, message => message.type === "opponent-left");
+  const disconnectNotice = nextMessage(second, message => message.type === "opponent-disconnected");
   first.close();
-  await disconnectNotice;
+  const disconnected = await disconnectNotice;
+  assert.equal(disconnected.graceSeconds, 30);
+  await delay(1200);
+  const resumedClient = await connect();
+  const resumedPromise = nextMessage(resumedClient, message => message.type === "resumed");
+  const opponentReconnected = nextMessage(second, message => message.type === "opponent-reconnected");
+  resumedClient.send(JSON.stringify({ type: "resume", token: assigned.resumeToken }));
+  const resumed = await resumedPromise;
+  await opponentReconnected;
+  assert.equal(resumed.side, "blue");
+  assert.equal(resumed.state.time, deployed.state.time, "The match should pause while a player is disconnected.");
+  const resumedStatePromise = nextMessage(second, message => message.type === "state");
+  await delay(300);
+  assert.ok((await resumedStatePromise).state.time >= resumed.state.time);
 
   const queuedPlayer = await connect();
   const waitingNotice = nextMessage(queuedPlayer, message => message.type === "queue-status");
@@ -107,7 +121,7 @@ try {
   cancelPlayer.send(JSON.stringify({ type: "cancel-matchmaking" }));
   await cancelled;
 
-  console.log("Multiplayer smoke test passed: private rooms, FIFO public matchmaking, queue cancellation, shared simulation, no AI, deployment validation, and disconnect handling.");
+  console.log("Multiplayer smoke test passed: private rooms, FIFO public matchmaking, queue cancellation, shared simulation, no AI, deployment validation, 30-second reconnect/resume, and disconnect handling.");
 } finally {
   for (const socket of sockets) socket.close();
   server.kill("SIGTERM");
