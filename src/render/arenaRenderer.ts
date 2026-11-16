@@ -206,7 +206,8 @@ export class ArenaRenderer {
     const layout = this.hudLayout();
     const graphics = this.hudGraphics;
     const blue = state.sides.blue;
-    const nextCardId = blue.drawPile[blue.drawIndex % blue.drawPile.length];
+    const nextCardId = blue.drawPile[0];
+    const nextCard = nextCardId ? cardById(nextCardId) : null;
 
     graphics.clear();
     graphics
@@ -233,7 +234,7 @@ export class ArenaRenderer {
     this.nextCardLabel.text = "NEXT";
     this.nextCardLabel.anchor.set(0.5);
     this.nextCardLabel.position.set(nextX + layout.nextWidth / 2, layout.cardY + 6);
-    this.nextCardName.text = cardById(nextCardId).name;
+    this.nextCardName.text = nextCard?.name ?? "—";
     this.nextCardName.anchor.set(0.5);
     this.nextCardName.position.set(nextX + layout.nextWidth / 2, nextY + (layout.cardHeight - 16) / 2);
     this.nextCardName.style.fontSize = Math.max(7, Math.min(9, layout.nextWidth * 0.15));
@@ -244,7 +245,7 @@ export class ArenaRenderer {
     const nextCostY = nextY + layout.cardHeight - 27;
     graphics.circle(nextCostX, nextCostY, 9).fill({ color: 0x76569a });
     graphics.circle(nextCostX, nextCostY, 9).stroke({ color: 0xc2a4df, width: 1 });
-    this.nextCardCost.text = cardById(nextCardId).cost.toString();
+    this.nextCardCost.text = nextCard ? nextCard.cost.toString() : "—";
     this.nextCardCost.anchor.set(0.5);
     this.nextCardCost.position.set(nextCostX, nextCostY);
 
