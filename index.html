@@ -36,6 +36,21 @@
         <section class="arena-column" aria-label="Battlefield">
           <div class="arena-frame">
             <div id="game" class="game-surface"></div>
+            <div id="emote-ui" class="emote-ui" hidden>
+              <button id="emote-toggle" class="emote-toggle" type="button" aria-expanded="false" aria-controls="emote-picker">☺ Emotes</button>
+              <div id="emote-picker" class="emote-picker" role="group" aria-label="Battle emotes" hidden>
+                <button type="button" data-emote-id="0">Good game!</button>
+                <button type="button" data-emote-id="1">Well played!</button>
+                <button type="button" data-emote-id="2">Oops!</button>
+                <button type="button" data-emote-id="3">Thanks!</button>
+                <button type="button" data-emote-id="4">Wow!</button>
+                <button type="button" data-emote-id="5">Good luck!</button>
+                <button type="button" data-emote-id="6">Nice!</button>
+                <button type="button" data-emote-id="7">Let's go!</button>
+              </div>
+            </div>
+            <div id="emote-bubble-blue" class="emote-bubble emote-bubble-blue" hidden><span></span><strong></strong></div>
+            <div id="emote-bubble-red" class="emote-bubble emote-bubble-red" hidden><span></span><strong></strong></div>
             <div id="match-result" class="match-result" hidden>
               <div class="match-result-panel">
                 <span class="eyebrow">MATCH COMPLETE</span>

@@ -136,6 +136,49 @@ function updateOpponentLabel(players: { side: "blue" | "red"; name: string }[]):
 }
 renderProfile();
 
+const BATTLE_EMOTES = ["Good game!", "Well played!", "Oops!", "Thanks!", "Wow!", "Good luck!", "Nice!", "Let's go!"];
+const emoteUi = document.getElementById("emote-ui");
+const emoteToggle = document.getElementById("emote-toggle");
+const emotePicker = document.getElementById("emote-picker");
+const emoteBubbles = {
+  blue: document.getElementById("emote-bubble-blue"),
+  red: document.getElementById("emote-bubble-red")
+};
+let emoteHideTimer: ReturnType<typeof setTimeout> | null = null;
+function showBattleEmote(side: "blue" | "red", emoteId: number, name: string): void {
+  const bubble = emoteBubbles[side];
+  if (!(bubble instanceof HTMLElement) || !BATTLE_EMOTES[emoteId]) return;
+  const nameLabel = bubble.querySelector("span");
+  const emoteLabel = bubble.querySelector("strong");
+  if (nameLabel) nameLabel.textContent = name;
+  if (emoteLabel) emoteLabel.textContent = BATTLE_EMOTES[emoteId];
+  bubble.hidden = false;
+  if (emoteHideTimer) clearTimeout(emoteHideTimer);
+  emoteHideTimer = setTimeout(() => {
+    for (const item of Object.values(emoteBubbles)) if (item) item.hidden = true;
+    emoteHideTimer = null;
+  }, 2600);
+}
+emoteToggle?.addEventListener("click", () => {
+  if (!(emotePicker instanceof HTMLElement)) return;
+  emotePicker.hidden = !emotePicker.hidden;
+  emoteToggle.setAttribute("aria-expanded", String(!emotePicker.hidden));
+});
+emotePicker?.addEventListener("click", event => {
+  const target = event.target;
+  if (!(target instanceof HTMLButtonElement)) return;
+  const emoteId = Number(target.dataset.emoteId);
+  if (!Number.isInteger(emoteId) || emoteId < 0 || emoteId >= BATTLE_EMOTES.length || !battle.isOnline) return;
+  onlineClient.sendEmote(emoteId);
+  if (emotePicker instanceof HTMLElement) emotePicker.hidden = true;
+  emoteToggle?.setAttribute("aria-expanded", "false");
+});
+document.addEventListener("pointerdown", event => {
+  if (!(event.target instanceof Node) || !(emoteUi instanceof HTMLElement) || emoteUi.contains(event.target)) return;
+  if (emotePicker instanceof HTMLElement) emotePicker.hidden = true;
+  emoteToggle?.setAttribute("aria-expanded", "false");
+});
+
 function setLobbyStatus(message: string): void {
   if (lobbyStatus) lobbyStatus.textContent = message;
 }
@@ -167,6 +210,7 @@ async function connectOnline(): Promise<boolean> {
           onlineClient.setProfile(guestProfile.id, guestProfile.name);
           if (message.players) updateOpponentLabel(message.players);
           if (message.state) {
+            if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
             battle.activateOnline(message.side, message.state, onlineClient);
             if (playAgainButton instanceof HTMLButtonElement) {
               playAgainButton.disabled = false;
@@ -185,7 +229,8 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "opponent-reconnected") {
           battle.setOnlineNotice("Opponent reconnected. The battle is resuming.");
         } else if (message.type === "queue-status") {
-          setLobbyStatus("Searching for an opponent…");
+          const position = message.position ? " · Position " + message.position + " of " + message.waiting : "";
+          setLobbyStatus("Searching for an opponent… " + message.waiting + " player" + (message.waiting === 1 ? "" : "s") + " in queue" + position + ".");
         } else if (message.type === "queue-cancelled") {
           setLobbyStatus("Matchmaking cancelled.");
         } else if (message.type === "room") {
@@ -196,6 +241,7 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "players-updated") {
           updateOpponentLabel(message.players);
         } else if (message.type === "match-start") {
+          if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
           if (message.players) updateOpponentLabel(message.players);
           const side = document.body.dataset.onlineSide === "red" ? "red" : "blue";
           battle.activateOnline(side, message.state, onlineClient);
@@ -222,6 +268,8 @@ async function connectOnline(): Promise<boolean> {
           }
           battle.activateOnline(battle.side, message.state, onlineClient);
           setLobbyStatus("Rematch started.");
+        } else if (message.type === "emote") {
+          showBattleEmote(message.side, message.emoteId, message.name);
         } else if (message.type === "state") {
           battle.applyOnlineState(message.state);
         } else if (message.type === "opponent-left") {
@@ -321,6 +369,12 @@ joinRoomButton?.addEventListener("click", async () => {
   setLobbyStatus("Joining room…");
 });
 function leaveOnlineMatch(): void {
+  if (emoteUi instanceof HTMLElement) emoteUi.hidden = true;
+  if (emotePicker instanceof HTMLElement) emotePicker.hidden = true;
+  emoteToggle?.setAttribute("aria-expanded", "false");
+  for (const item of Object.values(emoteBubbles)) if (item) item.hidden = true;
+  if (emoteHideTimer) clearTimeout(emoteHideTimer);
+  emoteHideTimer = null;
   onlineUnsubscribe?.();
   onlineUnsubscribe = null;
   battle.leaveOnline();

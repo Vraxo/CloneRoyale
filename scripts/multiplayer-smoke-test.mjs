@@ -59,6 +59,15 @@ try {
   assert.equal(assigned.code.length, 5);
   assert.equal(typeof assigned.resumeToken, "string");
 
+  const sameRoomNotice = nextMessage(first, message => message.type === "room" && message.players.length === 1);
+  first.send(JSON.stringify({ type: "join-room", code: assigned.code }));
+  await sameRoomNotice;
+  const activeRoomSearchError = nextMessage(first, message =>
+    message.type === "error" && message.message.includes("Leave your current room")
+  );
+  first.send(JSON.stringify({ type: "find-match" }));
+  await activeRoomSearchError;
+
   const second = await connect();
   second.send(JSON.stringify({ type: "set-profile", guestId: "22222222-2222-4222-8222-222222222222", name: "RedPlayer" }));
   const firstStartPromise = nextMessage(first, message => message.type === "match-start");
@@ -69,6 +78,16 @@ try {
   assert.equal(secondStart.state.time, 0);
   assert.deepEqual(firstStart.players.map(player => player.name).sort(), ["BluePlayer", "RedPlayer"]);
   assert.deepEqual(secondStart.players.map(player => player.name).sort(), ["BluePlayer", "RedPlayer"]);
+
+  const emoteReceivedByOpponent = nextMessage(second, message => message.type === "emote");
+  const emoteEchoedToSender = nextMessage(first, message => message.type === "emote");
+  first.send(JSON.stringify({ type: "emote", emoteId: 3 }));
+  const [opponentEmote, senderEmote] = await Promise.all([emoteReceivedByOpponent, emoteEchoedToSender]);
+  assert.deepEqual(opponentEmote, { type: "emote", side: "blue", emoteId: 3, name: "BluePlayer" });
+  assert.deepEqual(senderEmote, opponentEmote);
+  const invalidEmoteNotice = nextMessage(second, message => message.type === "emote", 250);
+  first.send(JSON.stringify({ type: "emote", emoteId: 99 }));
+  await assert.rejects(invalidEmoteNotice, /Timed out/);
 
   await delay(1200);
   const liveState = await nextMessage(first, message => message.type === "state");
@@ -108,6 +127,13 @@ try {
   const waitingNotice = nextMessage(queuedPlayer, message => message.type === "queue-status");
   queuedPlayer.send(JSON.stringify({ type: "find-match" }));
   assert.equal((await waitingNotice).waiting, 1);
+  const duplicateQueueNotice = nextMessage(queuedPlayer, message => message.type === "queue-status");
+  queuedPlayer.send(JSON.stringify({ type: "find-match" }));
+  const duplicateQueueStatus = await duplicateQueueNotice;
+  assert.equal(duplicateQueueStatus.waiting, 1, "Repeated search requests must not duplicate a queue entry.");
+  assert.equal(duplicateQueueStatus.position, 1);
+  const queueMetrics = await (await fetch(baseUrl + "/matchmaking-status")).json();
+  assert.equal(queueMetrics.queuedPlayers, 1);
 
   const publicOpponent = await connect();
   const firstPublicStart = nextMessage(queuedPlayer, message => message.type === "match-start");
@@ -116,6 +142,9 @@ try {
   const [publicFirst, publicSecond] = await Promise.all([firstPublicStart, secondPublicStart]);
   assert.equal(publicFirst.state.time, 0);
   assert.equal(publicSecond.state.time, 0);
+  const activeMetrics = await (await fetch(baseUrl + "/matchmaking-status")).json();
+  assert.equal(activeMetrics.queuedPlayers, 0);
+  assert.ok(activeMetrics.activePublicMatches >= 1);
 
   const cancelPlayer = await connect();
   const cancelQueued = nextMessage(cancelPlayer, message => message.type === "queue-status");
@@ -124,8 +153,23 @@ try {
   const cancelled = nextMessage(cancelPlayer, message => message.type === "queue-cancelled");
   cancelPlayer.send(JSON.stringify({ type: "cancel-matchmaking" }));
   await cancelled;
+  const emptyQueueMetrics = await (await fetch(baseUrl + "/matchmaking-status")).json();
+  assert.equal(emptyQueueMetrics.queuedPlayers, 0);
 
-  console.log("Multiplayer smoke test passed: private rooms, FIFO public matchmaking, queue cancellation, shared simulation, no AI, deployment validation, 30-second reconnect/resume, and disconnect handling.");
+  const disconnectedQueuedPlayer = await connect();
+  const disconnectedQueueNotice = nextMessage(disconnectedQueuedPlayer, message => message.type === "queue-status");
+  disconnectedQueuedPlayer.send(JSON.stringify({ type: "find-match" }));
+  assert.equal((await disconnectedQueueNotice).waiting, 1);
+  disconnectedQueuedPlayer.close();
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const metrics = await (await fetch(baseUrl + "/matchmaking-status")).json();
+    if (metrics.queuedPlayers === 0) break;
+    await delay(50);
+  }
+  const disconnectedQueueMetrics = await (await fetch(baseUrl + "/matchmaking-status")).json();
+  assert.equal(disconnectedQueueMetrics.queuedPlayers, 0, "Disconnected players must be removed from the queue.");
+
+  console.log("Multiplayer smoke test passed: private rooms, idempotent room joins, active-room matchmaking protection, FIFO public matchmaking, duplicate queue protection, cancellation, queue disconnect cleanup and metrics, shared simulation, no AI, deployment validation, and 30-second reconnect/resume.");
 } finally {
   for (const socket of sockets) socket.close();
   server.kill("SIGTERM");
