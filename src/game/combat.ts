@@ -244,6 +244,7 @@ function attackUnit(state: GameState, unit: Unit, target: Unit | Tower): void {
   if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-attack");
   if (unit.type === "giant") state.audioEvents.push("giant-attack");
   if (unit.type === "skeleton") state.audioEvents.push("skeleton-attack");
+  if (unit.type === "cannon") state.audioEvents.push("cannon-attack");
 
   if (unit.attack.type === "melee") {
     damageTarget(state, target.id, unit.damage);
@@ -282,6 +283,7 @@ export function updateUnits(state: GameState, dt: number): void {
       if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-deploy");
       if (unit.type === "giant") state.audioEvents.push("giant-deploy");
       if (unit.type === "skeleton") state.audioEvents.push("skeleton-deploy");
+      if (unit.type === "cannon") state.audioEvents.push("cannon-deploy");
 
       state.effects.push({
         id: state.nextId++,

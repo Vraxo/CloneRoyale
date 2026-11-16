@@ -17,4 +17,6 @@ export type AudioEvent =
   | "king-tower-attack"
   | "elixir-gain"
   | "double-elixir"
-  | "triple-elixir";
+  | "triple-elixir"
+  | "cannon-deploy"
+  | "cannon-attack";

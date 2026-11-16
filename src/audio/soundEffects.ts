@@ -42,7 +42,9 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "king-tower-attack": ["/audio/sfx/towers/king-tower-projectile-shot.ogg"],
   "elixir-gain": ["/audio/sfx/elixir/elixir-pickup.ogg"],
   "double-elixir": ["/audio/sfx/elixir/double-elixir-start.ogg"],
-  "triple-elixir": ["/audio/sfx/elixir/triple-elixir-start.ogg"]
+  "triple-elixir": ["/audio/sfx/elixir/triple-elixir-start.ogg"],
+  "cannon-deploy": ["/audio/sfx/cannon/cannon-deployment.ogg"],
+  "cannon-attack": ["/audio/sfx/cannon/cannon-fire.ogg"]
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
@@ -64,7 +66,9 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "king-tower-attack": 0.48,
   "elixir-gain": 0.42,
   "double-elixir": 0.72,
-  "triple-elixir": 0.78
+  "triple-elixir": 0.78,
+  "cannon-deploy": 0.72,
+  "cannon-attack": 0.62
 };
 
 const MAX_VOICES_PER_SOUND = 6;
