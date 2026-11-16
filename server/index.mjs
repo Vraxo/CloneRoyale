@@ -73,6 +73,7 @@ function handleMessage(client, message) {
   const lane = point.x < 360 ? "left" : "right";
   if (!playCard(state, side, cardId, lane, point.x, point.y, point)) { send(client, { type: "action-error", message: "That card is no longer available." }); return; }
   broadcast(client.room, { type: "state", state });
+  state.audioEvents = [];
 }
 function closeClient(client) {
   if (client.closed) return;
@@ -132,6 +133,7 @@ setInterval(() => {
     room.accumulator += elapsed;
     while (room.accumulator >= SIMULATION_STEP) { stepGame(room.state, SIMULATION_STEP, null, true); room.accumulator -= SIMULATION_STEP; }
     broadcast(room, { type: "state", state: room.state });
+    room.state.audioEvents = [];
   }
 }, SIMULATION_STEP * 1000);
 server.listen(PORT, "0.0.0.0", () => console.log("Clone Royale server listening on " + PORT));

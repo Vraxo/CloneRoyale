@@ -114,9 +114,9 @@ export class BattleController {
       this.selectedCard = null;
       this.renderer.setDeploymentArea(state, this.playerSide, null);
       this.renderer.clearUnitPreview();
+    } else {
+      this.renderer.setDeploymentArea(state, this.playerSide, this.selectedCard);
     }
-    this.renderer.render(state);
-    this.updateHud();
   }
 
   public leaveOnline(): void {

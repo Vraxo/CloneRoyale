@@ -78,8 +78,16 @@ function updateStatistics(elements: HudElements, game: GameState, playerSide: Si
   elements.redPlayedLabel.textContent = game.sides[opponentSide].cardsPlayed.toString();
   const yourLabel = document.getElementById("your-side-label");
   const opponentLabel = document.getElementById("opponent-side-label");
-  if (yourLabel) yourLabel.textContent = playerSide.toUpperCase() + (playerSide === "blue" ? " · SOUTH" : " · NORTH");
-  if (opponentLabel) opponentLabel.textContent = opponentSide.toUpperCase() + (opponentSide === "blue" ? " · SOUTH" : " · NORTH");
+  if (yourLabel) {
+    yourLabel.textContent = playerSide.toUpperCase() + (playerSide === "blue" ? " · SOUTH" : " · NORTH");
+    yourLabel.classList.toggle("blue-text", playerSide === "blue");
+    yourLabel.classList.toggle("red-text", playerSide === "red");
+  }
+  if (opponentLabel) {
+    opponentLabel.textContent = opponentSide.toUpperCase() + (opponentSide === "blue" ? " · SOUTH" : " · NORTH");
+    opponentLabel.classList.toggle("blue-text", opponentSide === "blue");
+    opponentLabel.classList.toggle("red-text", opponentSide === "red");
+  }
 }
 
 function updateEventFeed(elements: HudElements, game: GameState): void {
