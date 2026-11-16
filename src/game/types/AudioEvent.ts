@@ -29,4 +29,6 @@ export type AudioEvent =
   | "cannon-attack"
   | "arrows-impact"
   | "fireball-launch"
-  | "fireball-explosion";
+  | "fireball-explosion"
+  | "ui-click"
+  | "ui-invalid";
