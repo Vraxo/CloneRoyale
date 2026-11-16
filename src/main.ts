@@ -109,16 +109,19 @@ function selectCard(cardId: CardId): void {
   if (paused || game.gameOver) return;
 
   if (selectedCard === cardId) {
+    soundEffects.play("ui-click");
     selectedCard = null;
     placementMessage = "Choose a card, then deploy on your side.";
   } else {
     const card = cardById(cardId);
     if (game.sides.blue.elixir < card.cost) {
+      soundEffects.play("ui-invalid");
       placementMessage = `You need ${card.cost} elixir to play ${card.name}.`;
       updateHud();
       return;
     }
 
+    soundEffects.play("ui-click");
     selectedCard = cardId;
     placementMessage = card.category === "spell"
       ? `Click anywhere on the arena to cast ${card.name}.`
@@ -188,6 +191,7 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
   if (!point) return;
 
   if (!selectedCard) {
+    soundEffects.play("ui-invalid");
     placementMessage = "Select a card first.";
     updateHud();
     return;
@@ -195,6 +199,7 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
 
   const cardId = selectedCard;
   if (!canPlaceCard(game, "blue", cardId, point.x, point.y)) {
+    soundEffects.play("ui-invalid");
     placementMessage = cardById(cardId).category === "spell"
       ? "That spell target is outside the arena or the card is unavailable."
       : "Invalid deployment. Ground troops and buildings must be placed on your side of the river.";
@@ -205,6 +210,7 @@ function playSelectedCardAt(clientX: number, clientY: number): void {
 
   const lane: Lane = point.x < 360 ? "left" : "right";
   if (!playCard(game, "blue", cardId, lane, point.x, point.y, point)) {
+    soundEffects.play("ui-invalid");
     placementMessage = "That card can no longer be played.";
     updateHud();
     return;
@@ -263,12 +269,14 @@ function advanceOneStep(): void {
 }
 
 function stepForward(): void {
+  soundEffects.play("ui-click");
   advanceOneStep();
   renderer.render(game);
   updateHud();
 }
 
 function stepBackward(): void {
+  soundEffects.play("ui-click");
   const previousState = history.stepBack();
   if (!previousState) return;
 
@@ -344,9 +352,18 @@ function bindHoldControl(
   });
 }
 
-element<HTMLButtonElement>("new-battle").addEventListener("click", startNewBattle);
-element<HTMLButtonElement>("play-again").addEventListener("click", startNewBattle);
-pauseButton.addEventListener("click", () => setPaused(!paused));
+element<HTMLButtonElement>("new-battle").addEventListener("click", () => {
+  soundEffects.play("ui-click");
+  startNewBattle();
+});
+element<HTMLButtonElement>("play-again").addEventListener("click", () => {
+  soundEffects.play("ui-click");
+  startNewBattle();
+});
+pauseButton.addEventListener("click", () => {
+  soundEffects.play("ui-click");
+  setPaused(!paused);
+});
 
 const canvas = renderer.app.canvas;
 canvas.addEventListener("pointermove", updatePlacementPreview);
@@ -369,6 +386,7 @@ bindHoldControl(stepButton, stepForward, () => !game.gameOver);
 bindHoldControl(stepBackButton, stepBackward, () => history.canStepBack() && !game.gameOver);
 
 speedButton.addEventListener("click", () => {
+  soundEffects.play("ui-click");
   const speeds = [0.5, 1, 2, 4, 8];
   const currentIndex = speeds.indexOf(speed);
   speed = speeds[(currentIndex + 1) % speeds.length];

@@ -54,7 +54,9 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "cannon-attack": ["/audio/sfx/cannon/cannon-fire.ogg"],
   "arrows-impact": ["/audio/sfx/spells/arrows-impact.ogg"],
   "fireball-launch": ["/audio/sfx/spells/fireball-launch.ogg"],
-  "fireball-explosion": ["/audio/sfx/spells/fireball-explosion.ogg"]
+  "fireball-explosion": ["/audio/sfx/spells/fireball-explosion.ogg"],
+  "ui-click": ["/audio/sfx/ui/ui-button-click.ogg"],
+  "ui-invalid": ["/audio/sfx/ui/ui-invalid-action.ogg"]
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
@@ -88,7 +90,9 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "cannon-attack": 0.62,
   "arrows-impact": 0.62,
   "fireball-launch": 0.64,
-  "fireball-explosion": 0.78
+  "fireball-explosion": 0.78,
+  "ui-click": 0.32,
+  "ui-invalid": 0.48
 };
 
 const MAX_VOICES_PER_SOUND = 6;
