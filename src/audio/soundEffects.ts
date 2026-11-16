@@ -38,6 +38,13 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   ],
   "skeleton-step": ["/audio/sfx/skeleton/skeleton-footsteps.ogg"],
   "skeleton-death": ["/audio/sfx/skeleton/skeleton-death.ogg"],
+  "archer-deploy": ["/audio/sfx/archer/archer-deployment.ogg"],
+  "archer-attack": ["/audio/sfx/archer/archer-arrow-shot.ogg"],
+  "archer-step": ["/audio/sfx/archer/archer-footsteps.ogg"],
+  "archer-death": ["/audio/sfx/archer/archer-death.ogg"],
+  "baby-dragon-deploy": ["/audio/sfx/baby-dragon/baby-dragon-deployment.ogg"],
+  "baby-dragon-attack": ["/audio/sfx/baby-dragon/baby-dragon-fire-breath.ogg"],
+  "baby-dragon-wing": ["/audio/sfx/baby-dragon/baby-dragon-wing-flap.ogg"],
   "princess-tower-attack": ["/audio/sfx/towers/princess-tower-arrow-shot.ogg"],
   "king-tower-attack": ["/audio/sfx/towers/king-tower-projectile-shot.ogg"],
   "elixir-gain": ["/audio/sfx/elixir/elixir-pickup.ogg"],
@@ -62,6 +69,13 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "skeleton-hit": 0.42,
   "skeleton-step": 0.2,
   "skeleton-death": 0.52,
+  "archer-deploy": 0.58,
+  "archer-attack": 0.48,
+  "archer-step": 0.18,
+  "archer-death": 0.52,
+  "baby-dragon-deploy": 0.72,
+  "baby-dragon-attack": 0.58,
+  "baby-dragon-wing": 0.2,
   "princess-tower-attack": 0.42,
   "king-tower-attack": 0.48,
   "elixir-gain": 0.42,
@@ -80,7 +94,7 @@ export function createSoundEffects(): SoundEffects {
   const sources = new Map<AudioEvent, HTMLAudioElement[]>();
   const voices = new Map<AudioEvent, HTMLAudioElement[]>();
   const lastVariant = new Map<AudioEvent, number>();
-  const lastSkeletonSoundAt = new Map<AudioEvent, number>();
+  const lastUnitSoundAt = new Map<AudioEvent, number>();
 
   for (const [event, paths] of Object.entries(SOUND_SOURCES) as [AudioEvent, readonly string[]][]) {
     sources.set(event, paths.map((path) => {
@@ -145,11 +159,17 @@ export function createSoundEffects(): SoundEffects {
         || event === "skeleton-hit"
         || event === "skeleton-step"
         || event === "skeleton-death"
+        || event === "archer-attack"
+        || event === "archer-step"
+        || event === "archer-death"
+        || event === "baby-dragon-wing"
       ) {
-        const previous = lastSkeletonSoundAt.get(event) ?? Number.NEGATIVE_INFINITY;
-        const minimumInterval = event === "skeleton-step" ? 115 : 95;
+        const previous = lastUnitSoundAt.get(event) ?? Number.NEGATIVE_INFINITY;
+        const minimumInterval = event === "skeleton-step"
+          || event === "archer-step"
+          || event === "baby-dragon-wing" ? 115 : 95;
         if (now - previous < minimumInterval) return;
-        lastSkeletonSoundAt.set(event, now);
+        lastUnitSoundAt.set(event, now);
       }
 
       if (event === "mini-pekka-hit" || event === "giant-hit") {
@@ -167,6 +187,8 @@ export function createSoundEffects(): SoundEffects {
         || event === "skeleton-attack"
         || event === "skeleton-death"
         || event === "skeleton-step"
+        || event === "archer-step"
+        || event === "baby-dragon-wing"
         ? MAX_HIT_VOICES
         : MAX_VOICES_PER_SOUND;
 

@@ -245,6 +245,8 @@ function attackUnit(state: GameState, unit: Unit, target: Unit | Tower): void {
   if (unit.type === "giant") state.audioEvents.push("giant-attack");
   if (unit.type === "skeleton") state.audioEvents.push("skeleton-attack");
   if (unit.type === "cannon") state.audioEvents.push("cannon-attack");
+  if (unit.type === "archer") state.audioEvents.push("archer-attack");
+  if (unit.type === "baby-dragon") state.audioEvents.push("baby-dragon-attack");
 
   if (unit.attack.type === "melee") {
     damageTarget(state, target.id, unit.damage);
@@ -284,6 +286,8 @@ export function updateUnits(state: GameState, dt: number): void {
       if (unit.type === "giant") state.audioEvents.push("giant-deploy");
       if (unit.type === "skeleton") state.audioEvents.push("skeleton-deploy");
       if (unit.type === "cannon") state.audioEvents.push("cannon-deploy");
+      if (unit.type === "archer") state.audioEvents.push("archer-deploy");
+      if (unit.type === "baby-dragon") state.audioEvents.push("baby-dragon-deploy");
 
       state.effects.push({
         id: state.nextId++,
@@ -346,17 +350,25 @@ export function updateUnits(state: GameState, dt: number): void {
   }
 
   for (const unit of state.units) {
-    if (
-      (unit.type !== "mini-pekka" && unit.type !== "giant" && unit.type !== "skeleton")
-      || unit.hp <= 0
-    ) continue;
+    if (unit.hp <= 0) continue;
+
+    const hasMovementSound = unit.type === "mini-pekka"
+      || unit.type === "giant"
+      || unit.type === "skeleton"
+      || unit.type === "archer"
+      || unit.type === "baby-dragon";
+    if (!hasMovementSound) continue;
 
     const stepInterval = unit.type === "giant"
       ? 0.62
-      : unit.type === "skeleton" ? 0.5 : 0.42;
+      : unit.type === "skeleton" ? 0.5
+        : unit.type === "baby-dragon" ? 0.58
+          : unit.type === "archer" ? 0.48 : 0.42;
     const stepEvent = unit.type === "giant"
       ? "giant-step"
-      : unit.type === "skeleton" ? "skeleton-step" : "mini-pekka-step";
+      : unit.type === "skeleton" ? "skeleton-step"
+        : unit.type === "baby-dragon" ? "baby-dragon-wing"
+          : unit.type === "archer" ? "archer-step" : "mini-pekka-step";
 
     if (unit.isMoving) {
       unit.footstepCooldown = (unit.footstepCooldown ?? 0) - dt;
