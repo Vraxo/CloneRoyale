@@ -194,6 +194,44 @@ function separateUnits(units: Unit[]): void {
   }
 }
 
+function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
+  for (let iteration = 0; iteration < 2; iteration += 1) {
+    for (const unit of units) {
+      if (unit.hp <= 0 || unit.isAir) continue;
+
+      for (const tower of towers) {
+        if (tower.hp <= 0) continue;
+
+        const dx = unit.x - tower.x;
+        const dy = unit.y - tower.y;
+        const distanceSquared = dx * dx + dy * dy;
+        const minimumDistance = unit.radius + tower.radius + 2;
+        if (distanceSquared >= minimumDistance * minimumDistance) continue;
+
+        const distance = Math.sqrt(distanceSquared);
+        const directionX = distance > 0.001
+          ? dx / distance
+          : unit.side === "blue" ? 0 : 0;
+        const directionY = distance > 0.001
+          ? dy / distance
+          : unit.side === "blue" ? 1 : -1;
+        const overlap = minimumDistance - distance;
+
+        unit.x = clamp(
+          unit.x + directionX * overlap,
+          unit.radius,
+          FIELD_WIDTH - unit.radius
+        );
+        unit.y = clamp(
+          unit.y + directionY * overlap,
+          unit.radius,
+          FIELD_HEIGHT - unit.radius
+        );
+      }
+    }
+  }
+}
+
 function clamp(value: number, minimum: number, maximum: number): number {
   return Math.max(minimum, Math.min(maximum, value));
 }
@@ -296,6 +334,7 @@ export function updateUnits(state: GameState, dt: number): void {
   }
 
   separateUnits(state.units);
+  separateUnitsFromTowers(state.units, state.towers);
   keepGroundUnitsOnBridges(state.units);
 }
 
