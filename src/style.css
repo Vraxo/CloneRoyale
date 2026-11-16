@@ -1,6 +1,22 @@
+@font-face {
+  font-family: "Supercell Magic";
+  src: url("/fonts/Supercell-Magic.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SC CCBackBeat";
+  src: url("/fonts/SCCCBackBeat.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "SC CCBackBeat", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -91,7 +107,7 @@ button {
 .brand-mark span:nth-child(3) { height: 9px; }
 
 .brand-copy { display: grid; gap: 2px; }
-.brand-copy strong { font-size: 15px; letter-spacing: 0.01em; }
+.brand-copy strong { font-family: "Supercell Magic", sans-serif; font-size: 13px; font-weight: 400; letter-spacing: 0.01em; }
 .brand-copy small { color: var(--muted); font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; }
 .brand-copy small i {
   display: inline-block;
@@ -410,7 +426,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid #d8bd7c; outline-offs
 .match-result-panel h2 {
   margin: 10px 0 5px;
   color: #e9e2c7;
-  font-size: 28px;
+  font-family: "Supercell Magic", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
 }
 
 .match-result-panel p {

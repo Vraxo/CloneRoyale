@@ -26,11 +26,11 @@ function matchClock(state: GameState): string {
   }
 }
 
-function createHudText(fontSize: number, fill: number): Text {
+function createHudText(fontSize: number, fill: number, fontFamily = "SC CCBackBeat"): Text {
   const label = new Text({
     text: "",
     style: {
-      fontFamily: "Arial, sans-serif",
+      fontFamily,
       fontSize,
       fill,
       fontWeight: "700",
@@ -60,19 +60,19 @@ export class BattleHud {
 
   private readonly graphics = new Graphics();
   private readonly heldCardGraphics = new Graphics();
-  private readonly heldCardGlyph = createHudText(34, 0xf0dfb6);
-  private readonly heldCardName = createHudText(12, 0xf4eedc);
-  private readonly heldCardCost = createHudText(13, 0xffffff);
-  private readonly cardGlyphs = Array.from({ length: 4 }, () => createHudText(25, 0xf0dfb6));
-  private readonly cardNames = Array.from({ length: 4 }, () => createHudText(11, 0xf4eedc));
-  private readonly cardCosts = Array.from({ length: 4 }, () => createHudText(12, 0xffffff));
+  private readonly heldCardGlyph = createHudText(34, 0xf0dfb6, "Supercell Magic");
+  private readonly heldCardName = createHudText(12, 0xf4eedc, "Supercell Magic");
+  private readonly heldCardCost = createHudText(13, 0xffffff, "Supercell Magic");
+  private readonly cardGlyphs = Array.from({ length: 4 }, () => createHudText(25, 0xf0dfb6, "Supercell Magic"));
+  private readonly cardNames = Array.from({ length: 4 }, () => createHudText(11, 0xf4eedc, "Supercell Magic"));
+  private readonly cardCosts = Array.from({ length: 4 }, () => createHudText(12, 0xffffff, "Supercell Magic"));
   private readonly nextCardLabel = createHudText(7, 0xf0e4c7);
-  private readonly nextCardName = createHudText(9, 0xe7dfca);
-  private readonly nextCardCost = createHudText(10, 0xffffff);
+  private readonly nextCardName = createHudText(9, 0xe7dfca, "Supercell Magic");
+  private readonly nextCardCost = createHudText(10, 0xffffff, "Supercell Magic");
   private readonly elixirValue = createHudText(17, 0xf1d8ff);
   private readonly elixirMax = createHudText(8, 0xc1a5d8);
   private readonly placementHint = createHudText(9, 0xc9d1c2);
-  private readonly matchClockLabel = createHudText(19, 0xf4eedc);
+  private readonly matchClockLabel = createHudText(19, 0xf4eedc, "Supercell Magic");
 
   public constructor() {
     this.container.eventMode = "none";
