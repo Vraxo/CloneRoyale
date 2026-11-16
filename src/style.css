@@ -508,3 +508,46 @@ body[data-mode="developer"] .mode-toggle { color: var(--gold); border-color: #7e
 @media (max-width: 640px) {
   body[data-mode="player"] .control-panel { display: block; }
 }
+
+
+/* Online room lobby */
+#leave-online { display: none; }
+body[data-online="true"] #online-play,
+body[data-online="true"] #new-battle,
+body[data-online="true"] #pause,
+body[data-online="true"] .debug-controls { display: none; }
+body[data-online="true"] #leave-online { display: block; width: 100%; margin-top: 8px; }
+.online-lobby[hidden] { display: none; }
+.online-lobby {
+  position: fixed; z-index: 20; inset: 0; display: grid; place-items: center;
+  padding: 18px; background: rgba(8, 12, 10, .78); backdrop-filter: blur(7px);
+}
+.online-lobby-panel {
+  width: min(100%, 390px); padding: 25px; border: 1px solid #58634e;
+  border-radius: 14px; background: #202923; box-shadow: 0 24px 80px rgba(0,0,0,.48);
+}
+.online-lobby-panel h2 {
+  margin: 4px 0 8px; color: #eee5c9; font-family: "Supercell Magic", sans-serif;
+  font-size: 20px; font-weight: 400;
+}
+.lobby-description { margin: 0 0 20px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.lobby-close {
+  width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 7px;
+  background: #303a34; color: var(--text); font-size: 20px; cursor: pointer;
+}
+.room-code-panel {
+  display: grid; gap: 7px; margin: 15px 0 18px; padding: 14px;
+  border: 1px solid #455444; border-radius: 8px; background: #18211c; text-align: center;
+}
+.room-code-panel strong {
+  color: var(--gold); font-family: "Supercell Magic", sans-serif;
+  font-size: 27px; letter-spacing: .18em;
+}
+.lobby-label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 9px; letter-spacing: .12em; }
+.join-room-row { display: grid; grid-template-columns: 1fr 82px; gap: 8px; }
+.join-room-row input {
+  min-width: 0; height: 40px; padding: 0 12px; border: 1px solid #455444; border-radius: 7px;
+  outline: none; background: #171e1a; color: var(--text); font: inherit; font-size: 13px; letter-spacing: .15em;
+}
+.join-room-row input:focus { border-color: var(--gold); }
+.online-status { min-height: 32px; margin: 15px 0 0; color: #b9c3b2; font-size: 11px; line-height: 1.45; }
