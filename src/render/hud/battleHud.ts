@@ -304,7 +304,7 @@ export class BattleHud {
         .stroke({ color: 0x2d2639, alpha: 0.6, width: 1 });
     }
 
-    this.elixirValue.text = elixir.toFixed(1);
+    this.elixirValue.text = Math.floor(elixir).toString();
     this.elixirValue.anchor.set(0, 0.5);
     this.elixirValue.position.set(meterX + 7, meterY + 8.5);
     this.elixirMax.text = "MAX 10";
