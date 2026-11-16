@@ -106,6 +106,7 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "resumed") {
           localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
           document.body.dataset.onlineSide = message.side;
+          onlineClient.setProfile(guestProfile.id, guestProfile.name);
           if (message.players) updateOpponentLabel(message.players);
           if (message.state) {
             battle.activateOnline(message.side, message.state, onlineClient);
@@ -211,7 +212,7 @@ saveProfileButton?.addEventListener("click", () => {
     if (profileError) profileError.textContent = "Enter a display name.";
     return;
   }
-  guestProfile = { ...guestProfile, name: name.replace(/[\\u0000-\\u001f\\u007f]/g, "").slice(0, 16) };
+  guestProfile = { ...guestProfile, name: name.replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 16) };
   localStorage.setItem("cloneroyale.profile", JSON.stringify(guestProfile));
   renderProfile();
   if (onlineClient.isConnected) onlineClient.setProfile(guestProfile.id, guestProfile.name);

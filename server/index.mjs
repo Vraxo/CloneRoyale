@@ -109,7 +109,7 @@ function handleMessage(client, message) {
   if (message.type === "resume") { resumePlayer(client, message.token); return; }
   if (message.type === "set-profile") {
     const rawName = typeof message.name === "string" ? message.name : "";
-    const name = rawName.replace(/[\\u0000-\\u001f\\u007f]/g, "").trim().slice(0, 16) || "Guest";
+    const name = rawName.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 16) || "Guest";
     const guestId = typeof message.guestId === "string" && /^[a-f0-9-]{36}$/i.test(message.guestId)
       ? message.guestId : client.guestId;
     client.guestId = guestId;
