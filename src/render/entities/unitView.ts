@@ -7,6 +7,7 @@ export abstract class UnitView {
 
   protected readonly body = new Container();
   private readonly shadow = new Graphics();
+  private readonly ownershipMarker = new Graphics();
   private readonly healthBar = new Graphics();
   private readonly damageFlash = new ColorMatrixFilter();
   private previousHp: number;
@@ -21,7 +22,15 @@ export abstract class UnitView {
     this.body.filters = [this.damageFlash];
     this.shadow.ellipse(0, unit.radius * 0.58, unit.radius * 1.3, unit.radius * 0.62)
       .fill(unit.isAir ? 0x283b2d : 0x344338);
-    this.container.addChild(this.shadow, this.body, this.healthBar);
+    if (unit.id >= 0) {
+      const markerColor = unit.side === "blue" ? 0x48a5ff : 0xf06464;
+      this.ownershipMarker
+        .circle(0, 0, 5.5)
+        .fill(markerColor)
+        .stroke({ color: 0xffffff, alpha: 0.95, width: 1.7 });
+      this.ownershipMarker.filters = [];
+    }
+    this.container.addChild(this.shadow, this.body, this.healthBar, this.ownershipMarker);
   }
 
   public abstract update(unit: Unit, time: number): void;
@@ -50,6 +59,8 @@ export abstract class UnitView {
     const lift = Math.pow(1 - easedProgress, 2) * 76;
     this.body.y = -lift;
     this.body.alpha = hasAppeared ? 0.72 + progress * 0.28 : 0;
+    this.ownershipMarker.position.set(0, -lift - unit.radius - 13);
+    this.ownershipMarker.alpha = unit.id >= 0 && hasAppeared ? 1 : 0;
     this.shadow.scale.set(1 + (1 - progress) * 0.65, 1 + (1 - progress) * 0.4);
     this.shadow.alpha = hasAppeared ? 0.35 + progress * 0.65 : 0;
 
