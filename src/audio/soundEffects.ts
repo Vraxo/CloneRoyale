@@ -13,6 +13,7 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "mini-pekka-deploy": ["/audio/sfx/mini-pekka/mini-pekka-deployment.ogg"],
   "mini-pekka-attack": ["/audio/sfx/mini-pekka/mini-pekka-attack-swing.ogg"],
   "mini-pekka-hit": ["/audio/sfx/mini-pekka/mini-pekka-hit-impact.ogg"],
+  "mini-pekka-death": ["/audio/sfx/mini-pekka/mini-pekka-death.ogg"],
   "mini-pekka-step": ["/audio/sfx/mini-pekka/mini-pekka-footsteps.ogg"],
   "giant-deploy": ["/audio/sfx/giant/giant-deployment.ogg"],
   "giant-attack": [
@@ -44,6 +45,7 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "archer-death": ["/audio/sfx/archer/archer-death.ogg"],
   "baby-dragon-deploy": ["/audio/sfx/baby-dragon/baby-dragon-deployment.ogg"],
   "baby-dragon-attack": ["/audio/sfx/baby-dragon/baby-dragon-fire-breath.ogg"],
+  "baby-dragon-death": ["/audio/sfx/baby-dragon/baby-dragon-death.ogg"],
   "baby-dragon-wing": ["/audio/sfx/baby-dragon/baby-dragon-wing-flap.ogg"],
   "princess-tower-attack": ["/audio/sfx/towers/princess-tower-arrow-shot.ogg"],
   "king-tower-attack": ["/audio/sfx/towers/king-tower-projectile-shot.ogg"],
@@ -52,9 +54,12 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "triple-elixir": ["/audio/sfx/elixir/triple-elixir-start.ogg"],
   "cannon-deploy": ["/audio/sfx/cannon/cannon-deployment.ogg"],
   "cannon-attack": ["/audio/sfx/cannon/cannon-fire.ogg"],
+  "cannon-death": ["/audio/sfx/cannon/cannon-destruction.ogg"],
   "arrows-impact": ["/audio/sfx/spells/arrows-impact.ogg"],
   "fireball-launch": ["/audio/sfx/spells/fireball-launch.ogg"],
   "fireball-explosion": ["/audio/sfx/spells/fireball-explosion.ogg"],
+  "projectile-impact": ["/audio/sfx/projectiles/projectile-impact.ogg"],
+  "tower-hit": ["/audio/sfx/towers/tower-damage-impact.ogg"],
   "ui-click": ["/audio/sfx/ui/ui-button-click.ogg"],
   "ui-invalid": ["/audio/sfx/ui/ui-invalid-action.ogg"],
   "king-activation": ["/audio/sfx/towers/king-tower-activation.ogg"],
@@ -71,6 +76,7 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "mini-pekka-deploy": 0.8,
   "mini-pekka-attack": 0.8,
   "mini-pekka-hit": 0.65,
+  "mini-pekka-death": 0.72,
   "mini-pekka-step": 0.28,
   "giant-deploy": 0.8,
   "giant-attack": 0.72,
@@ -88,6 +94,7 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "archer-death": 0.52,
   "baby-dragon-deploy": 0.72,
   "baby-dragon-attack": 0.58,
+  "baby-dragon-death": 0.68,
   "baby-dragon-wing": 0.2,
   "princess-tower-attack": 0.42,
   "king-tower-attack": 0.48,
@@ -96,9 +103,12 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "triple-elixir": 0.78,
   "cannon-deploy": 0.72,
   "cannon-attack": 0.62,
+  "cannon-death": 0.78,
   "arrows-impact": 0.62,
   "fireball-launch": 0.64,
   "fireball-explosion": 0.78,
+  "projectile-impact": 0.46,
+  "tower-hit": 0.58,
   "ui-click": 0.32,
   "ui-invalid": 0.48,
   "king-activation": 0.9,
@@ -189,11 +199,14 @@ export function createSoundEffects(): SoundEffects {
         || event === "archer-step"
         || event === "archer-death"
         || event === "baby-dragon-wing"
+        || event === "projectile-impact"
+        || event === "tower-hit"
       ) {
         const previous = lastUnitSoundAt.get(event) ?? Number.NEGATIVE_INFINITY;
         const minimumInterval = event === "skeleton-step"
           || event === "archer-step"
-          || event === "baby-dragon-wing" ? 115 : 95;
+          || event === "baby-dragon-wing" ? 115
+          : event === "tower-hit" ? 150 : 90;
         if (now - previous < minimumInterval) return;
         lastUnitSoundAt.set(event, now);
       }
@@ -215,6 +228,8 @@ export function createSoundEffects(): SoundEffects {
         || event === "skeleton-step"
         || event === "archer-step"
         || event === "baby-dragon-wing"
+        || event === "projectile-impact"
+        || event === "tower-hit"
         ? MAX_HIT_VOICES
         : MAX_VOICES_PER_SOUND;
 

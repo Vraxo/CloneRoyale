@@ -76,6 +76,15 @@ export function updateProjectiles(state: GameState, dt: number): void {
         style: projectile.style === "arrows" ? "arrows" : "explosion"
       });
     } else if (projectile.targetId !== null) {
+      const unitTarget = state.units.find((unit) => unit.id === projectile.targetId);
+      const towerTarget = state.towers.find((tower) => tower.id === projectile.targetId);
+
+      if (unitTarget && unitTarget.hp > projectile.damage) {
+        state.audioEvents.push("projectile-impact");
+      } else if (towerTarget && towerTarget.hp > projectile.damage) {
+        state.audioEvents.push("tower-hit");
+      }
+
       damageTarget(state, projectile.targetId, projectile.damage);
     }
 
