@@ -1,10 +1,21 @@
-import { Container, Graphics, Text } from "pixi.js";
+import { Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 import type { CardId, GameState } from "../../game/types";
 import { cardById } from "../../game/cards";
 import { MATCH_RULES } from "../../game/matchRules";
 import { calculateHudLayout } from "./hudLayout";
 
 const HUD_HEIGHT = 176;
+
+const CARD_ART: Record<CardId, string> = {
+  giant: "/cards/giant.png",
+  archers: "/cards/archers.png",
+  "mini-pekka": "/cards/mini-pekka.png",
+  "baby-dragon": "/cards/baby-dragon.png",
+  "skeleton-army": "/cards/skeleton-army.png",
+  cannon: "/cards/cannon.png",
+  fireball: "/cards/fireball.png",
+  arrows: "/cards/arrows.png"
+};
 
 function formatClock(seconds: number): string {
   const remaining = Math.max(0, Math.ceil(seconds));
@@ -60,6 +71,10 @@ export class BattleHud {
 
   private readonly graphics = new Graphics();
   private readonly heldCardGraphics = new Graphics();
+  private readonly heldCardArt = new Sprite(Texture.EMPTY);
+  private readonly cardArts = Array.from({ length: 4 }, () => new Sprite(Texture.EMPTY));
+  private readonly nextCardArt = new Sprite(Texture.EMPTY);
+  private readonly cardTextures = new Map<CardId, Texture>();
   private readonly heldCardGlyph = createHudText(34, 0xf0dfb6, "Supercell Magic");
   private readonly heldCardName = createHudText(12, 0xf4eedc, "Supercell Magic");
   private readonly heldCardCost = createHudText(13, 0xffffff, "Supercell Magic");
@@ -78,6 +93,9 @@ export class BattleHud {
     this.container.eventMode = "none";
     this.container.addChild(
       this.graphics,
+      this.nextCardArt,
+      ...this.cardArts,
+      this.heldCardArt,
       ...this.cardGlyphs,
       ...this.cardNames,
       ...this.cardCosts,
@@ -94,10 +112,38 @@ export class BattleHud {
       this.heldCardCost
     );
 
+    this.nextCardArt.eventMode = "none";
+    this.cardArts.forEach((art) => {
+      art.eventMode = "none";
+      art.anchor.set(0.5);
+      art.visible = false;
+    });
+    this.nextCardArt.anchor.set(0.5);
+    this.nextCardArt.visible = false;
+    this.heldCardArt.anchor.set(0.5);
+    this.heldCardArt.eventMode = "none";
+    this.heldCardArt.visible = false;
     this.heldCardGraphics.eventMode = "none";
     this.heldCardGlyph.alpha = 0.88;
     this.heldCardName.alpha = 0.9;
     this.heldCardCost.alpha = 0.95;
+  }
+
+  public async loadCardArt(): Promise<void> {
+    const loaded = await Promise.all(
+      (Object.entries(CARD_ART) as [CardId, string][]).map(async ([cardId, source]) => {
+        try {
+          return [cardId, await Assets.load<Texture>(source)] as const;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    for (const entry of loaded) {
+      if (!entry) continue;
+      this.cardTextures.set(entry[0], entry[1]);
+    }
   }
 
   public update(
@@ -138,6 +184,18 @@ export class BattleHud {
     this.nextCardLabel.text = "NEXT";
     this.nextCardLabel.anchor.set(0.5);
     this.nextCardLabel.position.set(nextX + layout.nextWidth / 2, layout.cardY + 6);
+    this.nextCardArt.texture = nextCard ? this.cardTextures.get(nextCard.id) ?? Texture.EMPTY : Texture.EMPTY;
+    this.nextCardArt.visible = nextCard !== null && this.cardTextures.has(nextCard.id);
+    if (this.nextCardArt.visible) {
+      const artHeight = layout.cardHeight - 24;
+      this.nextCardArt.position.set(
+        nextX + layout.nextWidth / 2,
+        nextY + artHeight / 2 + 3
+      );
+      this.nextCardArt.width = artHeight * 0.68;
+      this.nextCardArt.height = artHeight;
+    }
+    this.nextCardName.visible = false;
     this.nextCardName.text = nextCard?.name ?? "—";
     this.nextCardName.anchor.set(0.5);
     this.nextCardName.position.set(
@@ -177,6 +235,7 @@ export class BattleHud {
     screenHeight: number
   ): void {
     this.heldCardGraphics.clear();
+    this.heldCardArt.visible = false;
     this.heldCardGlyph.visible = false;
     this.heldCardName.visible = false;
     this.heldCardCost.visible = false;
@@ -205,6 +264,16 @@ export class BattleHud {
       .roundRect(x + 6, y + 6, width - 12, height - 12, 6)
       .stroke({ color: 0xe4d7ad, alpha: 0.32, width: 1 });
 
+    const texture = this.cardTextures.get(cardId);
+    if (texture) {
+      this.heldCardArt.texture = texture;
+      this.heldCardArt.position.set(point.x, y + height * 0.47);
+      this.heldCardArt.width = Math.min(width - 12, (height - 20) * 0.68);
+      this.heldCardArt.height = height - 20;
+      this.heldCardArt.visible = true;
+    }
+
+    this.heldCardGlyph.visible = !this.heldCardArt.visible;
     this.heldCardGlyph.text = cardGlyph(cardId);
     this.heldCardGlyph.anchor.set(0.5);
     this.heldCardGlyph.position.set(point.x, y + height * 0.38);
@@ -213,8 +282,8 @@ export class BattleHud {
 
     this.heldCardName.text = card.name;
     this.heldCardName.anchor.set(0.5);
-    this.heldCardName.position.set(point.x, y + height - 25);
-    this.heldCardName.style.fontSize = Math.max(9, Math.min(12, width * 0.12));
+    this.heldCardName.position.set(point.x, y + height - 8);
+    this.heldCardName.style.fontSize = Math.max(8, Math.min(10, width * 0.1));
     this.heldCardName.style.wordWrap = true;
     this.heldCardName.style.wordWrapWidth = width - 12;
     this.heldCardName.visible = true;
@@ -296,7 +365,20 @@ export class BattleHud {
         .roundRect(rect.x + 5, rect.y + 5, rect.width - 10, rect.height - 10, 5)
         .stroke({ color: 0xe4d7ad, alpha: affordable ? 0.22 : 0.1, width: 1 });
 
+      const art = this.cardArts[index];
+      const texture = card ? this.cardTextures.get(card.id) : undefined;
+      art.texture = texture ?? Texture.EMPTY;
+      art.visible = texture !== undefined;
+      if (texture) {
+        const artHeight = Math.min(62, rect.height - 21);
+        art.position.set(rect.x + rect.width / 2, rect.y + artHeight / 2 + 3);
+        art.width = Math.min(rect.width - 12, artHeight * 0.68);
+        art.height = artHeight;
+        art.alpha = affordable ? 1 : 0.5;
+      }
+
       const glyph = this.cardGlyphs[index];
+      glyph.visible = !art.visible;
       const name = this.cardNames[index];
       const cost = this.cardCosts[index];
       glyph.text = card ? cardGlyph(cardId) : "";
@@ -307,8 +389,8 @@ export class BattleHud {
 
       name.text = card?.name ?? "";
       name.anchor.set(0.5);
-      name.position.set(rect.x + rect.width / 2, rect.y + rect.height - 14);
-      name.style.fontSize = Math.max(7, Math.min(11, rect.width * 0.085));
+      name.position.set(rect.x + rect.width / 2, rect.y + rect.height - 8);
+      name.style.fontSize = Math.max(7, Math.min(9, rect.width * 0.075));
       name.style.wordWrap = true;
       name.style.wordWrapWidth = rect.width - 12;
       name.alpha = affordable ? 1 : 0.52;

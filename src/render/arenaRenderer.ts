@@ -30,6 +30,8 @@ export class ArenaRenderer {
   private initialized = false;
 
   public async initialize(host: HTMLElement): Promise<void> {
+    await this.hud.loadCardArt();
+
     await this.app.init({
       resizeTo: host,
       background: "#18221e",
