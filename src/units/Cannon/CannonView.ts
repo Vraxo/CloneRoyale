@@ -23,7 +23,7 @@ export class CannonView extends UnitView {
   }
 
   public update(unit: Unit, time: number): void {
-    this.updateCommon(unit);
+    this.updateCommon(unit, time);
     this.body.rotation = unit.facing + Math.PI / 2;
     this.barrel.rotation = Math.sin(time * 0.7 + unit.animationOffset) * 0.035;
   }

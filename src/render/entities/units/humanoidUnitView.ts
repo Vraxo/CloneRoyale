@@ -12,7 +12,7 @@ export class HumanoidUnitView extends UnitView {
   }
 
   public update(unit: Unit, time: number): void {
-    this.updateCommon(unit);
+    this.updateCommon(unit, time);
     this.rig.update(unit, time);
   }
 }

@@ -38,7 +38,7 @@ export class BabyDragonView extends UnitView {
   }
 
   public update(unit: Unit, time: number): void {
-    this.updateCommon(unit);
+    this.updateCommon(unit, time);
     this.body.rotation = unit.facing + Math.PI / 2;
     this.body.y = Math.sin(time * 4 + unit.animationOffset) * 2.6;
 
