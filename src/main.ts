@@ -85,7 +85,7 @@ function startNewBattle(): void {
   history.reset(game);
   previousGameOver = false;
   setPaused(false);
-  music.start(game.time);
+  music.start(game.time, game.phase);
   renderer.render(game);
   updateHud();
 }
@@ -254,6 +254,8 @@ function advanceOneStep(): void {
   stepGame(game, SIMULATION_STEP, "red");
   if (game.time === previousTime) return;
 
+  music.update(game.time, game.phase);
+
   for (const event of game.audioEvents) soundEffects.play(event);
   game.audioEvents = [];
   history.record(game);
@@ -286,7 +288,7 @@ function stepBackward(): void {
   accumulator = 0;
   setPaused(true);
   previousGameOver = game.gameOver;
-  music.seek(game.time);
+  music.seek(game.time, game.phase);
   music.setPaused(true);
   renderer.render(game);
   updateHud();
