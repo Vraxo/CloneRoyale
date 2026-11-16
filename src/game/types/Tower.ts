@@ -15,4 +15,5 @@ export interface Tower {
   range: number;
   attackInterval: number;
   attackCooldown: number;
+  activated?: boolean;
 }

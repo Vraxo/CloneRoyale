@@ -31,4 +31,12 @@ export type AudioEvent =
   | "fireball-launch"
   | "fireball-explosion"
   | "ui-click"
-  | "ui-invalid";
+  | "ui-invalid"
+  | "king-activation"
+  | "tower-destroyed"
+  | "king-tower-destroyed"
+  | "crown-earned"
+  | "overtime-start"
+  | "match-victory"
+  | "match-defeat"
+  | "match-draw";

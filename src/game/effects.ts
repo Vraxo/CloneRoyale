@@ -28,8 +28,27 @@ export function damageTarget(state: GameState, targetId: number, damage: number)
   if (!tower || tower.hp <= 0) return;
 
   tower.hp = Math.max(0, tower.hp - damage);
+
+  if (tower.kind === "king" && !tower.activated) {
+    tower.activated = true;
+    state.audioEvents.push("king-activation");
+  }
+
   if (tower.hp === 0) {
     addEvent(state, `${tower.side === "blue" ? "Blue" : "Red"} ${tower.kind} tower destroyed!`);
+
+    if (tower.kind === "princess") {
+      state.audioEvents.push("tower-destroyed", "crown-earned");
+      const king = state.towers.find((candidate) =>
+        candidate.side === tower.side && candidate.kind === "king"
+      );
+      if (king && !king.activated) {
+        king.activated = true;
+        state.audioEvents.push("king-activation");
+      }
+    } else {
+      state.audioEvents.push("king-tower-destroyed");
+    }
   }
 }
 

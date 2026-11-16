@@ -56,7 +56,15 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "fireball-launch": ["/audio/sfx/spells/fireball-launch.ogg"],
   "fireball-explosion": ["/audio/sfx/spells/fireball-explosion.ogg"],
   "ui-click": ["/audio/sfx/ui/ui-button-click.ogg"],
-  "ui-invalid": ["/audio/sfx/ui/ui-invalid-action.ogg"]
+  "ui-invalid": ["/audio/sfx/ui/ui-invalid-action.ogg"],
+  "king-activation": ["/audio/sfx/towers/king-tower-activation.ogg"],
+  "tower-destroyed": ["/audio/sfx/towers/princess-tower-destroyed.ogg"],
+  "king-tower-destroyed": ["/audio/sfx/towers/king-tower-destroyed.ogg"],
+  "crown-earned": ["/audio/sfx/towers/crown-earned.ogg"],
+  "overtime-start": ["/audio/sfx/ui/overtime-start.ogg"],
+  "match-victory": ["/audio/sfx/ui/match-victory.ogg"],
+  "match-defeat": ["/audio/sfx/ui/match-defeat.ogg"],
+  "match-draw": ["/audio/sfx/ui/match-draw.ogg"]
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
@@ -92,7 +100,15 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "fireball-launch": 0.64,
   "fireball-explosion": 0.78,
   "ui-click": 0.32,
-  "ui-invalid": 0.48
+  "ui-invalid": 0.48,
+  "king-activation": 0.9,
+  "tower-destroyed": 0.78,
+  "king-tower-destroyed": 0.95,
+  "crown-earned": 0.72,
+  "overtime-start": 0.85,
+  "match-victory": 0.9,
+  "match-defeat": 0.85,
+  "match-draw": 0.8
 };
 
 const MAX_VOICES_PER_SOUND = 6;

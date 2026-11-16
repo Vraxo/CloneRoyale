@@ -45,7 +45,8 @@ function addTower(
     damage: king ? 92 : 76,
     range: king ? 275 : 245,
     attackInterval: king ? 0.95 : 1.05,
-    attackCooldown: 0.3
+    attackCooldown: 0.3,
+    activated: false
   });
 }
 
@@ -91,11 +92,14 @@ function finishGame(state: GameState, winner: Side | "draw", message: string): v
   state.gameOver = true;
   state.phase = "finished";
   state.winner = winner;
+  if (winner === "draw") state.audioEvents.push("match-draw");
+  else state.audioEvents.push(winner === "blue" ? "match-victory" : "match-defeat");
   addEvent(state, message);
 }
 
 function beginOvertime(state: GameState): void {
   state.phase = "overtime";
+  state.audioEvents.push("overtime-start");
   state.overtimeStartCrowns = {
     blue: crownCount(state, "blue"),
     red: crownCount(state, "red")
