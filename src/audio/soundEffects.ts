@@ -14,7 +14,10 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "mini-pekka-hit": ["/audio/sfx/mini-pekka/hit.ogg"],
   "mini-pekka-step": ["/audio/sfx/mini-pekka/step.ogg"],
   "princess-tower-attack": ["/audio/sfx/towers/princess-attack.ogg"],
-  "king-tower-attack": ["/audio/sfx/towers/king-attack.ogg"]
+  "king-tower-attack": ["/audio/sfx/towers/king-attack.ogg"],
+  "elixir-gain": ["/audio/sfx/elixir/get-elixir.ogg"],
+  "double-elixir": ["/audio/sfx/elixir/double-elixir.ogg"],
+  "triple-elixir": ["/audio/sfx/elixir/triple-elixir.ogg"]
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
@@ -23,7 +26,10 @@ const SOUND_VOLUMES: Record<AudioEvent, number> = {
   "mini-pekka-hit": 0.65,
   "mini-pekka-step": 0.28,
   "princess-tower-attack": 0.42,
-  "king-tower-attack": 0.48
+  "king-tower-attack": 0.48,
+  "elixir-gain": 0.42,
+  "double-elixir": 0.72,
+  "triple-elixir": 0.78
 };
 
 const MAX_VOICES_PER_SOUND = 6;

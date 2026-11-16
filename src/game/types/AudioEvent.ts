@@ -4,4 +4,7 @@ export type AudioEvent =
   | "mini-pekka-hit"
   | "mini-pekka-step"
   | "princess-tower-attack"
-  | "king-tower-attack";
+  | "king-tower-attack"
+  | "elixir-gain"
+  | "double-elixir"
+  | "triple-elixir";
