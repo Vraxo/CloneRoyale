@@ -9,7 +9,7 @@ export interface MenuAudio {
 }
 
 export function createMenuAudio(): MenuAudio {
-  const music = new Audio("/audio/music/home-menu-loop.ogg");
+  const music = new Audio("https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Music/Lobby/music_lobby_202606.ogg");
   music.loop = true;
   music.preload = "auto";
 
