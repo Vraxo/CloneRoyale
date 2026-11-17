@@ -44,8 +44,6 @@ export class ProjectileView {
     } else if (projectile.style === "cannon") {
       this.graphic.circle(0, 0, 6).fill(0x39433c);
       this.graphic.circle(0, 0, 3.5).fill(0xaab6b7);
-    } else if (projectile.style === "arrows") {
-      this.graphic.circle(0, 0, 2.5).fill(0xe7d8a5);
     } else {
       this.graphic.moveTo(-3, 0).lineTo(4, 0)
         .stroke({ color: 0x39433c, width: 3, cap: "round" });
