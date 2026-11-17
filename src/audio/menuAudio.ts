@@ -9,7 +9,7 @@ export interface MenuAudio {
 }
 
 export function createMenuAudio(): MenuAudio {
-  const music = new Audio("/audio/music/home-menu-loop.ogg");
+  const music = new Audio("/audio/music/home-menu-loop.m4a");
   music.loop = true;
   music.preload = "auto";
 
