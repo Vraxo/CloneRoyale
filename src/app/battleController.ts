@@ -263,12 +263,12 @@ export class BattleController {
   public updatePlacementPreview(event: PointerEvent): void {
     if (!this.selectedCard || this.paused || this.game.gameOver) {
       this.renderer.setPlacementPreview(null);
-      this.renderer.setDeploymentArea(this.game, "blue", null);
+      this.renderer.setDeploymentArea(this.game, this.playerSide, null);
       this.renderer.clearUnitPreview();
       return;
     }
 
-    this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
+    this.renderer.setDeploymentArea(this.game, this.playerSide, this.selectedCard);
     const point = this.renderer.screenToWorld(event.clientX, event.clientY);
     if (!point) {
       this.renderer.setPlacementPreview(null);
