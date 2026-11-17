@@ -33,6 +33,7 @@ document.addEventListener("click", event => {
   const button = event.target.closest("button");
   if (!button) return;
   if (button.id === "menu-play") menuAudio.playLaunch();
+  else if (button.id === "menu-settings") menuAudio.playTransition();
   else menuAudio.playButton();
 }, true);
 menuAudio.startMusic();
@@ -408,10 +409,7 @@ profileNameInput?.addEventListener("keydown", event => {
 onlineButton?.addEventListener("click", openLobby);
 menuPlayButton?.addEventListener("click", startSoloBattle);
 menuOnlineButton?.addEventListener("click", openLobby);
-menuSettingsButton?.addEventListener("click", () => {
-  menuAudio.playTransition();
-  setGameMenuOpen(true);
-});
+menuSettingsButton?.addEventListener("click", () => setGameMenuOpen(true));
 findMatchButton?.addEventListener("click", async () => {
   if (!(await connectOnline())) return;
   if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = true;
