@@ -108,6 +108,9 @@ echo.
 echo Local address:
 echo   http://localhost:3001
 echo.
+echo Opening Clone Royale in your browser...
+start "" "http://localhost:3001"
+echo.
 echo Public Tailscale address:
 "%TAILSCALE%" funnel status
 echo.
