@@ -1280,6 +1280,7 @@ body[data-controls-open="true"] .control-panel .match-control-section {
 
   .arena-frame {
     bottom: env(safe-area-inset-bottom);
+    height: auto;
   }
 
   .topbar {
