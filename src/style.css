@@ -1803,3 +1803,123 @@ body[data-screen="home"] .workspace { visibility: hidden; pointer-events: none; 
   .cr-deck-panel { padding: 6px; }
   .cr-home-nav .cr-nav-button, .cr-home-nav .cr-battle-button { min-height: 49px; }
 }
+
+
+/* Living arena ambience */
+@keyframes cr-cloud-drift {
+  0%, 100% { transform: translate3d(-2%, 0, 0) scale(1); }
+  50% { transform: translate3d(3%, 2%, 0) scale(1.04); }
+}
+@keyframes cr-arena-breathe {
+  0%, 100% { transform: translate(-50%, 0) scale(1); }
+  50% { transform: translate(-50%, -7px) scale(1.012); }
+}
+@keyframes cr-water-flow {
+  from { background-position: 0 0; }
+  to { background-position: 220px 0; }
+}
+@keyframes cr-crest-float {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-3deg); }
+  50% { transform: translate(-50%, calc(-50% - 7px)) rotate(3deg); }
+}
+@keyframes cr-flag-wave {
+  0%, 100% { transform: skewY(-9deg) rotate(-2deg); }
+  50% { transform: skewY(8deg) rotate(4deg); }
+}
+@keyframes cr-card-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes cr-battle-glow {
+  0%, 100% { box-shadow: 0 5px 0 #92551e, 0 10px 20px rgba(0,0,0,.3), 0 0 0 rgba(255,211,89,0); }
+  50% { box-shadow: 0 5px 0 #92551e, 0 12px 25px rgba(0,0,0,.32), 0 0 22px rgba(255,211,89,.32); }
+}
+@keyframes cr-button-sheen {
+  0%, 62% { transform: translateX(-150%) skewX(-18deg); opacity: 0; }
+  72% { opacity: .55; }
+  88%, 100% { transform: translateX(250%) skewX(-18deg); opacity: 0; }
+}
+.cr-home-backdrop::before,
+.cr-home-backdrop::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 34vw;
+  height: 12vw;
+  min-height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(220,241,255,.25), rgba(181,221,247,.12) 45%, transparent 72%);
+  filter: blur(12px);
+  pointer-events: none;
+  animation: cr-cloud-drift 19s ease-in-out infinite;
+}
+.cr-home-backdrop::before { top: 12%; left: -8%; }
+.cr-home-backdrop::after { top: 29%; right: -8%; animation-delay: -9s; animation-duration: 24s; }
+.cr-arena-scene { animation: cr-arena-breathe 8s ease-in-out infinite; }
+.cr-river {
+  background-size: 220px 100%;
+  animation: cr-water-flow 7s linear infinite;
+}
+.cr-arena-crest { animation: cr-crest-float 4.5s ease-in-out infinite; }
+.cr-tower::after {
+  content: "";
+  position: absolute;
+  top: -43%;
+  left: 50%;
+  width: 35%;
+  height: 27%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #ffe48a, #e6a735);
+  clip-path: polygon(0 0, 100% 18%, 72% 55%, 100% 100%, 0 100%);
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,.25));
+  animation: cr-flag-wave 2.8s ease-in-out infinite;
+}
+.cr-tower-blue::after {
+  background: linear-gradient(90deg, #c5efff, #58b5e8);
+}
+.cr-card-tile {
+  animation: cr-card-idle 4s ease-in-out infinite;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+.cr-card-tile:nth-child(2n) { animation-delay: -1.2s; }
+.cr-card-tile:nth-child(3n) { animation-delay: -2.4s; }
+.cr-card-tile:hover {
+  animation-play-state: paused;
+  transform: translateY(-7px) scale(1.045);
+  filter: brightness(1.12);
+  box-shadow: 0 7px 0 #744d2d, 0 10px 16px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.3);
+}
+.cr-battle-button {
+  position: relative;
+  overflow: hidden;
+  animation: cr-battle-glow 3.4s ease-in-out infinite;
+}
+.cr-battle-button::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: 0;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.58), transparent);
+  pointer-events: none;
+  animation: cr-button-sheen 5.5s ease-in-out infinite;
+}
+.cr-battle-button > * { position: relative; z-index: 1; }
+.cr-nav-button { transition: transform .16s ease, filter .16s ease, box-shadow .16s ease; }
+.cr-nav-button:hover { box-shadow: 0 6px 0 #153c61, 0 12px 20px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.18); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cr-home-backdrop::before,
+  .cr-home-backdrop::after,
+  .cr-arena-scene,
+  .cr-river,
+  .cr-arena-crest,
+  .cr-tower::after,
+  .cr-card-tile,
+  .cr-battle-button,
+  .cr-battle-button::after {
+    animation: none !important;
+  }
+  .cr-card-tile, .cr-nav-button, .cr-battle-button { transition: none !important; }
+}
