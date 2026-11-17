@@ -1923,3 +1923,53 @@ body[data-screen="home"] .workspace { visibility: hidden; pointer-events: none; 
   }
   .cr-card-tile, .cr-nav-button, .cr-battle-button { transition: none !important; }
 }
+
+
+/* Centered game/settings popup */
+body[data-controls-open="true"]::before {
+  content: "";
+  position: fixed;
+  z-index: 11;
+  inset: 0;
+  background: rgba(2, 10, 22, .68);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.control-panel {
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  width: min(430px, calc(100vw - 28px));
+  max-height: min( min(820px, calc(100dvh - 32px)), 92dvh);
+  transform: translate(-50%, -50%);
+  border-radius: 17px;
+}
+body[data-controls-open="true"] .control-panel {
+  animation: controls-center-enter .18s ease-out;
+}
+.game-menu-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  margin: -5px -5px -5px auto;
+  border-radius: 9px;
+  font-size: 24px;
+  line-height: 1;
+}
+@keyframes controls-center-enter {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 8px)) scale(.98); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@media (max-width: 640px) {
+  .control-panel {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    width: min(430px, calc(100vw - 24px));
+    max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    transform: translate(-50%, -50%);
+    border-radius: 15px;
+  }
+}

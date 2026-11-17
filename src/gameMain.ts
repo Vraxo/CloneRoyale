@@ -121,7 +121,6 @@ const menuPlayButton = document.getElementById("menu-play");
 const menuOnlineButton = document.getElementById("menu-online");
 const menuSettingsButton = document.getElementById("menu-settings");
 const menuProfileButton = document.getElementById("menu-profile");
-const menuProfileShortcutButton = document.getElementById("menu-profile-shortcut");
 const menuProfileName = document.getElementById("menu-profile-name");
 function setGameScreen(screen: "home" | "battle"): void {
   document.body.dataset.screen = screen;
@@ -381,7 +380,6 @@ function openProfile(): void {
 }
 profileButton?.addEventListener("click", openProfile);
 menuProfileButton?.addEventListener("click", openProfile);
-menuProfileShortcutButton?.addEventListener("click", openProfile);
 function closeProfile(): void {
   if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = true;
   if (profileError) profileError.textContent = "";
@@ -481,10 +479,12 @@ playAgainButton?.addEventListener("click", () => {
 });
 
 const gameMenuToggle = document.getElementById("game-menu-toggle");
+const closeGameMenuButton = document.getElementById("close-game-menu");
 function setGameMenuOpen(open: boolean): void {
   document.body.dataset.controlsOpen = open ? "true" : "false";
   gameMenuToggle?.setAttribute("aria-expanded", String(open));
 }
+closeGameMenuButton?.addEventListener("click", () => setGameMenuOpen(false));
 gameMenuToggle?.addEventListener("click", () => {
   const open = document.body.dataset.controlsOpen !== "true";
   menuAudio.playTransition();
