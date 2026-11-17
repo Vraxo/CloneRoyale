@@ -434,6 +434,9 @@ closeLobbyButton?.addEventListener("click", () => {
   }
   if (lobby instanceof HTMLDivElement) lobby.hidden = true;
 });
+lobby?.addEventListener("click", event => {
+  if (event.target === lobby) closeLobbyButton?.click();
+});
 createRoomButton?.addEventListener("click", async () => {
   if (!(await connectOnline())) return;
   onlineClient.createRoom();
@@ -491,6 +494,11 @@ gameMenuToggle?.addEventListener("click", () => {
 });
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") setGameMenuOpen(false);
+});
+document.addEventListener("pointerdown", event => {
+  if (document.body.dataset.controlsOpen !== "true" || !(event.target instanceof Element)) return;
+  if (event.target.closest(".control-panel, #game-menu-toggle")) return;
+  setGameMenuOpen(false);
 });
 onlineButton?.addEventListener("click", () => setGameMenuOpen(false));
 
