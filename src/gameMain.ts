@@ -469,6 +469,15 @@ function leaveOnlineMatch(): void {
 }
 leaveOnlineButton?.addEventListener("click", leaveOnlineMatch);
 leaveResultButton?.addEventListener("click", leaveOnlineMatch);
+const returnMainMenuButton = document.getElementById("return-main-menu");
+returnMainMenuButton?.addEventListener("click", () => {
+  if (battle.isOnline) {
+    leaveOnlineMatch();
+  } else {
+    battle.setPaused(true);
+  }
+  setGameScreen("home");
+});
 playAgainButton?.addEventListener("click", () => {
   if (battle.isOnline) {
     onlineClient.requestRematch();
