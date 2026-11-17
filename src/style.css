@@ -2289,3 +2289,133 @@ body, button, input, output, summary, label, small {
   .event-feed li { font-size: 11px; }
 }
 
+
+
+/* Clean Clash Royale-style button finish: restrained depth, crisp edges, no glow. */
+.cr-nav-button,
+.cr-battle-button {
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 9px;
+  box-shadow: 0 3px 0 #153c61, 0 4px 7px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.22);
+  text-shadow: none;
+  filter: none;
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+.cr-nav-button {
+  background: linear-gradient(180deg, #347fb5 0%, #286b9e 100%);
+  color: #f5f9ff;
+}
+.cr-nav-button span { color: #ffe18a; }
+.cr-nav-button small { color: #f5f9ff; font-size: 10px; letter-spacing: .04em; }
+.cr-battle-button {
+  border-color: #ffe69a;
+  background: linear-gradient(180deg, #ffdf68 0%, #ffc342 100%);
+  color: #684018;
+  box-shadow: 0 3px 0 #96591e, 0 4px 7px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.48);
+  text-shadow: none;
+  animation: none;
+}
+.cr-battle-button strong {
+  color: #684018;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: .01em;
+}
+.cr-battle-button small { color: #80501e; font-size: 10px; font-weight: 800; letter-spacing: .07em; }
+.cr-battle-button::after { display: none; }
+.cr-nav-button:hover,
+.cr-battle-button:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #153c61, 0 6px 9px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.22);
+}
+.cr-battle-button:hover {
+  box-shadow: 0 4px 0 #96591e, 0 6px 9px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.48);
+}
+.cr-nav-button:active,
+.cr-battle-button:active {
+  transform: translateY(2px);
+  filter: none;
+  box-shadow: 0 1px 0 #153c61, inset 0 1px rgba(0,0,0,.12);
+}
+.cr-battle-button:active { box-shadow: 0 1px 0 #96591e, inset 0 1px rgba(0,0,0,.1); }
+
+.menu-play-button,
+.menu-action-button {
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 9px;
+  box-shadow: 0 3px 0 rgba(0,0,0,.24), 0 5px 10px rgba(0,0,0,.14);
+  transform: none;
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.menu-play-button {
+  background: linear-gradient(180deg, #ffdf70, #f5b83e);
+  border-color: #ffe69a;
+  color: #674018;
+  text-shadow: none;
+}
+.menu-play-button:hover,
+.menu-action-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 4px 0 rgba(0,0,0,.24), 0 7px 12px rgba(0,0,0,.17);
+}
+.menu-action-button {
+  background: linear-gradient(180deg, #286b9e, #1c527e);
+  color: #f4f8ff;
+}
+.menu-action-button .menu-action-icon {
+  border-radius: 7px;
+  background: rgba(255,222,126,.14);
+  color: #ffe18a;
+}
+.menu-play-button:active,
+.menu-action-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0,0,0,.24), inset 0 1px rgba(0,0,0,.1);
+}
+
+.online-lobby-panel .primary-button,
+.online-lobby-panel .secondary-button,
+.control-panel .primary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button {
+  border-width: 1px;
+  border-radius: 7px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  text-shadow: none;
+  box-shadow: 0 2px 0 #164c83, 0 3px 5px rgba(20,48,73,.16), inset 0 1px rgba(255,255,255,.28);
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+.online-lobby-panel .primary-button,
+.control-panel .primary-button {
+  background: linear-gradient(180deg, #ffdf70, #f5b83e);
+  border-color: #ffe69a;
+  color: #674018;
+}
+.online-lobby-panel .secondary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button {
+  background: linear-gradient(180deg, #347fb5, #286b9e);
+  border-color: #79b7df;
+  color: #f5f9ff;
+}
+.online-lobby-panel .primary-button:hover,
+.control-panel .primary-button:hover,
+.online-lobby-panel .secondary-button:hover,
+.control-panel .secondary-button:hover,
+.control-panel .speed-button:hover {
+  filter: brightness(1.06);
+}
+.online-lobby-panel .primary-button:active,
+.online-lobby-panel .secondary-button:active,
+.control-panel .primary-button:active,
+.control-panel .secondary-button:active,
+.control-panel .speed-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #164c83, inset 0 1px rgba(0,0,0,.1);
+}
