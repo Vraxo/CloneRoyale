@@ -63,7 +63,6 @@ export function updateProjectiles(state: GameState, dt: number): void {
     if (progress < 1) continue;
 
     if (projectile.splashRadius > 0) {
-      if (projectile.style === "arrows") state.audioEvents.push("arrows-impact");
       if (projectile.style === "fireball") state.audioEvents.push("fireball-explosion");
       applySplash(state, projectile, projectile.targetX, projectile.targetY);
       state.effects.push({
