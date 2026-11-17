@@ -378,7 +378,6 @@ function openProfile(): void {
     profileNameInput.select();
   }
 }
-profileButton?.addEventListener("click", openProfile);
 menuProfileButton?.addEventListener("click", openProfile);
 function closeProfile(): void {
   if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = true;

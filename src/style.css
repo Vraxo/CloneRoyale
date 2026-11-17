@@ -120,10 +120,10 @@ button {
 .profile-button {
   display: inline-flex; align-items: center; gap: 8px; min-height: 36px; max-width: 190px;
   padding: 4px 10px 4px 5px; border: 1px solid var(--line); border-radius: 8px;
-  background: rgba(39, 49, 42, .72); color: var(--text); cursor: pointer;
+  background: rgba(39, 49, 42, .72); color: var(--text); cursor: default;
   font-size: 10px; font-weight: 700;
 }
-.profile-button:hover { border-color: #7e704e; background: #303a34; }
+
 .profile-button #profile-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .profile-avatar {
   display: grid; place-items: center; width: 25px; height: 25px; flex: 0 0 25px;
@@ -1057,7 +1057,7 @@ body {
   border-color: #3a6b9a;
   background: rgba(17, 53, 91, .88);
 }
-.profile-button:hover { border-color: var(--gold); background: #1b4b7a; }
+
 .profile-avatar {
   border-color: #d3a63f;
   background: linear-gradient(145deg, #f5c84d, #bd8428);
