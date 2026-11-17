@@ -1,11 +1,17 @@
 import { Container, Graphics } from "pixi.js";
 import type { Projectile } from "../../game/types";
+import { drawArrow } from "./arrowArt";
 
 export class ProjectileView {
   public readonly id: number;
   public readonly container = new Container();
 
   private readonly graphic = new Graphics();
+  private readonly arrowTrail = new Graphics();
+  private readonly arrowFeathers = new Graphics();
+  private readonly arrowShaft = new Graphics();
+  private readonly arrowHead = new Graphics();
+  private readonly arrowDetails = new Graphics();
   private readonly fireballAura = new Graphics();
   private readonly fireballTrail = new Graphics();
   private readonly fireballBody = new Graphics();
@@ -15,6 +21,11 @@ export class ProjectileView {
   public constructor(projectile: Projectile) {
     this.id = projectile.id;
     this.container.addChild(
+      this.arrowTrail,
+      this.arrowFeathers,
+      this.arrowShaft,
+      this.arrowHead,
+      this.arrowDetails,
       this.fireballAura,
       this.fireballTrail,
       this.graphic,
@@ -31,8 +42,17 @@ export class ProjectileView {
       projectile.targetX - projectile.startX
     );
 
+    this.clearArrowGraphics();
+    this.container.scale.set(1);
+
     if (projectile.style === "fireball") {
       this.drawFireball(projectile);
+      return;
+    }
+
+    if (projectile.style === "arrow" || projectile.style === "arrows") {
+      this.graphic.clear();
+      this.drawArrowProjectile(projectile);
       return;
     }
 
@@ -53,6 +73,81 @@ export class ProjectileView {
 
   public destroy(): void {
     this.container.destroy({ children: true });
+  }
+
+  private clearArrowGraphics(): void {
+    this.arrowTrail.clear();
+    this.arrowFeathers.clear();
+    this.arrowShaft.clear();
+    this.arrowHead.clear();
+    this.arrowDetails.clear();
+  }
+
+  private drawArrowProjectile(projectile: Projectile): void {
+    const teamFletching = projectile.side === "red" ? 0xc56e65 : 0x659bc8;
+    const arrowLayers = {
+      trail: this.arrowTrail,
+      feathers: this.arrowFeathers,
+      shaft: this.arrowShaft,
+      head: this.arrowHead,
+      details: this.arrowDetails
+    };
+
+    if (projectile.style === "arrows") {
+      this.container.scale.set(1.1);
+      drawArrow(arrowLayers, {
+        tipX: 5,
+        tipY: 0,
+        angle: 0,
+        length: 37,
+        scale: 1.1,
+        alpha: 1,
+        fletchingColor: teamFletching,
+        trailColor: 0xffe4a3,
+        trailLength: 24,
+        trailAlpha: 0.75
+      });
+
+      drawArrow(arrowLayers, {
+        tipX: -5,
+        tipY: -8,
+        angle: -0.09,
+        length: 30,
+        scale: 0.9,
+        alpha: 0.82,
+        fletchingColor: teamFletching,
+        trailColor: 0xffe4a3,
+        trailLength: 18,
+        trailAlpha: 0.48
+      });
+
+      drawArrow(arrowLayers, {
+        tipX: -5,
+        tipY: 8,
+        angle: 0.09,
+        length: 30,
+        scale: 0.9,
+        alpha: 0.82,
+        fletchingColor: teamFletching,
+        trailColor: 0xffe4a3,
+        trailLength: 18,
+        trailAlpha: 0.48
+      });
+      return;
+    }
+
+    drawArrow(arrowLayers, {
+      tipX: 0,
+      tipY: 0,
+      angle: 0,
+      length: 25,
+      scale: 0.92,
+      alpha: 1,
+      fletchingColor: teamFletching,
+      trailColor: 0xffe4a3,
+      trailLength: 7,
+      trailAlpha: 0.24
+    });
   }
 
   private drawFireball(projectile: Projectile): void {

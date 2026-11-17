@@ -168,8 +168,39 @@ export class ArenaRenderer {
     if (card.category === "spell") {
       this.clearUnitPreview();
       this.spellPreview.clear();
-      const color = cardId === "fireball" ? 0xff8b3d : 0xd9e8ff;
       const radius = card.effect.radius;
+      if (cardId === "arrows") {
+        const accent = side === "red" ? 0xd17a70 : 0x78a8d2;
+        this.spellPreview
+          .circle(point.x, point.y, radius)
+          .fill({ color: 0xe5c47f, alpha: 0.045 })
+          .stroke({ color: 0xe5c47f, alpha: 0.84, width: 2 });
+
+        this.spellPreview
+          .circle(point.x, point.y, radius * 0.91)
+          .stroke({ color: 0x55452e, alpha: 0.34, width: 1 });
+
+        for (let index = 0; index < 16; index += 1) {
+          const angle = (Math.PI * 2 * index) / 16;
+          this.spellPreview
+            .moveTo(
+              point.x + Math.cos(angle) * radius * 0.91,
+              point.y + Math.sin(angle) * radius * 0.91
+            )
+            .lineTo(
+              point.x + Math.cos(angle) * radius * 1.025,
+              point.y + Math.sin(angle) * radius * 1.025
+            )
+            .stroke({ color: accent, alpha: 0.78, width: 2.2, cap: "round" });
+        }
+
+        this.spellPreview
+          .circle(point.x, point.y, 3.5)
+          .fill({ color: 0xffe6ac, alpha: 0.94 });
+        return;
+      }
+
+      const color = 0xff8b3d;
       this.spellPreview
         .circle(point.x, point.y, radius)
         .fill({ color, alpha: 0.2 })

@@ -73,8 +73,9 @@ export function updateProjectiles(state: GameState, dt: number): void {
         age: 0,
         lifetime: projectile.style === "fireball"
           ? 0.82
-          : projectile.style === "arrows" ? 0.38 : 0.48,
+          : projectile.style === "arrows" ? 0.94 : 0.48,
         radius: projectile.splashRadius,
+        side: projectile.side,
         style: projectile.style === "fireball"
           ? "fireball"
           : projectile.style === "arrows" ? "arrows" : "explosion"
