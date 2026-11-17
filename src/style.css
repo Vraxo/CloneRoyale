@@ -2210,3 +2210,82 @@ body[data-controls-open="true"] .control-panel {
     max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
+
+/* Readable typography pass: crisp system UI text at normal browser zoom. */
+:root {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+body, button, input, output, summary, label, small {
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+.brand-copy strong,
+.cr-player-copy strong,
+.cr-trophy-chip strong,
+.cr-arena-title h1,
+.cr-battle-button strong {
+  font-family: "Supercell Magic", "Segoe UI", Arial, sans-serif;
+}
+.brand-copy small { font-size: 12px; letter-spacing: .06em; }
+.profile-button { font-size: 13px; }
+.profile-avatar { font-size: 12px; }
+.match-summary { font-size: 13px; }
+.eyebrow { font-size: 11px; letter-spacing: .09em; }
+.status-tag { font-size: 10px; }
+.primary-button { font-size: 14px; }
+.secondary-button, .speed-button { font-size: 13px; }
+.speed-row { font-size: 12px; }
+.team-label { font-size: 10px; letter-spacing: .08em; }
+.elixir-line > span { font-size: 10px; }
+.team-stats span { font-size: 10px; letter-spacing: .06em; }
+.event-feed li { font-size: 12px; line-height: 1.45; }
+.panel-footer { font-size: 10px; letter-spacing: .07em; }
+.arena-caption { font-size: 11px; letter-spacing: .08em; }
+.caption-center { font-size: 10px; }
+.cr-player-copy small, .cr-trophy-chip small { font-size: 10px; letter-spacing: .09em; }
+.cr-player-copy strong { font-size: 13px; }
+.cr-arena-kicker { font-size: 10px; letter-spacing: .14em; }
+.cr-arena-subtitle { font-size: 11px; letter-spacing: .13em; }
+.cr-deck-heading { font-size: 11px; }
+.cr-deck-heading small { font-size: 10px; letter-spacing: .08em; }
+.cr-card-tile span { font-size: 9px; font-weight: 700; }
+.cr-nav-button small { font-size: 10px; letter-spacing: .06em; }
+.cr-battle-button small { font-size: 10px; letter-spacing: .09em; }
+.online-lobby-panel .eyebrow,
+.control-panel .eyebrow,
+.online-lobby-panel h2,
+.online-lobby-panel .primary-button,
+.online-lobby-panel .secondary-button,
+.control-panel .primary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button {
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+.online-lobby-panel .eyebrow,
+.control-panel .eyebrow { font-size: 11px; letter-spacing: .08em; }
+.online-lobby-panel h2 { font-size: 20px; font-weight: 700; }
+.online-lobby-panel .lobby-description { font-size: 13px; line-height: 1.55; }
+.online-lobby-panel .primary-button,
+.online-lobby-panel .secondary-button,
+.control-panel .primary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button { font-size: 13px; font-weight: 700; }
+
+@media (max-width: 760px) {
+  .cr-player-copy small, .cr-trophy-chip small { font-size: 9px; }
+  .cr-player-copy strong { font-size: 12px; }
+  .cr-arena-kicker { font-size: 9px; }
+  .cr-arena-subtitle { font-size: 10px; }
+  .cr-card-tile span { font-size: 8px; }
+  .cr-nav-button small, .cr-battle-button small { font-size: 9px; }
+}
+@media (max-width: 420px) {
+  .cr-player-copy strong { font-size: 11px; }
+  .cr-trophy-chip small { font-size: 8px; }
+  .cr-deck-heading { font-size: 10px; }
+  .cr-card-tile span { font-size: 7px; }
+  .cr-nav-button small, .cr-battle-button small { font-size: 8px; }
+  .event-feed li { font-size: 11px; }
+}
+
