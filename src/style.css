@@ -1984,7 +1984,6 @@ body[data-controls-open="true"] .control-panel {
 
 .online-lobby-panel,
 .control-panel {
-  position: relative;
   isolation: isolate;
   color: #193957;
   border: 4px solid #627f98;
@@ -2012,6 +2011,7 @@ body[data-controls-open="true"] .control-panel {
 }
 
 .online-lobby-panel {
+  position: relative;
   width: min(100%, 410px);
   padding: 20px;
   border-color: #748da4;
