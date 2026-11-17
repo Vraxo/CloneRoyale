@@ -134,7 +134,6 @@ export class BattleController {
   }
 
   public initialize(): void {
-    this.music.start(this.game.time, this.game.phase);
     this.renderer.render(this.game);
     this.updateHud();
   }

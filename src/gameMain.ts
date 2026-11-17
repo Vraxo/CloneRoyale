@@ -4,6 +4,7 @@ import { bindBattleInput } from "./app/battleInput";
 import { startBattleLoop } from "./app/battleLoop";
 import { OnlineClient, type OnlineMessage } from "./net/onlineClient";
 import type { AudioEvent } from "./game/types";
+import { createMenuAudio } from "./audio/menuAudio";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -23,6 +24,18 @@ const renderer = new ArenaRenderer();
 await renderer.initialize(host);
 
 const battle = new BattleController(renderer, developerMode);
+const menuAudio = createMenuAudio();
+document.body.dataset.screen = "home";
+document.addEventListener("pointerdown", () => menuAudio.unlock(), true);
+document.addEventListener("keydown", () => menuAudio.unlock(), true);
+document.addEventListener("click", event => {
+  if (document.body.dataset.screen !== "home" || !(event.target instanceof Element)) return;
+  const button = event.target.closest("button");
+  if (!button) return;
+  if (button.id === "menu-play") menuAudio.playLaunch();
+  else menuAudio.playButton();
+}, true);
+menuAudio.startMusic();
 
 type AudioSettings = { soundEffectsVolume: number; musicVolume: number };
 const AUDIO_SETTINGS_KEY = "cloneroyale.settings";
@@ -54,6 +67,7 @@ function renderAudioSettings(): void {
   if (musicValue) musicValue.textContent = Math.round(audioSettings.musicVolume * 100) + "%";
   battle.soundEffects.setVolume(audioSettings.soundEffectsVolume);
   battle.music.setVolume(audioSettings.musicVolume);
+  menuAudio.setVolumes(audioSettings.soundEffectsVolume, audioSettings.musicVolume);
 }
 function saveAudioSettings(): void {
   localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify(audioSettings));
@@ -109,7 +123,12 @@ const menuProfileButton = document.getElementById("menu-profile");
 const menuProfileName = document.getElementById("menu-profile-name");
 function setGameScreen(screen: "home" | "battle"): void {
   document.body.dataset.screen = screen;
-  if (screen === "battle") setGameMenuOpen(false);
+  if (screen === "battle") {
+    menuAudio.stopMusic();
+    setGameMenuOpen(false);
+  } else {
+    menuAudio.startMusic();
+  }
 }
 function startSoloBattle(): void {
   battle.startNewBattle();
@@ -389,8 +408,10 @@ profileNameInput?.addEventListener("keydown", event => {
 onlineButton?.addEventListener("click", openLobby);
 menuPlayButton?.addEventListener("click", startSoloBattle);
 menuOnlineButton?.addEventListener("click", openLobby);
-menuSettingsButton?.addEventListener("click", () => setGameMenuOpen(true));
-document.body.dataset.screen = "home";
+menuSettingsButton?.addEventListener("click", () => {
+  menuAudio.playTransition();
+  setGameMenuOpen(true);
+});
 findMatchButton?.addEventListener("click", async () => {
   if (!(await connectOnline())) return;
   if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = true;
@@ -465,7 +486,9 @@ function setGameMenuOpen(open: boolean): void {
   gameMenuToggle?.setAttribute("aria-expanded", String(open));
 }
 gameMenuToggle?.addEventListener("click", () => {
-  setGameMenuOpen(document.body.dataset.controlsOpen !== "true");
+  const open = document.body.dataset.controlsOpen !== "true";
+  menuAudio.playTransition();
+  setGameMenuOpen(open);
 });
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") setGameMenuOpen(false);
