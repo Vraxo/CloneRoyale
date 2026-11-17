@@ -17,10 +17,20 @@ The vector characters are deliberately a first-pass visual experiment, not final
 
 ## Requirements
 
-- Node.js 20.19 or newer.
-- npm.
+- Node.js 20.19 or newer (includes npm).
+- Tailscale, if you want to make your game publicly accessible through the included launcher.
 
-## Run locally
+## Start the game (recommended)
+
+On Windows, install Tailscale, sign in, and enable Tailscale Funnel for your tailnet once. Then double-click **Start Clone Royale.cmd**.
+
+The launcher installs dependencies when needed, builds the game, starts the server, and enables the public Funnel URL. It prints both the local address and your public address. Friends can open the public address in their browsers; they do not need Tailscale.
+
+Keep Tailscale running while you host. The game server runs in a separate minimized window; close that window to stop the server.
+
+## Run locally / development
+
+If you only want to run the game on your own machine or your local network, use:
 
 ```sh
 npm install
@@ -36,6 +46,19 @@ npm run typecheck
 npm run build
 ```
 
+## Online multiplayer
+
+The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Players can enter a public FIFO matchmaking queue and be paired automatically, or create private rooms with five-character invite codes. Players join as guests, with no account or password storage.
+
+For manual production-style startup:
+
+```sh
+npm run build
+npm start
+```
+
+Open the app and choose **Online play**. Use **Find match** in two browser sessions to be paired automatically, or use **Create private room** and share its code. For deployment, the included `render.yaml` describes a Render web service. Import the repository into Render and deploy the Blueprint. The free instance may sleep when idle, and room state is in memory, so active rooms are lost if the service restarts.
+
 ## Architecture
 
 - `src/game/types.ts`: simulation data contracts.
@@ -46,17 +69,6 @@ npm run build
 - `src/main.ts`: browser lifecycle, fixed-step loop, and controls.
 
 The simulation does not import PixiJS or access the DOM. Keep that boundary intact: rendering must never decide whether an attack hits or how much damage is dealt.
-
-## Online multiplayer
-
-The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Players can enter a public FIFO matchmaking queue and be paired automatically, or create private rooms with five-character invite codes. Players join as guests, with no account or password storage.
-
-```sh
-npm run build
-npm start
-```
-
-Open the app and choose **Online play**. Use **Find match** in two browser sessions to be paired automatically, or use **Create private room** and share its code. For deployment, the included `render.yaml` describes a Render web service. Import the repository into Render and deploy the Blueprint. The free instance may sleep when idle, and room state is in memory, so active rooms are lost if the service restarts.
 
 ## Next milestones
 
