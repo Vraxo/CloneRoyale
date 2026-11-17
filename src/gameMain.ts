@@ -121,6 +121,7 @@ const menuPlayButton = document.getElementById("menu-play");
 const menuOnlineButton = document.getElementById("menu-online");
 const menuSettingsButton = document.getElementById("menu-settings");
 const menuProfileButton = document.getElementById("menu-profile");
+const menuProfileShortcutButton = document.getElementById("menu-profile-shortcut");
 const menuProfileName = document.getElementById("menu-profile-name");
 function setGameScreen(screen: "home" | "battle"): void {
   document.body.dataset.screen = screen;
@@ -380,6 +381,7 @@ function openProfile(): void {
 }
 profileButton?.addEventListener("click", openProfile);
 menuProfileButton?.addEventListener("click", openProfile);
+menuProfileShortcutButton?.addEventListener("click", openProfile);
 function closeProfile(): void {
   if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = true;
   if (profileError) profileError.textContent = "";

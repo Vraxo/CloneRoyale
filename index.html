@@ -12,23 +12,66 @@
   <body>
     <div class="app-shell">
       <main id="main-menu" class="main-menu" aria-label="Main menu">
-        <div class="menu-atmosphere" aria-hidden="true"><span></span><span></span><span></span></div>
-        <div class="main-menu-content">
-          <div class="menu-brand">
-            <span class="menu-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="eyebrow">A REAL-TIME STRATEGY GAME</span>
+        <div class="cr-home-backdrop" aria-hidden="true">
+          <div class="cr-sky-glow"></div>
+          <div class="cr-arena-scene">
+            <div class="cr-arena-cliff cr-cliff-left"></div>
+            <div class="cr-arena-cliff cr-cliff-right"></div>
+            <div class="cr-arena-field">
+              <div class="cr-lane cr-lane-left"></div>
+              <div class="cr-lane cr-lane-right"></div>
+              <div class="cr-river"></div>
+              <div class="cr-bridge cr-bridge-left"></div>
+              <div class="cr-bridge cr-bridge-right"></div>
+              <div class="cr-tower cr-tower-blue cr-tower-one"><i></i></div>
+              <div class="cr-tower cr-tower-blue cr-tower-two"><i></i></div>
+              <div class="cr-tower cr-tower-red cr-tower-three"><i></i></div>
+              <div class="cr-tower cr-tower-red cr-tower-four"><i></i></div>
+              <div class="cr-arena-crest">♛</div>
+            </div>
           </div>
-          <h1>CLONE <span>ROYALE</span></h1>
-          <p class="menu-tagline">Build your deck. Deploy your troops. Take the crown.</p>
-          <div class="menu-actions">
-            <button id="menu-play" class="menu-play-button" type="button"><span class="menu-action-icon">⚔</span><span><strong>Play</strong><small>Battle against the AI</small></span><b>→</b></button>
-            <button id="menu-online" class="menu-action-button" type="button"><span class="menu-action-icon">◎</span><span><strong>Online</strong><small>Challenge another player</small></span><b>→</b></button>
-            <button id="menu-settings" class="menu-action-button" type="button"><span class="menu-action-icon">⚙</span><span><strong>Settings</strong><small>Audio and game options</small></span><b>→</b></button>
-            <button id="menu-profile" class="menu-action-button" type="button"><span class="menu-action-icon">♙</span><span><strong>Profile</strong><small id="menu-profile-name">Guest</small></span><b>→</b></button>
-          </div>
-          <div class="menu-footer"><span><i></i> READY FOR BATTLE</span><span>PROTOTYPE 0.2</span></div>
+          <div class="cr-backdrop-vignette"></div>
         </div>
-        <div class="menu-side-note" aria-hidden="true">THE ARENA AWAITS</div>
+
+        <header class="cr-home-header">
+          <button id="menu-profile" class="cr-player-chip" type="button" aria-label="Edit player profile">
+            <span class="cr-player-avatar">♙</span>
+            <span class="cr-player-copy"><small>PLAYER</small><strong id="menu-profile-name">Guest</strong></span>
+            <span class="cr-player-chevron">⌄</span>
+          </button>
+          <div class="cr-trophy-chip"><span>🏆</span><strong>0</strong><small>TROPHIES</small></div>
+        </header>
+
+        <section class="cr-home-center" aria-label="Arena">
+          <div class="cr-arena-title">
+            <span class="cr-arena-kicker">YOUR BATTLEFIELD</span>
+            <h1>TRAINING <span>CAMP</span></h1>
+            <span class="cr-arena-subtitle"><i></i> ARENA 1 <i></i></span>
+          </div>
+        </section>
+
+        <section class="cr-home-lower" aria-label="Battle and cards">
+          <div class="cr-deck-panel">
+            <div class="cr-deck-heading"><span>YOUR CARDS</span><small>COLLECTION</small></div>
+            <div class="cr-card-row">
+              <div class="cr-card-tile"><img src="/cards/archers.png" alt="Archers" /><span>ARCHERS</span></div>
+              <div class="cr-card-tile"><img src="/cards/giant.png" alt="Giant" /><span>GIANT</span></div>
+              <div class="cr-card-tile"><img src="/cards/mini-pekka.png" alt="Mini P.E.K.K.A." /><span>MINI P.E.K.K.A.</span></div>
+              <div class="cr-card-tile"><img src="/cards/baby-dragon.png" alt="Baby Dragon" /><span>BABY DRAGON</span></div>
+              <div class="cr-card-tile"><img src="/cards/skeleton-army.png" alt="Skeleton Army" /><span>SKELETON ARMY</span></div>
+              <div class="cr-card-tile"><img src="/cards/cannon.png" alt="Cannon" /><span>CANNON</span></div>
+              <div class="cr-card-tile"><img src="/cards/fireball.png" alt="Fireball" /><span>FIREBALL</span></div>
+              <div class="cr-card-tile"><img src="/cards/arrows.png" alt="Arrows" /><span>ARROWS</span></div>
+            </div>
+          </div>
+
+          <nav class="cr-home-nav" aria-label="Main navigation">
+            <button id="menu-settings" class="cr-nav-button" type="button"><span>⚙</span><small>SETTINGS</small></button>
+            <button id="menu-online" class="cr-nav-button" type="button"><span>⚔</span><small>ONLINE</small></button>
+            <button id="menu-play" class="cr-battle-button" type="button"><span class="cr-battle-swords">⚔</span><span><strong>BATTLE</strong><small>PLAY VS AI</small></span><b>›</b></button>
+            <button id="menu-profile-shortcut" class="cr-nav-button" type="button" aria-label="Player profile"><span>♙</span><small>PROFILE</small></button>
+          </nav>
+        </section>
       </main>
       <header class="topbar">
         <a class="brand" href="/" aria-label="Clone Royale home">
