@@ -71,9 +71,13 @@ export function updateProjectiles(state: GameState, dt: number): void {
         x: projectile.targetX,
         y: projectile.targetY,
         age: 0,
-        lifetime: projectile.style === "arrows" ? 0.38 : 0.48,
+        lifetime: projectile.style === "fireball"
+          ? 0.82
+          : projectile.style === "arrows" ? 0.38 : 0.48,
         radius: projectile.splashRadius,
-        style: projectile.style === "arrows" ? "arrows" : "explosion"
+        style: projectile.style === "fireball"
+          ? "fireball"
+          : projectile.style === "arrows" ? "arrows" : "explosion"
       });
     } else if (projectile.targetId !== null) {
       const unitTarget = state.units.find((unit) => unit.id === projectile.targetId);
