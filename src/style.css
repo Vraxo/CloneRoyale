@@ -1269,3 +1269,306 @@ body[data-controls-open="true"] .control-panel .match-control-section {
   box-shadow: 0 0 10px rgba(104,225,160,.55);
 }
 .menu-side-note { color: rgba(183, 216, 247, .4); }
+
+
+/* Portrait mobile presentation */
+@media (max-width: 640px) and (orientation: portrait) {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
+  .arena-frame {
+    bottom: env(safe-area-inset-bottom);
+  }
+
+  .topbar {
+    height: calc(58px + env(safe-area-inset-top));
+    min-height: calc(58px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 12px 0;
+    background: linear-gradient(180deg, rgba(5, 20, 42, .94), rgba(5, 20, 42, .72) 76%, transparent);
+  }
+
+  .topbar .brand {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 8px;
+  }
+
+  .brand-copy {
+    min-width: 0;
+  }
+
+  .brand-copy strong {
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .topbar-actions {
+    flex: 0 0 auto;
+    gap: 7px;
+  }
+
+  .match-summary {
+    gap: 5px;
+    padding: 6px 8px;
+    border: 1px solid rgba(116, 179, 232, .28);
+    border-radius: 8px;
+    background: rgba(8, 31, 56, .8);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  .match-summary strong {
+    font-size: 10px;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+  }
+
+  .game-menu-toggle {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+
+  .game-menu-toggle span {
+    display: none;
+  }
+
+  .profile-button {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 10px;
+  }
+
+  .profile-button #profile-name,
+  .profile-button .profile-edit {
+    display: none;
+  }
+
+  .profile-avatar {
+    width: 27px;
+    height: 27px;
+    flex-basis: 27px;
+    border-radius: 8px;
+  }
+
+  .control-panel {
+    top: calc(66px + env(safe-area-inset-top));
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    width: min(350px, calc(100vw - 20px));
+    max-height: none;
+    border-radius: 15px;
+  }
+
+  .control-panel .panel-section {
+    padding: 14px;
+  }
+
+  .control-panel .section-heading {
+    margin-bottom: 11px;
+  }
+
+  .control-panel .primary-button,
+  .control-panel .secondary-button,
+  .control-panel .speed-button {
+    min-height: 44px;
+  }
+
+  .volume-control input {
+    height: 22px;
+  }
+
+  .emote-ui {
+    top: calc(68px + env(safe-area-inset-top));
+    left: 10px;
+  }
+
+  .online-lobby {
+    padding: max(16px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .online-lobby-panel {
+    width: min(100%, 420px);
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px);
+    overflow-y: auto;
+    padding: 21px;
+    border-radius: 16px;
+  }
+
+  .online-lobby-panel .primary-button,
+  .online-lobby-panel .secondary-button,
+  .online-lobby-panel .lobby-close {
+    min-height: 42px;
+  }
+
+  .lobby-close {
+    width: 38px;
+    height: 38px;
+  }
+
+  .join-room-row {
+    grid-template-columns: minmax(0, 1fr) 76px;
+  }
+
+  .main-menu {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: max(24px, env(safe-area-inset-top)) 0 max(20px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .main-menu-content {
+    width: min(440px, calc(100% - 36px));
+    margin: auto;
+    padding: 22px 0;
+  }
+
+  .menu-brand {
+    gap: 10px;
+    margin-bottom: 19px;
+  }
+
+  .menu-brand-mark {
+    width: 33px;
+    height: 33px;
+    flex: 0 0 33px;
+  }
+
+  .menu-brand .eyebrow {
+    font-size: 8px;
+    letter-spacing: .16em;
+  }
+
+  .main-menu h1 {
+    font-size: clamp(27px, 8vw, 35px);
+  }
+
+  .menu-tagline {
+    max-width: 300px;
+    margin: 10px 0 22px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .menu-actions {
+    gap: 8px;
+  }
+
+  .menu-play-button,
+  .menu-action-button {
+    min-height: 60px;
+    padding: 9px 13px;
+    border-radius: 12px;
+  }
+
+  .menu-action-icon {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+  }
+
+  .menu-footer {
+    gap: 12px;
+    margin-top: 21px;
+    font-size: 7px;
+    letter-spacing: .11em;
+  }
+
+  .match-result {
+    padding: 18px;
+  }
+
+  .match-result-panel {
+    width: min(100%, 320px);
+    padding: 22px 19px;
+    border-radius: 16px;
+  }
+
+  .match-result-panel .primary-button,
+  .match-result-panel .secondary-button {
+    min-height: 46px;
+  }
+
+  button,
+  input {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 380px) and (orientation: portrait) {
+  .topbar {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .topbar-actions {
+    gap: 5px;
+  }
+
+  .match-summary {
+    padding: 5px 6px;
+    font-size: 8px;
+  }
+
+  .brand-copy strong {
+    font-size: 11px;
+  }
+
+  .control-panel .panel-section {
+    padding: 12px;
+  }
+
+  .online-lobby-panel {
+    padding: 18px;
+  }
+
+  .menu-footer span:last-child {
+    white-space: nowrap;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 640px) and (orientation: portrait) {
+  .main-menu-content {
+    padding: 14px 0;
+  }
+
+  .menu-brand {
+    margin-bottom: 13px;
+  }
+
+  .menu-tagline {
+    margin: 7px 0 15px;
+  }
+
+  .menu-actions {
+    gap: 6px;
+  }
+
+  .menu-play-button,
+  .menu-action-button {
+    min-height: 54px;
+  }
+
+  .menu-footer {
+    margin-top: 14px;
+  }
+}

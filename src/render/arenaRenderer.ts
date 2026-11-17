@@ -38,7 +38,7 @@ export class ArenaRenderer {
 
     await this.app.init({
       resizeTo: host,
-      background: "#18221e",
+      background: "#0b1e38",
       antialias: true,
       autoDensity: true,
       resolution: Math.min(window.devicePixelRatio || 1, 2)

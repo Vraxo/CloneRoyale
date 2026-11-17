@@ -111,7 +111,7 @@ export class BattleHud {
   private readonly nextCardCost = createHudText(10, 0xffffff, "Supercell Magic");
   private readonly elixirValue = createHudText(17, 0xf1d8ff);
   private readonly elixirMax = createHudText(8, 0xc1a5d8);
-  private readonly placementHint = createHudText(9, 0xc9d1c2);
+  private readonly placementHint = createHudText(9, 0xc5d9ee);
   private readonly matchClockLabel = createHudText(19, 0xf4eedc, "Supercell Magic");
 
   public constructor() {
@@ -178,25 +178,25 @@ export class BattleHud {
     graphics.clear();
     graphics
       .roundRect(7, layout.top + 4, layout.width - 14, HUD_HEIGHT - 8, 15)
-      .fill({ color: 0x202923, alpha: 0.98 });
+      .fill({ color: 0x102d50, alpha: 0.99 });
     graphics
       .roundRect(7, layout.top + 4, layout.width - 14, HUD_HEIGHT - 8, 15)
-      .stroke({ color: 0x58634c, alpha: 0.95, width: 1.5 });
+      .stroke({ color: 0x477eae, alpha: 0.98, width: 1.5 });
     graphics
       .rect(18, layout.top + 5, layout.width - 36, 2)
-      .fill({ color: 0xc1a76e, alpha: 0.62 });
+      .fill({ color: 0xffcf55, alpha: 0.88 });
 
     const nextX = layout.padding;
     const nextY = layout.cardY + 16;
     graphics
       .roundRect(nextX, nextY, layout.nextWidth, layout.cardHeight - 16, 7)
-      .fill({ color: 0x303a34, alpha: 1 });
+      .fill({ color: 0x1b4771, alpha: 1 });
     graphics
       .roundRect(nextX, nextY, layout.nextWidth, layout.cardHeight - 16, 7)
-      .stroke({ color: 0x7c806a, width: 1 });
+      .stroke({ color: 0x6ba7d5, width: 1 });
     graphics
       .roundRect(nextX + 5, layout.cardY - 1, layout.nextWidth - 10, 14, 4)
-      .fill({ color: 0x4b3d62 });
+      .fill({ color: 0x285783 });
     this.nextCardLabel.text = "NEXT";
     this.nextCardLabel.anchor.set(0.5);
     this.nextCardLabel.position.set(nextX + layout.nextWidth / 2, layout.cardY + 6);
@@ -277,17 +277,17 @@ export class BattleHud {
     const countdownActive = remaining !== null && remaining > 0 && remaining <= 10;
     graphics
       .roundRect(x, y, clockWidth, clockHeight, 9)
-      .fill({ color: countdownActive ? 0x4a2928 : 0x202923, alpha: 0.98 });
+      .fill({ color: countdownActive ? 0x4a2928 : 0x102d50, alpha: 0.99 });
     graphics
       .roundRect(x, y, clockWidth, clockHeight, 9)
       .stroke({
-        color: countdownActive ? 0xe36b58 : 0xc1a76e,
+        color: countdownActive ? 0xe36b58 : 0xffcf55,
         alpha: 0.95,
         width: countdownActive ? 2 : 1.5
       });
 
     this.matchClockLabel.text = matchClock(state);
-    this.matchClockLabel.style.fill = countdownActive ? 0xff8b78 : 0xf4eedc;
+    this.matchClockLabel.style.fill = countdownActive ? 0xff8b78 : 0xfff3cf;
     this.matchClockLabel.anchor.set(0.5);
     this.matchClockLabel.position.set(width / 2, y + clockHeight / 2);
   }
@@ -330,9 +330,9 @@ export class BattleHud {
       const rect = isSelected ? { ...baseRect, y: baseRect.y - 8 } : baseRect;
       const affordable = card !== null && player.elixir >= card.cost;
       const fill = card?.category === "spell"
-        ? 0x4b4662
-        : card?.category === "building" ? 0x55513e : 0x35473d;
-      const border = isSelected ? 0xe3c77d : affordable ? 0x9b936d : 0x576057;
+        ? 0x403a66
+        : card?.category === "building" ? 0x62502f : 0x1e4b70;
+      const border = isSelected ? 0xffd45e : affordable ? 0x8cc9f6 : 0x34516d;
 
       graphics
         .roundRect(rect.x, rect.y, rect.width, rect.height, 8)
