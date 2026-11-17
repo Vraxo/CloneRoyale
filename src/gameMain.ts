@@ -75,6 +75,7 @@ renderAudioSettings();
 bindBattleInput(battle);
 startBattleLoop(renderer.app, battle);
 battle.initialize();
+battle.setPaused(true);
 
 const onlineClient = new OnlineClient();
 let onlineUnsubscribe: (() => void) | null = null;
@@ -101,6 +102,19 @@ const profileError = document.getElementById("profile-error");
 const saveProfileButton = document.getElementById("save-profile");
 const closeProfileButton = document.getElementById("close-profile");
 const modeDescription = document.getElementById("mode-description");
+const menuPlayButton = document.getElementById("menu-play");
+const menuOnlineButton = document.getElementById("menu-online");
+const menuSettingsButton = document.getElementById("menu-settings");
+const menuProfileButton = document.getElementById("menu-profile");
+const menuProfileName = document.getElementById("menu-profile-name");
+function setGameScreen(screen: "home" | "battle"): void {
+  document.body.dataset.screen = screen;
+  if (screen === "battle") setGameMenuOpen(false);
+}
+function startSoloBattle(): void {
+  battle.startNewBattle();
+  setGameScreen("battle");
+}
 
 type GuestProfile = { id: string; name: string };
 function createGuestId(): string {
@@ -126,6 +140,7 @@ let guestProfile = loadGuestProfile();
 let opponentName: string | null = null;
 function renderProfile(): void {
   if (profileNameLabel) profileNameLabel.textContent = guestProfile.name;
+  if (menuProfileName) menuProfileName.textContent = guestProfile.name;
   if (profileAvatar) profileAvatar.textContent = guestProfile.name.charAt(0).toUpperCase();
   if (profileButton) profileButton.setAttribute("aria-label", "Player profile: " + guestProfile.name);
   if (profileNameInput instanceof HTMLInputElement) profileNameInput.value = guestProfile.name;
@@ -247,6 +262,7 @@ async function connectOnline(): Promise<boolean> {
           onlineClient.setProfile(guestProfile.id, guestProfile.name);
           if (message.players) updateOpponentLabel(message.players);
           if (message.state) {
+            setGameScreen("battle");
             if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
             battle.activateOnline(message.side, message.state, onlineClient);
             if (playAgainButton instanceof HTMLButtonElement) {
@@ -278,6 +294,7 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "players-updated") {
           updateOpponentLabel(message.players);
         } else if (message.type === "match-start") {
+          setGameScreen("battle");
           if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
           if (message.players) updateOpponentLabel(message.players);
           const side = document.body.dataset.onlineSide === "red" ? "red" : "blue";
@@ -333,14 +350,16 @@ async function connectOnline(): Promise<boolean> {
   }
 }
 
-profileButton?.addEventListener("click", () => {
+function openProfile(): void {
   renderProfile();
   if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = false;
   if (profileNameInput instanceof HTMLInputElement) {
     profileNameInput.focus();
     profileNameInput.select();
   }
-});
+}
+profileButton?.addEventListener("click", openProfile);
+menuProfileButton?.addEventListener("click", openProfile);
 function closeProfile(): void {
   if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = true;
   if (profileError) profileError.textContent = "";
@@ -368,6 +387,10 @@ profileNameInput?.addEventListener("keydown", event => {
 });
 
 onlineButton?.addEventListener("click", openLobby);
+menuPlayButton?.addEventListener("click", startSoloBattle);
+menuOnlineButton?.addEventListener("click", openLobby);
+menuSettingsButton?.addEventListener("click", () => setGameMenuOpen(true));
+document.body.dataset.screen = "home";
 findMatchButton?.addEventListener("click", async () => {
   if (!(await connectOnline())) return;
   if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = true;
@@ -432,7 +455,7 @@ playAgainButton?.addEventListener("click", () => {
     playAgainButton.textContent = "Waiting for opponent…";
     setLobbyStatus("Rematch requested. Waiting for your opponent…");
   } else {
-    battle.startNewBattle();
+    startSoloBattle();
   }
 });
 
