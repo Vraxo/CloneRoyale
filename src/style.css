@@ -710,3 +710,234 @@ body[data-online="true"] #play-again { display: none; }
   .visual-emote img { width: 44px; height: 44px; }
   .emote-bubble img { width: 68px; height: 68px; }
 }
+
+
+/* Full-screen game presentation */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  min-height: 100%;
+  min-height: 100dvh;
+  background: #18221e;
+}
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.topbar {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  left: 0;
+  min-height: 66px;
+  padding: 0 22px;
+  border: 0;
+  background: linear-gradient(180deg, rgba(12, 18, 14, .78), rgba(12, 18, 14, 0));
+  pointer-events: none;
+}
+
+.topbar > *,
+.topbar a,
+.topbar button {
+  pointer-events: auto;
+}
+
+.topbar-actions {
+  gap: 12px;
+}
+
+.workspace {
+  position: absolute;
+  inset: 0;
+  display: block;
+  min-height: 0;
+  padding: 0;
+}
+
+.arena-column {
+  position: absolute;
+  inset: 0;
+  display: block;
+  min-height: 0;
+}
+
+.arena-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.game-surface,
+.game-surface canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.mobile-hint {
+  display: none !important;
+}
+
+.game-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid rgba(225, 210, 164, .35);
+  border-radius: 8px;
+  background: rgba(25, 34, 27, .84);
+  color: #f0e6c8;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.game-menu-toggle:hover,
+.game-menu-toggle[aria-expanded="true"] {
+  border-color: var(--gold);
+  background: #303c30;
+}
+
+.control-panel {
+  position: fixed;
+  z-index: 12;
+  top: 72px;
+  right: 18px;
+  bottom: 18px;
+  width: min(320px, calc(100vw - 28px));
+  max-height: calc(100dvh - 90px);
+  align-self: auto;
+  overflow: auto;
+  display: none;
+  border-color: rgba(145, 160, 133, .42);
+  border-radius: 13px;
+  background: rgba(27, 34, 30, .97);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .5);
+  backdrop-filter: blur(14px);
+}
+
+body[data-controls-open="true"] .control-panel {
+  display: block;
+  animation: controls-enter .16s ease-out;
+}
+
+body[data-controls-open="true"] .control-panel .panel-section {
+  display: block;
+}
+
+body[data-controls-open="true"] .control-panel .match-control-section {
+  border-bottom: 1px solid rgba(112,129,112,.17);
+}
+
+body[data-controls-open="true"] .control-panel .debug-controls,
+body[data-controls-open="true"] .control-panel .team-section,
+body[data-controls-open="true"] .control-panel .event-section {
+  display: block;
+}
+
+body[data-mode="developer"] .control-panel {
+  width: min(360px, calc(100vw - 28px));
+}
+
+@keyframes controls-enter {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.emote-ui {
+  top: 76px;
+  left: 16px;
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    min-height: 58px;
+    padding: 0 10px;
+  }
+
+  .brand {
+    gap: 7px;
+  }
+
+  .brand-mark {
+    width: 28px;
+    height: 28px;
+  }
+
+  .brand-copy strong {
+    font-size: 11px;
+  }
+
+  .brand-copy small {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 7px;
+  }
+
+  .match-summary {
+    font-size: 9px;
+  }
+
+  .game-menu-toggle {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 9px;
+  }
+
+  .profile-button {
+    max-width: 104px;
+  }
+
+  .control-panel {
+    top: 64px;
+    right: 9px;
+    bottom: 9px;
+    width: min(320px, calc(100vw - 18px));
+    max-height: calc(100dvh - 73px);
+  }
+
+  .emote-ui {
+    top: 66px;
+    left: 9px;
+  }
+}
+
+@media (max-width: 390px) {
+  .topbar {
+    padding: 0 7px;
+  }
+
+  .brand-copy strong {
+    font-size: 10px;
+  }
+
+  .game-menu-toggle span {
+    display: none;
+  }
+
+  .profile-button {
+    max-width: 86px;
+  }
+}

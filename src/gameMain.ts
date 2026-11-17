@@ -436,6 +436,19 @@ playAgainButton?.addEventListener("click", () => {
   }
 });
 
+const gameMenuToggle = document.getElementById("game-menu-toggle");
+function setGameMenuOpen(open: boolean): void {
+  document.body.dataset.controlsOpen = open ? "true" : "false";
+  gameMenuToggle?.setAttribute("aria-expanded", String(open));
+}
+gameMenuToggle?.addEventListener("click", () => {
+  setGameMenuOpen(document.body.dataset.controlsOpen !== "true");
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") setGameMenuOpen(false);
+});
+onlineButton?.addEventListener("click", () => setGameMenuOpen(false));
+
 const modeButton = document.getElementById("mode-toggle");
 if (modeButton instanceof HTMLButtonElement) {
   modeButton.textContent = developerMode ? "Player mode" : "Developer tools";

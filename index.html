@@ -20,6 +20,7 @@
           </span>
         </a>
         <div class="topbar-actions">
+          <button id="game-menu-toggle" class="game-menu-toggle" type="button" aria-expanded="false" aria-controls="game-controls">☰ <span>Menu</span></button>
           <div class="match-summary" aria-live="polite">
             <span class="live-dot"></span>
             <span id="match-status">Regulation</span>
@@ -68,7 +69,7 @@
           <p class="mobile-hint">Select a card from the battle bar, then tap a valid position on your side to deploy it.</p>
         </section>
 
-        <aside class="control-panel">
+        <aside id="game-controls" class="control-panel" aria-label="Game menu">
           <section class="panel-section match-control-section">
             <div class="section-heading">
               <span class="eyebrow">MATCH</span>
