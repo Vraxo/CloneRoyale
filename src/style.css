@@ -1017,3 +1017,5 @@ body[data-screen="home"] .online-lobby { z-index: 30; }
   .menu-actions { gap: 6px; } .menu-play-button, .menu-action-button { min-height: 54px; }
   .menu-footer { margin-top: 14px; }
 }
+
+body[data-screen="home"][data-controls-open="true"] .control-panel { visibility: visible; pointer-events: auto; }
