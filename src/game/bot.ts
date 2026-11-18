@@ -77,6 +77,11 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
     return { cardId: "mini-pekka", lane: enemyGiant.lane };
   }
 
+  const enemyTank = threats.find((unit) => unit.hp > 650);
+  if (enemyTank && affordable.has("knight") && !affordable.has("mini-pekka")) {
+    return { cardId: "knight", lane: enemyTank.lane };
+  }
+
   if (threats.length >= 3 && affordable.has("cannon")) {
     const lane = threats.filter((unit) => unit.lane === "left").length >= threats.filter((unit) => unit.lane === "right").length
       ? "left"
@@ -109,6 +114,7 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
 
   const priority: CardId[] = [
     "mini-pekka",
+    "knight",
     "baby-dragon",
     "skeleton-army",
     "cannon",
