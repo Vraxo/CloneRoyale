@@ -1,4 +1,3 @@
-import "./styles/main.css";
 import { ArenaRenderer } from "./render/arenaRenderer";
 import { BattleController } from "./app/battleController";
 import { bindBattleInput } from "./app/battleInput";
