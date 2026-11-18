@@ -9,6 +9,7 @@ import { initializeAudioSettings } from "./audio/audioSettings";
 import { initializeReplayLibrary } from "./app/replayLibrary";
 import { createOnlineSession } from "./app/onlineSession";
 import { initializeDeckScreen } from "./app/deckScreen";
+import { initializeGuestProfile } from "./app/guestProfile";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -66,20 +67,10 @@ const onlineButton = document.getElementById("online-play");
 const leaveOnlineButton = document.getElementById("leave-online");
 const playAgainButton = document.getElementById("play-again");
 const leaveResultButton = document.getElementById("leave-result");
-const profileButton = document.getElementById("profile-button");
-const profileNameLabel = document.getElementById("profile-name");
-const profileAvatar = document.getElementById("profile-avatar");
-const profilePanel = document.getElementById("profile-panel");
-const profileNameInput = document.getElementById("profile-name-input");
-const profileError = document.getElementById("profile-error");
-const saveProfileButton = document.getElementById("save-profile");
-const closeProfileButton = document.getElementById("close-profile");
 const modeDescription = document.getElementById("mode-description");
 const menuPlayButton = document.getElementById("menu-play");
 const menuOnlineButton = document.getElementById("menu-online");
 const menuSettingsButton = document.getElementById("menu-settings");
-const menuProfileButton = document.getElementById("menu-profile");
-const menuProfileName = document.getElementById("menu-profile-name");
 function setGameScreen(screen: "home" | "battle"): void {
   document.body.dataset.screen = screen;
   if (screen === "battle") {
@@ -94,41 +85,18 @@ function startSoloBattle(): void {
   setGameScreen("battle");
 }
 
-type GuestProfile = { id: string; name: string };
-function createGuestId(): string {
-  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, character => {
-    const value = Math.floor(Math.random() * 16);
-    return (character === "x" ? value : (value & 0x3) | 0x8).toString(16);
-  });
-}
-function loadGuestProfile(): GuestProfile {
-  try {
-    const stored = JSON.parse(localStorage.getItem("cloneroyale.profile") ?? "null") as Partial<GuestProfile> | null;
-    if (stored && typeof stored.id === "string" && /^[a-f0-9-]{36}$/i.test(stored.id)
-      && typeof stored.name === "string" && stored.name.trim()) {
-      return { id: stored.id, name: stored.name.trim().slice(0, 16) };
-    }
-  } catch { /* Replace invalid local profile data. */ }
-  const profile = { id: createGuestId(), name: "Guest" };
-  localStorage.setItem("cloneroyale.profile", JSON.stringify(profile));
-  return profile;
-}
-let guestProfile = loadGuestProfile();
 let opponentName: string | null = null;
-function renderProfile(): void {
-  if (profileNameLabel) profileNameLabel.textContent = guestProfile.name;
-  if (menuProfileName) menuProfileName.textContent = guestProfile.name;
-  if (profileAvatar) profileAvatar.textContent = guestProfile.name.charAt(0).toUpperCase();
-  if (profileButton) profileButton.setAttribute("aria-label", "Player profile: " + guestProfile.name);
-  if (profileNameInput instanceof HTMLInputElement) profileNameInput.value = guestProfile.name;
-}
+const guestProfile = initializeGuestProfile(profile => {
+  if (onlineClient.isConnected) onlineClient.setProfile(profile.id, profile.name);
+  if (modeDescription) modeDescription.textContent = profile.name
+    + (opponentName ? " · vs " + opponentName : battle.isOnline ? " · Online" : " · Live match");
+});
+
 function updateOpponentLabel(players: { side: "blue" | "red"; name: string }[]): void {
   const opponent = players.find(player => player.side !== document.body.dataset.onlineSide);
   opponentName = opponent?.name ?? null;
-  if (modeDescription) modeDescription.textContent = guestProfile.name + (opponentName ? " · vs " + opponentName : " · Online");
+  if (modeDescription) modeDescription.textContent = guestProfile.getProfile().name + (opponentName ? " · vs " + opponentName : " · Online");
 }
-renderProfile();
 
 const BATTLE_EMOTES = [
   { label: "Good game!" },
@@ -187,7 +155,7 @@ function showBattleEmote(side: "blue" | "red", emoteId: number, name: string): v
 const onlineSession = createOnlineSession({
   client: onlineClient,
   battle,
-  getProfile: () => guestProfile,
+  getProfile: guestProfile.getProfile,
   updateOpponentLabel,
   showBattleEmote,
   setGameScreen,
@@ -250,41 +218,6 @@ function openLobby(): void {
   setLobbyStatus("Connect to the game server to create or join a room.");
 }
 
-
-function openProfile(): void {
-  renderProfile();
-  if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = false;
-  if (profileNameInput instanceof HTMLInputElement) {
-    profileNameInput.focus();
-    profileNameInput.select();
-  }
-}
-menuProfileButton?.addEventListener("click", openProfile);
-function closeProfile(): void {
-  if (profilePanel instanceof HTMLDivElement) profilePanel.hidden = true;
-  if (profileError) profileError.textContent = "";
-}
-closeProfileButton?.addEventListener("click", closeProfile);
-profilePanel?.addEventListener("click", event => {
-  if (event.target === profilePanel) closeProfile();
-});
-saveProfileButton?.addEventListener("click", () => {
-  const name = profileNameInput instanceof HTMLInputElement ? profileNameInput.value.trim() : "";
-  if (!name) {
-    if (profileError) profileError.textContent = "Enter a display name.";
-    return;
-  }
-  guestProfile = { ...guestProfile, name: name.replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 16) };
-  localStorage.setItem("cloneroyale.profile", JSON.stringify(guestProfile));
-  renderProfile();
-  if (onlineClient.isConnected) onlineClient.setProfile(guestProfile.id, guestProfile.name);
-  if (modeDescription) modeDescription.textContent = guestProfile.name + (opponentName ? " · vs " + opponentName : battle.isOnline ? " · Online" : " · Live match");
-  closeProfile();
-});
-profileNameInput?.addEventListener("keydown", event => {
-  if (event.key === "Enter") saveProfileButton?.click();
-  if (event.key === "Escape") closeProfile();
-});
 
 onlineButton?.addEventListener("click", openLobby);
 menuPlayButton?.addEventListener("click", startSoloBattle);
