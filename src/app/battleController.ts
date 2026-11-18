@@ -278,7 +278,7 @@ export class BattleController {
   }
 
   public selectCard(cardId: CardId): void {
-    if (this.paused || this.game.gameOver) return;
+    if (this.paused || this.game.gameOver || this.replayPlayer) return;
 
     if (this.selectedCard === cardId) {
       this.soundEffects.play("ui-click");
@@ -363,7 +363,7 @@ export class BattleController {
   }
 
   public updatePlacementPreview(event: PointerEvent): void {
-    if (!this.selectedCard || this.paused || this.game.gameOver) {
+    if (!this.selectedCard || this.paused || this.game.gameOver || this.replayPlayer) {
       this.renderer.setPlacementPreview(null);
       this.renderer.setDeploymentArea(this.game, this.playerSide, null);
       this.renderer.clearUnitPreview();
