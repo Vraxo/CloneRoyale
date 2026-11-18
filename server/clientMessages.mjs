@@ -14,10 +14,17 @@ export function createClientMessageHandler(options) {
     leaveRoom,
     attachPlayer,
     requestRematch,
-    resumePlayer
+    resumePlayer,
+    sendRoom
   } = options;
 
-  function handleEmote(client, message) {
+  const handlers = new Map();
+
+  function register(type, handler) {
+    handlers.set(type, handler);
+  }
+
+  register("emote", (client, message) => {
     const room = client.room;
     const emoteId = message.emoteId;
     if (!room?.state || !client.side || client.disconnected) return;
@@ -26,75 +33,60 @@ export function createClientMessageHandler(options) {
     if (now - (client.lastEmoteAt ?? 0) < EMOTE_COOLDOWN_MS) return;
     client.lastEmoteAt = now;
     broadcast(room, { type: "emote", side: client.side, emoteId, name: client.name });
-  }
+  });
 
-  return function handleMessage(client, message) {
-    if (!message || typeof message.type !== "string") return;
-    if (message.type === "emote") {
-      handleEmote(client, message);
+  register("resume", (client, message) => resumePlayer(client, message.token));
+
+  register("set-profile", (client, message) => {
+    const rawName = typeof message.name === "string" ? message.name : "";
+    const name = rawName.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 16) || "Guest";
+    const guestId = typeof message.guestId === "string" && /^[a-f0-9-]{36}$/i.test(message.guestId)
+      ? message.guestId : client.guestId;
+    client.guestId = guestId;
+    client.name = name;
+    if (client.room) broadcast(client.room, { type: "players-updated", players: playerSummaries(client.room) });
+  });
+
+  register("rematch-ready", client => requestRematch(client));
+  register("find-match", client => matchmaking.join(client));
+  register("cancel-matchmaking", client => matchmaking.remove(client, true));
+
+  register("create-room", client => {
+    matchmaking.remove(client);
+    if (client.room) leaveRoom(client);
+    createRoom(client);
+  });
+
+  register("join-room", (client, message) => {
+    const room = rooms.get(String(message.code ?? "").trim().toUpperCase());
+    if (!room) {
+      send(client, { type: "error", message: "Room not found. Check the code and try again." });
       return;
     }
-    if (message.type === "resume") {
-      resumePlayer(client, message.token);
+    if (client.room === room) {
+      sendRoom(room);
       return;
     }
-    if (message.type === "set-profile") {
-      const rawName = typeof message.name === "string" ? message.name : "";
-      const name = rawName.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 16) || "Guest";
-      const guestId = typeof message.guestId === "string" && /^[a-f0-9-]{36}$/i.test(message.guestId)
-        ? message.guestId : client.guestId;
-      client.guestId = guestId;
-      client.name = name;
-      if (client.room) broadcast(client.room, { type: "players-updated", players: playerSummaries(client.room) });
+    if (room.players.size >= 2 || room.state) {
+      send(client, { type: "error", message: "That room is already full." });
       return;
     }
-    if (message.type === "rematch-ready") {
-      requestRematch(client);
+    matchmaking.remove(client);
+    if (client.room) leaveRoom(client);
+    if (rooms.get(room.code) !== room || room.players.size >= 2 || room.state) {
+      send(client, { type: "error", message: "That room is no longer available." });
       return;
     }
-    if (message.type === "find-match") {
-      matchmaking.join(client);
-      return;
-    }
-    if (message.type === "cancel-matchmaking") {
-      matchmaking.remove(client, true);
-      return;
-    }
-    if (message.type === "create-room") {
-      matchmaking.remove(client);
-      if (client.room) leaveRoom(client);
-      createRoom(client);
-      return;
-    }
-    if (message.type === "join-room") {
-      const room = rooms.get(String(message.code ?? "").trim().toUpperCase());
-      if (!room) {
-        send(client, { type: "error", message: "Room not found. Check the code and try again." });
-        return;
-      }
-      if (client.room === room) {
-        sendRoom(room);
-        return;
-      }
-      if (room.players.size >= 2 || room.state) {
-        send(client, { type: "error", message: "That room is already full." });
-        return;
-      }
-      matchmaking.remove(client);
-      if (client.room) leaveRoom(client);
-      if (rooms.get(room.code) !== room || room.players.size >= 2 || room.state) {
-        send(client, { type: "error", message: "That room is no longer available." });
-        return;
-      }
-      attachPlayer(room, client, "red");
-      return;
-    }
-    if (message.type === "leave-room") {
-      matchmaking.remove(client);
-      leaveRoom(client);
-      return;
-    }
-    if (message.type !== "play-card" || !client.room?.state || !client.side) return;
+    attachPlayer(room, client, "red");
+  });
+
+  register("leave-room", client => {
+    matchmaking.remove(client);
+    leaveRoom(client);
+  });
+
+  register("play-card", (client, message) => {
+    if (!client.room?.state || !client.side) return;
     const state = client.room.state;
     const side = client.side;
     if (state.gameOver) return;
@@ -115,5 +107,10 @@ export function createClientMessageHandler(options) {
     client.room.replayRecorder?.record(state, side, cardId, point.x, point.y);
     broadcast(client.room, { type: "state", state });
     state.audioEvents = [];
+  });
+
+  return function handleMessage(client, message) {
+    if (!message || typeof message.type !== "string") return;
+    handlers.get(message.type)?.(client, message);
   };
 }
