@@ -125,6 +125,21 @@ function updateMatchResult(elements: HudElements, game: GameState, paused: boole
   elements.matchResult.hidden = false;
 }
 
+function updateReplayControls(replayTick: number, replayDuration: number, paused: boolean): void {
+  const replayTime = document.getElementById("replay-time");
+  if (replayTime) {
+    const format = (seconds: number): string => {
+      const safe = Math.max(0, Math.floor(seconds));
+      return String(Math.floor(safe / 60)).padStart(2, "0") + ":" + String(safe % 60).padStart(2, "0");
+    };
+    replayTime.textContent = format(replayTick / 30) + " / " + format(replayDuration / 30);
+  }
+  const replayPlayButton = document.getElementById("replay-play");
+  if (replayPlayButton && document.body.dataset.replaying === "true") {
+    replayPlayButton.textContent = paused ? "▶ PLAY" : "Ⅱ PAUSE";
+  }
+}
+
 function placementStatus(game: GameState, paused: boolean, placementMessage: string): string {
   if (game.gameOver) return "Match complete.";
   if (paused) return "Resume to continue playing.";
@@ -151,6 +166,7 @@ export function createBattleHud(renderer: ArenaRenderer): BattleHud {
         timeline.value = String(replayTick);
       }
 
+      updateReplayControls(replayTick, replayDuration, paused);
       updateStatistics(elements, game, playerSide);
       updateEventFeed(elements, game);
       updateMatchResult(elements, game, paused, playerSide);
