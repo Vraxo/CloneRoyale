@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
-import { createMatchmaking } from "../server/matchmaking.mjs";
-import { createRoomLifecycle } from "../server/roomLifecycle.mjs";
-import { createClientMessageHandler } from "../server/clientMessages.mjs";
+import { createMatchmaking } from "../dist-server/services.js";
 
 function makeClient(id) {
   return {
