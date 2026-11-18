@@ -1,9 +1,6 @@
 import type { CardId, GameState, Side } from "./types";
 import { cardById } from "./cards";
-import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH } from "./state";
-
-const RIVER_TOP = 448;
-const RIVER_BOTTOM = 512;
+import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, RIVER_BOTTOM, RIVER_TOP } from "./state";
 const DESTROYED_TOWER_LANE_DEPTH = 9 * ARENA_TILE_SIZE;
 
 export interface DeploymentZone {
