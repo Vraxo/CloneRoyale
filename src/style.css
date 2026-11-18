@@ -3021,3 +3021,9 @@ body, button, input, output, summary, label, small {
 @media (prefers-reduced-motion: reduce) {
   .cr-arena-scene, .cr-card-tile, .cr-battle-button, .cr-river { animation: none !important; }
 }
+
+/* Keep the home UI crisp and game-like; avoid decorative pulsing on primary controls. */
+.cr-card-tile { animation: none; }
+.cr-battle-button { animation: none; }
+.cr-battle-button::after { display: none; }
+.cr-arena-scene { animation-duration: 12s; }
