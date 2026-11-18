@@ -1,0 +1,12 @@
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  build: {
+    ssr: "server/simulation.ts",
+    outDir: "dist-server",
+    emptyOutDir: false,
+    rollupOptions: {
+      output: { format: "es" }
+    }
+  }
+});
