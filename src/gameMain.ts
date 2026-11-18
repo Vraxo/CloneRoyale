@@ -652,6 +652,37 @@ returnMainMenuButton?.addEventListener("click", () => {
   }
   setGameScreen("home");
 });
+const watchReplayButton = document.getElementById("watch-replay");
+const replayControls = document.getElementById("replay-controls");
+const replayPlayButton = document.getElementById("replay-play");
+const replayExitButton = document.getElementById("replay-exit");
+const replayTimeline = document.getElementById("replay-timeline");
+const replaySpeed = document.getElementById("replay-speed");
+watchReplayButton?.addEventListener("click", () => {
+  const replay = battle.completedReplay;
+  if (!replay || !battle.startReplay(replay)) return;
+  if (replayControls instanceof HTMLElement) replayControls.hidden = false;
+  if (replayPlayButton) replayPlayButton.textContent = "Ⅱ PAUSE";
+  setGameMenuOpen(false);
+});
+replayPlayButton?.addEventListener("click", () => {
+  battle.setPaused(!battle.isPaused);
+  replayPlayButton.textContent = battle.isPaused ? "▶ PLAY" : "Ⅱ PAUSE";
+});
+replayExitButton?.addEventListener("click", () => {
+  battle.exitReplay();
+  if (replayControls instanceof HTMLElement) replayControls.hidden = true;
+  document.body.dataset.replaying = "false";
+});
+replayTimeline?.addEventListener("input", () => {
+  if (replayTimeline instanceof HTMLInputElement) {
+    battle.seekReplay(Number(replayTimeline.value));
+  }
+});
+replaySpeed?.addEventListener("change", () => {
+  if (replaySpeed instanceof HTMLSelectElement) battle.setSpeed(Number(replaySpeed.value));
+});
+
 playAgainButton?.addEventListener("click", () => {
   if (battle.isOnline) {
     onlineClient.requestRematch();
