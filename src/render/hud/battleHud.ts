@@ -117,6 +117,13 @@ export class BattleHud {
   private readonly placementHint = createHudText(9, 0xc5d9ee);
   private readonly matchClockLabel = createHudText(19, 0xf4eedc, "Supercell Magic");
   private readonly clockModeLabel = createHudText(8, 0xf4d8ff, "Supercell Magic");
+  private readonly notificationGraphics = new Graphics();
+  private readonly notificationLabel = createHudText(23, 0xfff1cf, "Supercell Magic");
+  private previousPhase: GameState["phase"] | null = null;
+  private previousTime = 0;
+  private notificationText = "";
+  private notificationStartedAt = 0;
+  private notificationDuration = 2600;
 
   public constructor() {
     this.container.eventMode = "none";
@@ -137,6 +144,8 @@ export class BattleHud {
       this.placementHint,
       this.matchClockLabel,
       this.clockModeLabel,
+      this.notificationGraphics,
+      this.notificationLabel,
     );
 
     this.nextCardArt.eventMode = "none";
@@ -174,6 +183,7 @@ export class BattleHud {
     height: number,
     side: Side = "blue"
   ): void {
+    this.updateMatchNotification(state);
     const layout = calculateHudLayout(width, height);
     const graphics = this.graphics;
     this.cardProgressGraphics.clear();
@@ -242,6 +252,7 @@ export class BattleHud {
     this.drawCards(state, selectedCard, layout.cards, graphics, side);
     this.drawCardBadges(layout, selectedCard);
     this.drawElixir(player.elixir, layout, graphics, state.time);
+    this.drawMatchNotification(width, height);
 
     this.placementHint.text = message;
     this.placementHint.anchor.set(0.5);
@@ -272,6 +283,98 @@ export class BattleHud {
     });
 
     return index >= 0 ? index : null;
+  }
+
+  private updateMatchNotification(state: GameState): void {
+    const previousRemaining = this.previousPhase === "regulation"
+      ? MATCH_RULES.regulationSeconds - this.previousTime
+      : this.previousPhase === "overtime"
+        ? MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeSeconds - this.previousTime
+        : null;
+    const remaining = remainingMatchSeconds(state);
+
+    if (this.previousPhase !== null && this.previousPhase !== state.phase) {
+      if (state.phase === "overtime") {
+        this.showMatchNotification("OVERTIME!", "SUDDEN DEATH", 0xf18a62, 3400);
+      } else if (state.phase === "tiebreaker") {
+        this.showMatchNotification("TIEBREAKER!", "TOWERS DECIDE THE WINNER", 0xffb36f, 3400);
+      } else if (state.phase === "finished") {
+        this.showMatchNotification(
+          state.winner === "draw" ? "DRAW!" : state.winner === "blue" ? "BLUE VICTORY!" : "RED VICTORY!",
+          "MATCH COMPLETE",
+          state.winner === "draw" ? 0xffd27a : 0xffe6a0,
+          3200
+        );
+      }
+    } else if (this.previousPhase === "regulation" && state.phase === "regulation"
+      && previousRemaining !== null && remaining !== null
+      && previousRemaining > MATCH_RULES.doubleElixirStartsAt
+      && remaining <= MATCH_RULES.doubleElixirStartsAt) {
+      this.showMatchNotification("DOUBLE ELIXIR!", "ELIXIR GENERATES 2× FASTER", 0xd8a0ff, 3200);
+    } else if (this.previousPhase === "overtime" && state.phase === "overtime"
+      && this.previousTime < MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeTripleElixirStartsAt
+      && state.time >= MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeTripleElixirStartsAt) {
+      this.showMatchNotification("TRIPLE ELIXIR!", "ELIXIR GENERATES 3× FASTER", 0xffa16d, 3200);
+    } else if (remaining !== null && this.previousPhase === state.phase
+      && previousRemaining !== null && previousRemaining > 10 && remaining <= 10) {
+      this.showMatchNotification("10 SECONDS LEFT!", "FINAL COUNTDOWN", 0xff806b, 1800);
+    } else if (remaining !== null && this.previousPhase === state.phase
+      && previousRemaining !== null && previousRemaining > 3 && remaining <= 3) {
+      this.showMatchNotification(Math.ceil(remaining) + "...", " ", 0xff806b, 850);
+    }
+
+    this.previousPhase = state.phase;
+    this.previousTime = state.time;
+  }
+
+  private showMatchNotification(title: string, subtitle: string, color: number, duration: number): void {
+    this.notificationText = title + (subtitle.trim() ? "|" + subtitle : "");
+    this.notificationStartedAt = Date.now();
+    this.notificationDuration = duration;
+    this.notificationLabel.style.fill = color;
+  }
+
+  private drawMatchNotification(width: number, height: number): void {
+    const graphics = this.notificationGraphics;
+    graphics.clear();
+    const elapsed = Date.now() - this.notificationStartedAt;
+    if (!this.notificationText || elapsed >= this.notificationDuration) {
+      this.notificationLabel.visible = false;
+      return;
+    }
+
+    const progress = elapsed / this.notificationDuration;
+    const fadeIn = Math.min(1, elapsed / 180);
+    const fadeOut = Math.min(1, (1 - progress) * 5);
+    const alpha = Math.min(fadeIn, fadeOut);
+    const scale = 0.92 + Math.min(1, elapsed / 220) * 0.08;
+    const [title, subtitle = ""] = this.notificationText.split("|");
+    const bannerWidth = Math.min(width - 36, Math.max(230, Math.min(360, width * 0.62)));
+    const bannerHeight = subtitle ? 68 : 52;
+    const x = (width - bannerWidth) / 2;
+    const y = Math.max(82, height * 0.29);
+
+    graphics
+      .roundRect(x - 5, y - 4, bannerWidth + 10, bannerHeight + 8, 13)
+      .fill({ color: 0x07182b, alpha: 0.2 * alpha });
+    graphics
+      .roundRect(x, y, bannerWidth, bannerHeight, 10)
+      .fill({ color: 0x102d50, alpha: 0.94 * alpha });
+    graphics
+      .roundRect(x, y, bannerWidth, bannerHeight, 10)
+      .stroke({ color: 0xffd16a, alpha: 0.92 * alpha, width: 2 });
+    graphics
+      .rect(x + 12, y + 5, bannerWidth - 24, 2)
+      .fill({ color: 0xffe4a0, alpha: 0.75 * alpha });
+
+    this.notificationLabel.visible = true;
+    this.notificationLabel.text = subtitle ? title + "\\n" + subtitle : title;
+    this.notificationLabel.anchor.set(0.5);
+    this.notificationLabel.position.set(width / 2, y + bannerHeight / 2);
+    this.notificationLabel.alpha = alpha;
+    this.notificationLabel.scale.set(scale);
+    this.notificationLabel.style.fontSize = subtitle ? 21 : 25;
+    this.notificationLabel.style.lineHeight = subtitle ? 27 : 30;
   }
 
   private drawMatchClock(state: GameState, width: number, graphics: Graphics): void {
