@@ -74,7 +74,7 @@ export function initializeAccountPanel(): void {
     password.focus();
   }
 
-  async function request(path: string, body?: { username: string; password: string }): Promise<AuthResponse> {
+  async function request(path: string, body?: { username?: string; password?: string }): Promise<AuthResponse> {
     const response = await fetch(path, {
       method: body ? "POST" : "GET",
       credentials: "same-origin",
