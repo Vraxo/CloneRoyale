@@ -170,11 +170,17 @@
             </div>
             <div id="emote-bubble-blue" class="emote-bubble emote-bubble-blue" hidden><span></span><strong></strong><img alt="" hidden></div>
             <div id="emote-bubble-red" class="emote-bubble emote-bubble-red" hidden><span></span><strong></strong><img alt="" hidden></div>
+            <div id="replay-controls" class="replay-controls" hidden>
+              <div class="replay-controls-top"><strong> BATTLE REPLAY</strong><button id="replay-exit" type="button">EXIT REPLAY</button></div>
+              <input id="replay-timeline" type="range" min="0" max="1" value="0" step="1" aria-label="Replay timeline" />
+              <div class="replay-controls-bottom"><button id="replay-play" type="button">Ⅱ PAUSE</button><label> SPEED <select id="replay-speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label><span id="replay-time">00:00 / 00:00</span></div>
+            </div>
             <div id="match-result" class="match-result" hidden>
               <div class="match-result-panel">
                 <span class="eyebrow">MATCH COMPLETE</span>
                 <h2 id="result-title">Victory</h2>
                 <p id="result-summary">Crowns 1 – 0</p>
+                <button id="watch-replay" class="secondary-button" type="button" hidden>▶ Watch replay</button>
                 <button id="play-again" class="primary-button" type="button">Play again</button>
                 <button id="leave-result" class="secondary-button" type="button" hidden>Leave match</button>
               </div>
