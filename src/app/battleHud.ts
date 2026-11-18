@@ -21,7 +21,7 @@ interface HudElements {
 }
 
 export interface BattleHud {
-  update(game: GameState, selectedCard: CardId | null, paused: boolean, placementMessage: string, canStepBack: boolean, playerSide?: Side): void;
+  update(game: GameState, selectedCard: CardId | null, paused: boolean, placementMessage: string, canStepBack: boolean, playerSide?: Side, replayTick?: number, replayDuration?: number): void;
   setPaused(paused: boolean, game: GameState): void;
 }
 
@@ -142,13 +142,13 @@ export function createBattleHud(renderer: ArenaRenderer): BattleHud {
         : paused ? "Paused" : phaseLabel(game);
     },
 
-    update(game, selectedCard, paused, placementMessage, canStepBack, playerSide = "blue"): void {
+    update(game, selectedCard, paused, placementMessage, canStepBack, playerSide = "blue", replayTick = 0, replayDuration = 0): void {
       elements.stepBackButton.disabled = !canStepBack || game.gameOver;
       elements.leaveResultButton.hidden = document.body.dataset.online !== "true" || !game.gameOver;
       const timeline = document.getElementById("replay-timeline");
       if (timeline instanceof HTMLInputElement && document.body.dataset.replaying === "true") {
-        timeline.max = String(Math.max(1, Number((window as unknown as { __replayDuration?: number }).__replayDuration ?? 1)));
-        timeline.value = String(Number((window as unknown as { __replayTick?: number }).__replayTick ?? 0));
+        timeline.max = String(Math.max(1, replayDuration));
+        timeline.value = String(replayTick);
       }
 
       updateStatistics(elements, game, playerSide);
