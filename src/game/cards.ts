@@ -5,6 +5,7 @@ import { BABY_DRAGON_CARD } from "../cards/BabyDragon/BabyDragonCard";
 import { CANNON_CARD } from "../cards/Cannon/CannonCard";
 import { FIREBALL_CARD } from "../cards/Fireball/FireballCard";
 import { GIANT_CARD } from "../cards/Giant/GiantCard";
+import { KNIGHT_CARD } from "../cards/Knight/KnightCard";
 import { MINI_PEKKA_CARD } from "../cards/MiniPekka/MiniPekkaCard";
 import { SKELETON_ARMY_CARD } from "../cards/Skeleton/SkeletonArmyCard";
 
@@ -27,7 +28,8 @@ export const CARDS: Record<CardId, CardDefinition> = {
   "skeleton-army": SKELETON_ARMY_CARD,
   cannon: CANNON_CARD,
   fireball: FIREBALL_CARD,
-  arrows: ARROWS_CARD
+  arrows: ARROWS_CARD,
+  knight: KNIGHT_CARD
 };
 
 export function cardById(id: CardId): CardDefinition {
