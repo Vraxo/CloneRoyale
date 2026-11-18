@@ -8,7 +8,7 @@ import { ReplayRecordingSession } from "../game/replayRecording";
 import { ReplayPlaybackSession } from "../game/replayPlayback";
 import { saveBattleReplay, saveReplayShareToken } from "../game/replayStorage";
 import { cardById, STARTER_DECK } from "../game/cards";
-import type { CardId, GameState, Lane, Side } from "../game/types";
+import type { CardId, GameState, Side } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
 import { createBattleHud, type BattleHud } from "./battleHud";
@@ -195,7 +195,7 @@ export class BattleController {
 
   public setOnlineNotice(message: string): void {
     if (!this.isOnline) return;
-    this.placementMessage = message;
+    this.actions.setNotice(message);
     this.updateHud();
   }
 
@@ -306,7 +306,7 @@ export class BattleController {
     if (!previousState) return;
     this.game = previousState;
     this.selectedCard = null;
-    this.placementMessage = "Choose a card, then deploy on your side.";
+    this.actions.reset();
     this.renderer.setPlacementPreview(null);
     this.soundEffects.stopAll();
     this.accumulator = 0;
