@@ -488,7 +488,7 @@ async function connectOnline(): Promise<boolean> {
           updateOpponentLabel(message.players);
         } else if (message.type === "match-start") {
           const shareButton = document.getElementById("share-replay");
-          if (shareButton instanceof HTMLButtonElement) { shareButton.hidden = true; shareButton.textContent = "↗ Share replay"; }
+          if (shareButton instanceof HTMLButtonElement) { shareButton.hidden = true; shareButton.textContent = "↗ Copy replay link"; }
           const shareStatus = document.getElementById("share-replay-status");
           if (shareStatus) shareStatus.textContent = "";
           setGameScreen("battle");
@@ -530,7 +530,7 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "match-replay") {
           battle.applyOnlineReplay(message.replay, message.shareToken);
           const shareButton = document.getElementById("share-replay");
-          if (shareButton instanceof HTMLButtonElement) shareButton.hidden = !battle.completedReplayShareToken;
+          if (shareButton instanceof HTMLButtonElement) { shareButton.hidden = !battle.completedReplayShareToken; shareButton.textContent = "↗ Copy replay link"; }
         } else if (message.type === "opponent-left") {
           if (battle.isOnline) {
             setLobbyStatus("Opponent left. You can leave this match and find another opponent.");
@@ -743,6 +743,21 @@ async function publishReplay(id: string, token: string): Promise<void> {
     if (resultStatus) resultStatus.textContent = message;
   }
 }
+async function unpublishReplay(id: string, token: string): Promise<void> {
+  if (replayLibraryStatus) replayLibraryStatus.textContent = "Removing replay from the public library…";
+  try {
+    const response = await fetch(replayApi("/api/replays/" + encodeURIComponent(id) + "/unpublish"), {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ shareToken: token })
+    });
+    const result = await response.json() as { error?: string; visibility?: string };
+    if (!response.ok || result.visibility !== "unlisted") throw new Error(result.error ?? "Could not hide replay.");
+    if (replayLibraryStatus) replayLibraryStatus.textContent = "Replay hidden from the public library. Its direct link still works.";
+    renderLocalReplays();
+    await refreshPublicReplays();
+  } catch (error) {
+    if (replayLibraryStatus) replayLibraryStatus.textContent = error instanceof Error ? error.message : "Could not hide replay.";
+  }
+}
 async function watchReplay(replay: unknown): Promise<void> {
   if (!isBattleReplay(replay)) return;
   replayReturnScreen = document.body.dataset.screen === "battle" ? "battle" : "home";
@@ -767,7 +782,10 @@ function renderLocalReplays(): void {
     const subtitle = players + " · " + replayResultLabel(replay.winner) + " · " + formatReplayDuration(replay.durationTicks / 30) + " · " + date;
     const actions: { label: string; run: () => void | Promise<void> }[] = [{ label: "▶ WATCH", run: () => watchReplay(replay) }];
     const token = tokens[replay.id];
-    if (replay.mode === "online" && token) actions.push({ label: "↗ SHARE", run: () => publishReplay(replay.id, token) });
+    if (replay.mode === "online" && token) {
+      actions.push({ label: "↗ SHARE", run: () => publishReplay(replay.id, token) });
+      actions.push({ label: "HIDE FROM PUBLIC", run: () => unpublishReplay(replay.id, token) });
+    }
     localReplayList.append(createReplayRow(replayResultLabel(replay.winner), subtitle, actions));
   }
 }
@@ -781,7 +799,7 @@ async function refreshPublicReplays(): Promise<void> {
     const data = await response.json() as { replays?: { id: string; createdAt: number; durationSeconds: number; winner: string | null; players: { blue: string; red: string } }[] };
     publicReplayList.replaceChildren();
     const replays = data.replays ?? [];
-    if (replays.length === 0) { const empty = document.createElement("p"); empty.className = "replay-empty"; empty.textContent = "No public replays yet. Share a multiplayer match to add the first one."; publicReplayList.append(empty); return; }
+    if (replays.length === 0) { const empty = document.createElement("p"); empty.className = "replay-empty"; empty.textContent = "No public matches yet. Completed PvP matches appear here automatically."; publicReplayList.append(empty); return; }
     for (const replay of replays) {
       const subtitle = replay.players.blue + " vs " + replay.players.red + " · " + replayResultLabel(replay.winner) + " · " + formatReplayDuration(replay.durationSeconds) + " · " + new Date(replay.createdAt).toLocaleString();
       publicReplayList.append(createReplayRow(replayResultLabel(replay.winner), subtitle, [
