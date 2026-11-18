@@ -3530,3 +3530,5 @@ body[data-screen="replays"] .workspace { visibility: hidden; pointer-events: non
   .account-section { padding: 10px; gap: 8px; }
   .profile-panel { max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
 }
+
+.account-form[hidden] { display: none; }
