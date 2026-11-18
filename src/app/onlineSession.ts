@@ -188,5 +188,9 @@ export function createOnlineSession(options: OnlineSessionOptions) {
     messageUnsubscribe = null;
   }
 
-  return { connect, unsubscribe };
+  function sendEmote(emoteId: number): void {
+    client.sendEmote(emoteId);
+  }
+
+  return { connect, unsubscribe, sendEmote };
 }
