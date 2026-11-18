@@ -3403,3 +3403,130 @@ body[data-screen="replays"] .workspace { visibility: hidden; pointer-events: non
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
+
+
+/* Optional game account controls inside the player profile. */
+.account-section {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 13px;
+  border: 1px solid rgba(103, 161, 207, .42);
+  border-radius: 8px;
+  background: linear-gradient(155deg, rgba(20, 64, 101, .72), rgba(7, 29, 52, .82));
+}
+.account-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #f4d77f;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+.account-section-heading small {
+  padding: 3px 6px;
+  border: 1px solid rgba(164, 197, 221, .3);
+  border-radius: 4px;
+  color: #9dbbd4;
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+.account-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid rgba(127, 170, 204, .25);
+  border-radius: 7px;
+  background: rgba(2, 17, 32, .5);
+}
+.account-tabs button {
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #9dbbd4;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+.account-tabs button[aria-pressed="true"] {
+  border-color: #e2c17a;
+  background: linear-gradient(180deg, #367eae, #174b76);
+  box-shadow: 0 2px 0 rgba(3, 20, 36, .55), inset 0 1px rgba(255,255,255,.16);
+  color: #fff1c8;
+}
+.account-form { display: grid; gap: 7px; }
+.account-form .lobby-label { margin: 2px 0 0; }
+.account-form .profile-name-input { margin: 0; }
+.account-helper, .account-note {
+  margin: 0;
+  color: #9dbbd4;
+  font-size: 9px;
+  line-height: 1.55;
+}
+.account-note {
+  padding-top: 9px;
+  border-top: 1px solid rgba(127, 170, 204, .2);
+}
+.account-signed-in {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid rgba(113, 190, 145, .4);
+  border-radius: 7px;
+  background: rgba(26, 91, 72, .22);
+}
+.account-signed-in[hidden] { display: none; }
+.account-status-mark {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #2c8b67;
+  color: white;
+  font-weight: 900;
+}
+.account-signed-in > div { display: grid; gap: 3px; min-width: 0; }
+.account-signed-in small { color: #9dbbd4; font-size: 8px; font-weight: 900; letter-spacing: .1em; }
+.account-signed-in strong { overflow-wrap: anywhere; color: #fff0c1; font-size: 12px; }
+.account-logout {
+  min-height: 32px;
+  margin-left: auto;
+  padding: 5px 8px;
+  border: 1px solid rgba(213, 158, 139, .45);
+  border-radius: 5px;
+  background: rgba(107, 47, 42, .35);
+  color: #ffd4c7;
+  font-size: 8px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.account-form button:disabled, .account-logout:disabled { opacity: .55; cursor: wait; }
+.profile-divider {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 4px 0 12px;
+  color: #9dbbd4;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+.profile-divider::before, .profile-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: rgba(127, 170, 204, .28);
+}
+.profile-panel { max-height: min(88dvh, 760px); overflow-y: auto; }
+.profile-panel .account-section .primary-button { margin-top: 2px; }
+@media (max-width: 640px) {
+  .account-section { padding: 10px; gap: 8px; }
+  .profile-panel { max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+}
