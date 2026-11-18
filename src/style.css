@@ -2577,3 +2577,36 @@ body, button, input, output, summary, label, small {
   .cr-install-button { min-height: 38px; padding: 0 8px; font-size: 9px; }
   .cr-network-status { top: 62px; right: 10px; font-size: 8px; }
 }
+
+
+/* iOS Add to Home Screen guidance. */
+.install-help[hidden] { display: none; }
+.install-help {
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(4, 13, 25, .78);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+.install-help-panel {
+  position: relative;
+  width: min(100%, 390px);
+  padding: 28px;
+  border: 1px solid rgba(177,211,236,.35);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #173b5d, #0d2945);
+  color: #eff7ff;
+  box-shadow: 0 18px 55px rgba(0,0,0,.42);
+}
+.install-help-panel > .lobby-close { position: absolute; top: 12px; right: 12px; }
+.install-help-panel > .eyebrow { color: #a9c9e2; font-size: 10px; letter-spacing: .12em; }
+.install-help-panel h2 { margin: 10px 0 12px; font-size: 21px; }
+.install-help-panel p, .install-help-panel li { color: #d1e0ed; font-size: 13px; line-height: 1.55; }
+.install-help-panel ol { padding-left: 21px; }
+.install-help-panel li { margin: 9px 0; padding-left: 3px; }
+.install-help-panel strong { color: #ffe18a; }
+.install-help-panel .install-help-note { margin: 18px 0 0; color: #a9c4d9; font-size: 11px; }
