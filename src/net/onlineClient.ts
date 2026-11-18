@@ -19,7 +19,7 @@ export type OnlineMessage =
   | { type: "rematch-status"; ready: number; total: number }
   | { type: "rematch-start"; state: GameState; players?: { side: Side; name: string }[] }
   | { type: "state"; state: GameState }
-  | { type: "match-replay"; replay: BattleReplay }
+  | { type: "match-replay"; replay: BattleReplay; shareToken?: string }
   | { type: "emote"; side: Side; emoteId: number; name: string }
   | { type: "opponent-left" }
   | { type: "action-error"; message: string }
