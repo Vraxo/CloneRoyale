@@ -17,6 +17,7 @@ interface HudElements {
   resultSummary: HTMLParagraphElement;
   playAgainButton: HTMLButtonElement;
   leaveResultButton: HTMLButtonElement;
+  watchReplayButton: HTMLButtonElement;
 }
 
 export interface BattleHud {
@@ -46,7 +47,8 @@ function findElements(): HudElements {
     resultTitle: element<HTMLHeadingElement>("result-title"),
     resultSummary: element<HTMLParagraphElement>("result-summary"),
     playAgainButton: element<HTMLButtonElement>("play-again"),
-    leaveResultButton: element<HTMLButtonElement>("leave-result")
+    leaveResultButton: element<HTMLButtonElement>("leave-result"),
+    watchReplayButton: element<HTMLButtonElement>("watch-replay")
   };
 }
 
@@ -103,7 +105,8 @@ function updateEventFeed(elements: HudElements, game: GameState): void {
 }
 
 function updateMatchResult(elements: HudElements, game: GameState, paused: boolean, playerSide: Side): void {
-  if (!game.gameOver) {
+  elements.watchReplayButton.hidden = document.body.dataset.replayAvailable !== "true" || document.body.dataset.replaying === "true";
+  if (!game.gameOver || document.body.dataset.replaying === "true") {
     if (!paused) elements.statusLabel.textContent = phaseLabel(game);
     elements.matchResult.hidden = true;
     return;
@@ -142,6 +145,11 @@ export function createBattleHud(renderer: ArenaRenderer): BattleHud {
     update(game, selectedCard, paused, placementMessage, canStepBack, playerSide = "blue"): void {
       elements.stepBackButton.disabled = !canStepBack || game.gameOver;
       elements.leaveResultButton.hidden = document.body.dataset.online !== "true" || !game.gameOver;
+      const timeline = document.getElementById("replay-timeline");
+      if (timeline instanceof HTMLInputElement && document.body.dataset.replaying === "true") {
+        timeline.max = String(Math.max(1, Number((window as unknown as { __replayDuration?: number }).__replayDuration ?? 1)));
+        timeline.value = String(Number((window as unknown as { __replayTick?: number }).__replayTick ?? 0));
+      }
 
       updateStatistics(elements, game, playerSide);
       updateEventFeed(elements, game);
