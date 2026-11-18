@@ -3,11 +3,7 @@
     "target": "ES2022",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": false,
@@ -20,6 +16,13 @@
   },
   "include": [
     "src",
-    "server/**/*.ts"
+    "server/types.ts",
+    "server/simulation.ts",
+    "server/playerMessages.ts",
+    "server/roomMessages.ts",
+    "server/matchMessages.ts",
+    "server/clientMessages.ts",
+    "server/matchmaking.ts",
+    "server/roomLifecycle.ts"
   ]
 }
