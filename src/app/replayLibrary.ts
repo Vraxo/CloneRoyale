@@ -9,6 +9,7 @@ import { copyReplayLink, createPublicReplayLink } from "./replaySharing";
 import {
   createReplayEmptyState,
   createReplayRow,
+  type ReplayAction,
   describeLocalReplay,
   describePublicReplay,
   replayResultLabel
@@ -71,7 +72,7 @@ export function initializeReplayLibrary(options: ReplayLibraryOptions): void {
 
     const tokens = readReplayShareTokens();
     for (const replay of replays) {
-      const actions = [{
+      const actions: ReplayAction[] = [{
         label: "▶ WATCH",
         run: () => watchReplay(replay)
       }];
