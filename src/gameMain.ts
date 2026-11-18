@@ -130,7 +130,7 @@ function leaveOnlineMatch(): void {
   battle.leaveOnline();
   opponentName = null;
   if (modeDescription) modeDescription.textContent = guestProfile.getProfile().name + " · Live match";
-  if (lobby instanceof HTMLDivElement) lobby.hidden = true;
+  lobbyScreen?.hideLobby();
   if (playAgainButton instanceof HTMLButtonElement) {
     playAgainButton.disabled = false;
     playAgainButton.textContent = "Play again";
