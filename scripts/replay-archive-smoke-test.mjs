@@ -42,7 +42,7 @@ try {
   const unpublish = await fetch(baseUrl + "/api/replays/" + replayId + "/unpublish", {
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ shareToken })
   });
-  assert.equal(unpublish.status, 405, "Replay visibility opt-out should not be available.");
+  assert.equal(unpublish.status, 404, "Replay visibility opt-out endpoint should not exist.");
   const stillPublic = await fetch(baseUrl + "/api/replays");
   assert.equal((await stillPublic.json()).replays.length, 1, "Completed PvP replays should remain public.");
   const republished = await fetch(baseUrl + "/api/replays/" + replayId + "/publish", {
