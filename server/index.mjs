@@ -370,9 +370,13 @@ const server = createServer(async (request, response) => {
     response.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }).end(JSON.stringify({ replays }));
     return;
   }
-  const replayMatch = requestUrl.pathname.match(/^\/api\/replays\/([a-f0-9]{32})(?:\/(publish))?$/);
+  const replayMatch = requestUrl.pathname.match(/^\/api\/replays\/([a-f0-9]{32})(?:\/(publish|unpublish))?$/);
   if (replayMatch) {
     const [, id, action] = replayMatch;
+    if (action === "unpublish") {
+      response.writeHead(404, { "content-type": "application/json" }).end(JSON.stringify({ error: "Not found." }));
+      return;
+    }
     const record = await readReplayRecord(id);
     if (!record) { response.writeHead(404, { "content-type": "application/json" }).end(JSON.stringify({ error: "Replay not found." })); return; }
     if (request.method === "GET" && !action) {
