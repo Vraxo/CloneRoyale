@@ -2,11 +2,12 @@ import { createServer } from "node:http";
 import { resolve } from "node:path";
 import { randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, playCard, ReplayRecorder, STARTER_DECK } from "../dist-server/simulation.js";
+import { createGame, createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, playCard, ReplayRecorder, STARTER_DECK, ReplayRecorder, STARTER_DECK } from "../dist-server/simulation.js";
 import { createReplayArchive } from "./replayArchive.mjs";
 import { createHttpHandler } from "./httpHandler.mjs";
 import { createWebSocketTransport } from "./webSocketTransport.mjs";
 import { createMatchmaking } from "./matchmaking.mjs";
+import { createRoomLifecycle } from "./roomLifecycle.mjs";
 import { createMatchSimulation } from "./matchSimulation.mjs";
 
 const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
@@ -29,25 +30,13 @@ function playerSummaries(room) {
 function sendRoom(room) {
   broadcast(room, { type: "room", code: room.code, players: playerSummaries(room), status: room.state ? "playing" : "waiting" });
 }
-function makeCode() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 5; i += 1) code += alphabet[randomBytes(1)[0] % alphabet.length];
-  return code;
-}
-function attachPlayer(room, client, side) {
-  client.room = room; client.side = side; room.players.set(client.id, client);
-  send(client, { type: "assigned", side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, resumeToken: client.resumeToken, name: client.name });
-  if (!room.publicMatch) sendRoom(room);
-  if (room.players.size === 2 && [...room.players.values()].every(player => !player.disconnected)) {
-    room.seed = randomBytes(4).readUInt32BE(0);
-    room.state = createGame(room.seed);
-    room.replayRecorder = new ReplayRecorder(room.seed, STARTER_DECK, randomBytes(16).toString("hex"), "online");
-    room.replaySent = false;
-    room.lastUpdate = Date.now();
-    broadcast(room, { type: "match-start", state: room.state, players: playerSummaries(room) });
-  }
-}
+let roomLifecycle;
+function attachPlayer(room, client, side) { roomLifecycle.attachPlayer(room, client, side); }
+function createRoom(client) { roomLifecycle.createRoom(client); }
+function leaveRoom(client) { roomLifecycle.leaveRoom(client); }
+function requestRematch(client) { roomLifecycle.requestRematch(client); }
+function resumePlayer(client, token) { roomLifecycle.resumePlayer(client, token); }
+function closeClient(client) { roomLifecycle.closeClient(client); }
 function isSocketUsable(client) {
   return !client.closed && Boolean(client.socket) && !client.socket.destroyed && client.socket.writable;
 }
@@ -60,25 +49,6 @@ const matchmaking = createMatchmaking({
   send: (client, payload) => send(client, payload),
   maxQueue: MAX_MATCHMAKING_QUEUE
 });
-function createRoom(client) {
-  let code;
-  do { code = makeCode(); } while (rooms.has(code));
-  const room = { code, players: new Map(), state: null, lastUpdate: Date.now(), accumulator: 0, publicMatch: false };
-  rooms.set(code, room); attachPlayer(room, client, "blue");
-}
-function leaveRoom(client) {
-  const room = client.room;
-  if (!room) return;
-  const timer = reconnectTimers.get(client.resumeToken);
-  if (timer) clearTimeout(timer);
-  reconnectTimers.delete(client.resumeToken);
-  room.players.delete(client.id); client.room = null; client.side = null; client.rematchReady = false;
-  if (room.players.size === 0 || room.state) { rooms.delete(room.code); }
-  if (room.players.size > 0) {
-    broadcast(room, { type: "opponent-left" });
-    if (!room.state) sendRoom(room);
-  }
-}
 const MATCH_EMOTE_COUNT = 12;
 const EMOTE_COOLDOWN_MS = 1200;
 function handleEmote(client, message) {
@@ -137,75 +107,6 @@ function handleMessage(client, message) {
   broadcast(client.room, { type: "state", state });
   state.audioEvents = [];
 }
-function requestRematch(client) {
-  const room = client.room;
-  if (!room?.state?.gameOver || !client.side || client.disconnected) return;
-  client.rematchReady = true;
-  const ready = [...room.players.values()].filter(player => player.rematchReady && !player.disconnected).length;
-  broadcast(room, { type: "rematch-status", ready, total: room.players.size });
-  if (room.players.size !== 2 || ready !== 2) return;
-  for (const player of room.players.values()) player.rematchReady = false;
-  room.seed = randomBytes(4).readUInt32BE(0);
-  room.state = createGame(room.seed);
-  room.replayRecorder = new ReplayRecorder(room.seed, STARTER_DECK, randomBytes(16).toString("hex"), "online");
-  room.replaySent = false;
-  room.lastUpdate = Date.now();
-  room.accumulator = 0;
-  broadcast(room, { type: "rematch-start", state: room.state, players: playerSummaries(room) });
-}
-
-function resumePlayer(client, token) {
-  if (typeof token !== "string" || token.length < 24 || token.length > 128) {
-    send(client, { type: "resume-failed" });
-    return;
-  }
-  for (const room of rooms.values()) {
-    const player = [...room.players.values()].find(candidate => candidate.resumeToken === token);
-    if (!player || !player.disconnected) continue;
-    const timer = reconnectTimers.get(token);
-    if (timer) clearTimeout(timer);
-    reconnectTimers.delete(token);
-    room.players.delete(player.id);
-    client.room = room;
-    client.side = player.side;
-    client.resumeToken = token;
-    client.name = player.name;
-    client.disconnected = false;
-    client.queued = false;
-    client.rematchReady = false;
-    room.players.set(client.id, client);
-    clients.add(client);
-    send(client, { type: "resumed", side: client.side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, state: room.state, resumeToken: token, name: client.name, players: playerSummaries(room) });
-    for (const opponent of room.players.values()) {
-      if (opponent !== client && !opponent.disconnected) send(opponent, { type: "opponent-reconnected", side: client.side });
-    }
-    if (room.state && room.players.size === 2) room.lastUpdate = Date.now();
-    else sendRoom(room);
-    return;
-  }
-  send(client, { type: "resume-failed" });
-}
-function closeClient(client) {
-  if (client.closed) return;
-  client.closed = true;
-  matchmaking.remove(client);
-  clients.delete(client.id);
-  if (client.room && client.room.state && !client.room.state.gameOver) {
-    const room = client.room;
-    client.disconnected = true;
-    client.socket = null;
-    broadcast(room, { type: "opponent-disconnected", graceSeconds: RECONNECT_GRACE_SECONDS });
-    const timer = setTimeout(() => {
-      reconnectTimers.delete(client.resumeToken);
-      if (!client.disconnected || client.room !== room) return;
-      leaveRoom(client);
-    }, RECONNECT_GRACE_SECONDS * 1000);
-    reconnectTimers.set(client.resumeToken, timer);
-    return;
-  }
-  leaveRoom(client);
-  client.socket?.end();
-}
 const server = createServer(createHttpHandler({
   root,
   replayArchive,
@@ -223,8 +124,23 @@ const websocketTransport = createWebSocketTransport({
   closeClient,
   maxMessageBytes: MAX_MESSAGE_BYTES
 });
-websocketTransport.attach(server, clients);
 const send = websocketTransport.send;
+roomLifecycle = createRoomLifecycle({
+  rooms,
+  clients,
+  reconnectTimers,
+  randomBytes,
+  createGame,
+  ReplayRecorder,
+  starterDeck: STARTER_DECK,
+  send,
+  broadcast,
+  playerSummaries,
+  sendRoom,
+  removeFromMatchmaking: client => matchmaking.remove(client),
+  reconnectGraceSeconds: RECONNECT_GRACE_SECONDS
+});
+websocketTransport.attach(server, clients);
 
 const matchSimulation = createMatchSimulation({
   rooms,
