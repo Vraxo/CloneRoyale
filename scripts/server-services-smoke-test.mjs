@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createMatchmaking } from "../server/matchmaking.mjs";
 import { createRoomLifecycle } from "../server/roomLifecycle.mjs";
+import { createClientMessageHandler } from "../server/clientMessages.mjs";
 
 function makeClient(id) {
   return {
@@ -219,6 +220,49 @@ function testRoomLifecycle() {
   for (const timer of reconnectTimers.values()) clearTimeout(timer);
 }
 
+function testClientMessageDispatch() {
+  const messages = [];
+  const roomUpdates = [];
+  const room = { code: "ABCDE", players: new Map(), state: null };
+  const client = makeClient("dispatcher");
+  client.room = room;
+  room.players.set(client.id, client);
+  const calls = [];
+  const handler = createClientMessageHandler({
+    send: (_client, message) => messages.push(message),
+    broadcast: (_room, message) => roomUpdates.push(message),
+    playerSummaries: currentRoom => [...currentRoom.players.values()].map(player => ({ name: player.name })),
+    rooms: new Map([[room.code, room]]),
+    matchmaking: {
+      join: current => calls.push(["find-match", current.id]),
+      remove: (current, notify) => calls.push(["remove", current.id, Boolean(notify)])
+    },
+    createRoom: current => calls.push(["create-room", current.id]),
+    leaveRoom: current => calls.push(["leave-room", current.id]),
+    attachPlayer: (...args) => calls.push(["attach-player", ...args]),
+    requestRematch: current => calls.push(["rematch-ready", current.id]),
+    resumePlayer: (current, token) => calls.push(["resume", current.id, token]),
+    sendRoom: currentRoom => roomUpdates.push({ type: "room", code: currentRoom.code })
+  });
+
+  handler(client, { type: "not-a-real-message" });
+  assert.equal(messages.length, 0, "Unknown message types must be ignored.");
+
+  handler(client, { type: "join-room", code: room.code.toLowerCase() });
+  assert.deepEqual(roomUpdates.at(-1), { type: "room", code: room.code },
+    "Joining the room a client already occupies should refresh its room state.");
+
+  handler(client, { type: "find-match" });
+  handler(client, { type: "rematch-ready" });
+  handler(client, { type: "resume", token: "resume-token" });
+  assert.deepEqual(calls, [
+    ["find-match", client.id],
+    ["rematch-ready", client.id],
+    ["resume", client.id, "resume-token"]
+  ], "Each registered message should dispatch to its own handler.");
+}
+
 testMatchmaking();
 testRoomLifecycle();
-console.log("Server service unit tests passed: matchmaking capacity, duplicate requests, cancellation, FIFO pairing, stale queue cleanup, room creation, match start, rematches, reconnect grace handling, token validation, resume, and room cleanup.");
+testClientMessageDispatch();
+console.log("Server service unit tests passed: matchmaking capacity, duplicate requests, cancellation, FIFO pairing, stale queue cleanup, room creation, match start, rematches, reconnect grace handling, token validation, resume, and room cleanup, and client-message dispatch.");
