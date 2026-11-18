@@ -1,7 +1,7 @@
 import { Container, Graphics } from "pixi.js";
 import type { Unit } from "../../game/types";
 
-export type HumanoidStyle = "skeleton" | "giant" | "archer" | "mini-pekka";
+export type HumanoidStyle = "skeleton" | "giant" | "archer" | "mini-pekka" | "knight";
 
 interface LimbRig {
   root: Container;
@@ -67,15 +67,17 @@ export class SkeletalRig {
         ? 0xb66d42
         : style === "mini-pekka"
           ? 0x59658f
-          : 0x416d75;
-    const limbScale = style === "giant" ? 1.35 : style === "mini-pekka" ? 1.05 : style === "skeleton" ? 0.76 : 0.92;
-    const upperWidth = (style === "skeleton" ? 2.8 : style === "giant" ? 7.5 : 4.5) * limbScale;
-    const lowerWidth = (style === "skeleton" ? 2.3 : style === "giant" ? 6.5 : 3.8) * limbScale;
+          : style === "knight"
+            ? 0x8296a8
+            : 0x416d75;
+    const limbScale = style === "giant" ? 1.35 : style === "mini-pekka" ? 1.05 : style === "skeleton" ? 0.76 : style === "knight" ? 1.02 : 0.92;
+    const upperWidth = (style === "skeleton" ? 2.8 : style === "giant" ? 7.5 : style === "knight" ? 5.2 : 4.5) * limbScale;
+    const lowerWidth = (style === "skeleton" ? 2.3 : style === "giant" ? 6.5 : style === "knight" ? 4.4 : 3.8) * limbScale;
 
     this.leftArm = createLimb(7 * limbScale, 6.5 * limbScale, upperWidth, lowerWidth, limbColor);
     this.rightArm = createLimb(7 * limbScale, 6.5 * limbScale, upperWidth, lowerWidth, limbColor);
-    this.leftLeg = createLimb(7 * limbScale, 7 * limbScale, lowerWidth, lowerWidth, style === "skeleton" ? boneColor : 0x3f4c48);
-    this.rightLeg = createLimb(7 * limbScale, 7 * limbScale, lowerWidth, lowerWidth, style === "skeleton" ? boneColor : 0x3f4c48);
+    this.leftLeg = createLimb(7 * limbScale, 7 * limbScale, lowerWidth, lowerWidth, style === "skeleton" ? boneColor : style === "knight" ? 0x536475 : 0x3f4c48);
+    this.rightLeg = createLimb(7 * limbScale, 7 * limbScale, lowerWidth, lowerWidth, style === "skeleton" ? boneColor : style === "knight" ? 0x536475 : 0x3f4c48);
 
     this.drawTorso();
     this.drawHead();
@@ -96,7 +98,7 @@ export class SkeletalRig {
     this.rightLeg.root.position.set(3.5, 7);
 
     if (style === "skeleton") addSword(this.rightArm.hand, 0xb8c6c2, 19, 2.5);
-    if (style === "mini-pekka") addSword(this.rightArm.hand, 0xd5dfdf, 24, 4);
+    if (style === "mini-pekka") addSword(this.rightArm.hand, 0xd5dfdf, 24, 4);\n    if (style === "knight") {\n      addSword(this.rightArm.hand, 0xe1e8ec, 21, 3.2);\n      this.addShield();\n    }
     if (style === "archer") this.addBow();
   }
 
@@ -117,7 +119,7 @@ export class SkeletalRig {
     this.rightLeg.elbow.rotation = -0.18 + Math.max(0, -stride) * 0.6;
 
     this.leftArm.root.rotation = -2.05 - stride * 0.55;
-    this.rightArm.root.rotation = 0.9 + stride * 0.55 - attackSwing * (this.style === "mini-pekka" ? 2.0 : 1.5);
+    this.rightArm.root.rotation = 0.9 + stride * 0.55 - attackSwing * (this.style === "mini-pekka" ? 2.0 : this.style === "knight" ? 1.65 : 1.5);
     this.leftArm.elbow.rotation = 0.45;
     this.rightArm.elbow.rotation = -0.72 - attackSwing * 0.7;
 
@@ -141,12 +143,19 @@ export class SkeletalRig {
       ? 0xc47a43
       : this.style === "mini-pekka"
         ? 0x555f91
-        : 0x537c82;
-    const width = this.style === "giant" ? 20 : this.style === "mini-pekka" ? 14 : 13;
-    const height = this.style === "giant" ? 22 : 17;
+        : this.style === "knight"
+          ? 0x74899b
+          : 0x537c82;
+    const width = this.style === "giant" ? 20 : this.style === "mini-pekka" ? 14 : this.style === "knight" ? 15 : 13;
+    const height = this.style === "giant" ? 22 : this.style === "knight" ? 19 : 17;
     this.torso.roundRect(-width / 2, -height / 2, width, height, this.style === "mini-pekka" ? 4 : 6).fill(fill);
-    this.torso.ellipse(0, -1, width * 0.32, 2.2).fill(this.style === "giant" ? 0xd79a61 : 0x8caaa0);
+    this.torso.ellipse(0, -1, width * 0.32, 2.2).fill(this.style === "giant" ? 0xd79a61 : this.style === "knight" ? 0xc5d2d9 : 0x8caaa0);
 
+    if (this.style === "knight") {
+      this.torso.roundRect(-5.5, -7, 11, 12, 3).fill(0x9eafbb).stroke({ color: 0xe0e8ed, width: 1 });
+      this.torso.moveTo(0, -6).lineTo(0, 4).stroke({ color: 0x536b7e, width: 1.4 });
+      this.torso.roundRect(-7, 4, 14, 4, 1.5).fill(0x3f5368);
+    }
     if (this.style === "mini-pekka") {
       this.torso.roundRect(-width / 2 + 2, 2, width - 4, 5, 2).fill(0x3e486f);
     }
@@ -172,6 +181,15 @@ export class SkeletalRig {
       return;
     }
 
+    if (this.style === "knight") {
+      this.head.roundRect(-6.5, -20, 13, 13, 4).fill(0x71879a).stroke({ color: 0xd7e0e6, width: 1.2 });
+      this.head.roundRect(-5.2, -15.5, 10.4, 4.2, 1.5).fill(0x26394b);
+      this.head.roundRect(-3.5, -14.8, 7, 1.2, 0.5).fill(0xb8d4df);
+      this.head.moveTo(-1.5, -19).lineTo(1.5, -27).lineTo(4, -19).closePath().fill(0x3e8fca);
+      this.head.moveTo(0, -20).lineTo(0, -25).stroke({ color: 0x9bd6ef, width: 1.2 });
+      return;
+    }
+
     if (this.style === "mini-pekka") {
       this.head.roundRect(-7, -20, 14, 13, 5).fill(0x6775a4);
       this.head.roundRect(-5, -17, 10, 5, 2).fill(0x303c67);
@@ -185,6 +203,16 @@ export class SkeletalRig {
     this.head.circle(0, -12, 5.4).fill(0xd8b58d);
     this.head.ellipse(0, -15.5, 6.2, 3.5).fill(0x6b4b38);
     this.head.roundRect(-6, -18, 12, 2.5, 1).fill(0x4e6f79);
+  }
+
+  private addShield(): void {
+    const shield = new Graphics();
+    shield.moveTo(-5, -10).lineTo(5, -10).lineTo(4.5, -2).lineTo(0, 3).lineTo(-4.5, -2).closePath()
+      .fill(0x547eaa)
+      .stroke({ color: 0xd9e2e8, width: 1.4 });
+    shield.moveTo(0, -8).lineTo(0, 0).stroke({ color: 0xd4b66f, width: 1.2 });
+    shield.moveTo(-3, -5).lineTo(3, -5).stroke({ color: 0xd4b66f, width: 1.2 });
+    this.leftArm.hand.addChild(shield);
   }
 
   private addBow(): void {
