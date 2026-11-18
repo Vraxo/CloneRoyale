@@ -9,9 +9,11 @@ const offlineContinue = document.querySelector<HTMLButtonElement>("#offline-cont
 
 function showOfflineSetup(): void {
   offlineSetup?.classList.remove("is-hidden");
+  offlineSetup?.classList.add("is-visible");
 }
 
 function hideOfflineSetup(): void {
+  offlineSetup?.classList.remove("is-visible");
   offlineSetup?.classList.add("is-hidden");
 }
 
