@@ -313,9 +313,10 @@ const server = createServer(async (request, response) => {
   try {
     const info = await stat(filePath); if (info.isDirectory()) filePath = resolve(filePath, "index.html");
     const content = await readFile(filePath);
-    const cacheControl = filePath.endsWith(".html") || filePath.endsWith("service-worker.js") || filePath.endsWith(".webmanifest")
-      ? "no-cache"
-      : "public, max-age=31536000, immutable";
+    const isHashedAsset = filePath.includes(sep + "assets" + sep);
+    const cacheControl = isHashedAsset
+      ? "public, max-age=31536000, immutable"
+      : "no-cache";
     response.writeHead(200, { "content-type": contentType(filePath), "cache-control": cacheControl }).end(content);
   } catch {
     try { const content = await readFile(resolve(root, "index.html")); response.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(content); }
