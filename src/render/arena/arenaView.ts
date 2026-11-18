@@ -54,7 +54,7 @@ export function createArenaView(): Graphics {
   for (const laneX of [FIELD_WIDTH * 7 / 36, FIELD_WIDTH * 29 / 36]) {
     const laneSegments = [
       { top: KING_TOWER_Y, height: RIVER_TOP - KING_TOWER_Y },
-      { top: FIELD_HEIGHT - KING_TOWER_Y, height: FIELD_HEIGHT - KING_TOWER_Y - RIVER_BOTTOM }
+      { top: RIVER_BOTTOM, height: FIELD_HEIGHT - KING_TOWER_Y - RIVER_BOTTOM }
     ];
 
     for (const segment of laneSegments) {
