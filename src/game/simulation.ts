@@ -7,8 +7,11 @@ import { updateProjectiles } from "./projectiles";
 import { MATCH_RULES } from "./matchRules";
 import {
   addEvent,
+  FIELD_HEIGHT,
+  KING_TOWER_Y,
   LANE_X,
   MAX_ELIXIR,
+  PRINCESS_TOWER_Y,
   nextRandom
 } from "./state";
 import type { GameState, Side, SideState, Tower } from "./types";
@@ -72,12 +75,12 @@ export function createGame(seed = 20261115): GameState {
     audioEvents: []
   };
 
-  addTower(state, "red", "princess", "left", LANE_X.left, 150);
-  addTower(state, "red", "princess", "right", LANE_X.right, 150);
-  addTower(state, "red", "king", "center", 270, 78);
-  addTower(state, "blue", "princess", "left", LANE_X.left, 810);
-  addTower(state, "blue", "princess", "right", LANE_X.right, 810);
-  addTower(state, "blue", "king", "center", 270, 882);
+  addTower(state, "red", "princess", "left", LANE_X.left, PRINCESS_TOWER_Y);
+  addTower(state, "red", "princess", "right", LANE_X.right, PRINCESS_TOWER_Y);
+  addTower(state, "red", "king", "center", 270, KING_TOWER_Y);
+  addTower(state, "blue", "princess", "left", LANE_X.left, FIELD_HEIGHT - PRINCESS_TOWER_Y);
+  addTower(state, "blue", "princess", "right", LANE_X.right, FIELD_HEIGHT - PRINCESS_TOWER_Y);
+  addTower(state, "blue", "king", "center", 270, FIELD_HEIGHT - KING_TOWER_Y);
 
   return state;
 }
