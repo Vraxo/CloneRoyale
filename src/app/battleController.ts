@@ -3,7 +3,8 @@ import { createSoundEffects, type SoundEffects } from "../audio/soundEffects";
 import { SIMULATION_STEP } from "../game/simulation";
 import { SimulationRuntime } from "../runtime/simulationRuntime";
 import { createGameHistory } from "../game/history";
-import { ReplayRecorder, isBattleReplay, type BattleReplay } from "../game/replay";
+import { isBattleReplay, type BattleReplay } from "../game/replay";
+import { ReplayRecordingSession } from "../game/replayRecording";
 import { ReplayPlaybackSession } from "../game/replayPlayback";
 import { saveBattleReplay, saveReplayShareToken } from "../game/replayStorage";
 import { cardById, STARTER_DECK } from "../game/cards";
@@ -26,7 +27,7 @@ export class BattleController {
   private selectedCard: CardId | null = null;
   private playerDeck: CardId[] = STARTER_DECK.slice();
   private battleSeed: number;
-  private replayRecorder: ReplayRecorder;
+  private readonly replayRecording: ReplayRecordingSession;
   private readonly replayPlayback = new ReplayPlaybackSession();
   private lastReplay: BattleReplay | null = null;
   private lastReplayShareToken: string | null = null;
@@ -45,7 +46,7 @@ export class BattleController {
     this.battleSeed = Date.now() >>> 0;
     this.runtime = new SimulationRuntime(this.battleSeed);
     this.game = this.runtime.state;
-    this.replayRecorder = new ReplayRecorder(this.battleSeed, this.playerDeck);
+    this.replayRecording = new ReplayRecordingSession(this.battleSeed, this.playerDeck);
     this.history = enableDebugTools ? createGameHistory(this.game) : null;
     this.music = createBattleMusic();
     this.soundEffects = createSoundEffects();
@@ -246,7 +247,7 @@ export class BattleController {
     this.runtime.reset(this.battleSeed);
     this.game = this.runtime.state;
     this.applyPlayerDeck();
-    this.replayRecorder = new ReplayRecorder(this.battleSeed, this.playerDeck);
+    this.replayRecording.reset(this.battleSeed, this.playerDeck);
     this.lastReplay = null;
     this.lastReplayShareToken = null;
     document.body.dataset.replayAvailable = "false";
@@ -339,7 +340,7 @@ export class BattleController {
 
     for (const event of this.game.audioEvents) this.soundEffects.play(event);
     this.game.audioEvents = [];
-    this.replayRecorder.record(this.game, this.playerSide, cardId, point.x, point.y);
+    this.replayRecording.recordDeployment(this.game, this.playerSide, cardId, point.x, point.y);
     this.history?.record(this.game);
     this.selectedCard = null;
     this.placementMessage = `${cardById(cardId).name} deployed.`;
@@ -459,7 +460,7 @@ export class BattleController {
     this.history?.record(this.game);
 
     if (this.game.gameOver) {
-      this.lastReplay = this.replayRecorder.finish(this.game);
+      this.lastReplay = this.replayRecording.finish(this.game);
       document.body.dataset.replayAvailable = "true";
       saveBattleReplay(this.lastReplay);
       this.selectedCard = null;
