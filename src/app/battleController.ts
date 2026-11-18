@@ -88,6 +88,49 @@ export class BattleController {
     return this.game;
   }
 
+  public get isReplaying(): boolean { return this.replayPlayer !== null; }
+  public get replayTick(): number { return this.replayPlayer?.tick ?? 0; }
+  public get replayDurationTicks(): number { return this.replayPlayer?.durationTicks ?? 0; }
+  public get completedReplay(): BattleReplay | null { return this.lastReplay; }
+
+  public startReplay(replay: unknown): boolean {
+    if (this.isOnline || !isBattleReplay(replay)) return false;
+    this.replayLiveState = this.game;
+    this.replayPlayer = new ReplayPlayer(replay);
+    this.game = this.replayPlayer.state;
+    this.selectedCard = null;
+    this.paused = false;
+    this.speed = 1;
+    this.accumulator = 0;
+    this.renderer.setPlacementPreview(null);
+    this.renderer.setDeploymentArea(this.game, "blue", null);
+    this.renderer.clearUnitPreview();
+    this.music.stop();
+    this.renderer.render(this.game);
+    this.updateHud();
+    return true;
+  }
+
+  public seekReplay(tick: number): void {
+    if (!this.replayPlayer) return;
+    this.game = this.replayPlayer.seek(tick);
+    this.accumulator = 0;
+    this.renderer.render(this.game);
+    this.updateHud();
+  }
+
+  public exitReplay(): void {
+    if (!this.replayPlayer || !this.replayLiveState) return;
+    this.game = this.replayLiveState;
+    this.replayPlayer = null;
+    this.replayLiveState = null;
+    this.paused = true;
+    this.accumulator = 0;
+    this.renderer.setDeploymentArea(this.game, "blue", null);
+    this.renderer.render(this.game);
+    this.updateHud();
+  }
+
   public get isPaused(): boolean {
     return this.paused;
   }
@@ -182,9 +225,13 @@ export class BattleController {
   public startNewBattle(): void {
     if (this.isOnline) return;
     this.soundEffects.stopAll();
-    this.runtime.reset((Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0);
+    this.battleSeed = (Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0;
+    this.runtime.reset(this.battleSeed);
     this.game = this.runtime.state;
     this.applyPlayerDeck();
+    this.replayRecorder = new ReplayRecorder(this.battleSeed, this.playerDeck);
+    this.replayPlayer = null;
+    this.replayLiveState = null;
     this.selectedCard = null;
     this.placementMessage = "Choose a card, then deploy on your side.";
     this.renderer.setPlacementPreview(null);
@@ -273,6 +320,7 @@ export class BattleController {
 
     for (const event of this.game.audioEvents) this.soundEffects.play(event);
     this.game.audioEvents = [];
+    this.replayRecorder.record(this.game, this.playerSide, cardId, point.x, point.y);
     this.history?.record(this.game);
     this.selectedCard = null;
     this.placementMessage = `${cardById(cardId).name} deployed.`;
@@ -373,6 +421,12 @@ export class BattleController {
 
   private advanceOneStep(): void {
     if (this.game.gameOver) return;
+    if (this.replayPlayer) {
+      this.game = this.replayPlayer.step();
+      this.renderer.setDeploymentArea(this.game, "blue", null);
+      if (this.replayPlayer.isFinished) this.paused = true;
+      return;
+    }
     const previousTime = this.game.time;
     this.runtime.step(SIMULATION_STEP, "red");
     this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
@@ -384,6 +438,13 @@ export class BattleController {
     this.history?.record(this.game);
 
     if (this.game.gameOver) {
+      this.lastReplay = this.replayRecorder.finish(this.game);
+      try {
+        const stored = JSON.parse(localStorage.getItem("cloneroyale.replays") ?? "[]") as unknown;
+        const replays = Array.isArray(stored) ? stored.filter(isBattleReplay) : [];
+        replays.unshift(this.lastReplay);
+        localStorage.setItem("cloneroyale.replays", JSON.stringify(replays.slice(0, 20)));
+      } catch { /* Replay remains available in memory if storage is unavailable. */ }
       this.selectedCard = null;
       this.renderer.setPlacementPreview(null);
       this.renderer.setDeploymentArea(this.game, "blue", null);
