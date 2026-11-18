@@ -11,6 +11,7 @@ export interface ServerSocket {
 export interface ServerClient {
   id: string;
   guestId: string | null;
+  accountId: string | null;
   name: string;
   room: ServerRoom | null;
   side: Side | null;

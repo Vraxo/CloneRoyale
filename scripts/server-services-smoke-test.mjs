@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { createMatchmaking, createRoomLifecycle, createClientMessageHandler } from "../dist-server/services.js";
+import { EventEmitter } from "node:events";
+import { createMatchmaking, createRoomLifecycle, createClientMessageHandler, createWebSocketTransport } from "../dist-server/services.js";
 
 function makeClient(id) {
   return {
@@ -160,6 +161,8 @@ function testRoomLifecycle() {
   });
 
   const host = makeClient("host");
+  host.accountId = "account-1111";
+  host.guestId = host.accountId;
   clients.add(host);
   lifecycle.createRoom(host);
   const room = host.room;
@@ -201,10 +204,14 @@ function testRoomLifecycle() {
   assert.equal(sent.get(replacement.id).at(-1).type, "resume-failed");
 
   lifecycle.resumePlayer(replacement, resumeToken);
+  assert.equal(sent.get(replacement.id).at(-1).type, "resume-failed", "A resume token must not cross account identities.");
+  replacement.accountId = host.accountId;
+  lifecycle.resumePlayer(replacement, resumeToken);
   assert.equal(reconnectTimers.has(resumeToken), false, "Successful resume must clear the grace timer.");
   assert.equal(replacement.room, room);
   assert.equal(replacement.side, "blue");
   assert.equal(replacement.name, host.name);
+  assert.equal(replacement.guestId, host.guestId, "The authenticated identity must survive reconnect.");
   assert.equal(replacement.disconnected, false);
   assert.equal(clients.has(replacement), true);
   assert.equal(sent.get(replacement.id).at(-1).type, "resumed");
@@ -250,6 +257,11 @@ function testClientMessageDispatch() {
   assert.deepEqual(roomUpdates.at(-1), { type: "room", code: room.code },
     "Joining the room a client already occupies should refresh its room state.");
 
+  client.accountId = "account-2222";
+  handler(client, { type: "set-profile", guestId: "attacker-controlled-guest-id", name: "AccountKnight" });
+  assert.equal(client.guestId, client.accountId, "Authenticated clients must not choose a different player identity.");
+  assert.equal(client.name, "AccountKnight");
+
   handler(client, { type: "find-match" });
   handler(client, { type: "rematch-ready" });
   handler(client, { type: "resume", token: "resume-token" });
@@ -260,7 +272,47 @@ function testClientMessageDispatch() {
   ], "Each registered message should dispatch to its own handler.");
 }
 
+async function testWebSocketAccountResolution() {
+  const server = new EventEmitter();
+  const socket = new EventEmitter();
+  const clients = new Set();
+  const writes = [];
+  socket.destroyed = false;
+  socket.writable = true;
+  socket.write = data => { writes.push(Buffer.from(data)); return true; };
+  socket.destroy = () => { socket.destroyed = true; };
+  const accountId = "account-3333";
+  const transport = createWebSocketTransport({
+    randomBytes: size => Buffer.alloc(size, 9),
+    handleMessage: () => {},
+    closeClient: () => {},
+    maxMessageBytes: 16_384,
+    resolveAccount: async token => {
+      assert.equal(token, "valid-session-token");
+      return { id: accountId, username: "AccountKnight" };
+    }
+  });
+  transport.attach(server, clients);
+  server.emit("upgrade", {
+    url: "/ws",
+    headers: {
+      upgrade: "websocket",
+      "sec-websocket-key": "dGhlIHNhbXBsZSBub25jZQ==",
+      cookie: "theme=dark; clone_royale_session=valid-session-token; other=value"
+    }
+  }, socket);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  const client = [...clients][0];
+  assert.ok(client, "A valid WebSocket upgrade should create a client.");
+  assert.equal(client.accountId, accountId);
+  assert.equal(client.guestId, accountId);
+  assert.equal(client.name, "AccountKnight");
+  assert.ok(writes[0].toString("utf8").startsWith("HTTP/1.1 101"));
+  assert.ok(writes.length >= 2, "The server should send its connected frame after resolving the session.");
+}
+
 testMatchmaking();
 testRoomLifecycle();
 testClientMessageDispatch();
+await testWebSocketAccountResolution();
 console.log("Server service unit tests passed: matchmaking capacity, duplicate requests, cancellation, FIFO pairing, stale queue cleanup, room creation, match start, rematches, reconnect grace handling, token validation, resume, and room cleanup, and client-message dispatch.");

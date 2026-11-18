@@ -13,10 +13,11 @@ interface WebSocketTransportOptions {
   handleMessage: (client: ServerClient, message: any) => void;
   closeClient: (client: ServerClient) => void;
   maxMessageBytes: number;
+  resolveAccount: (token: string) => Promise<{ id: string; username: string } | null>;
 }
 
 export function createWebSocketTransport(options: WebSocketTransportOptions) {
-  const { randomBytes, handleMessage, closeClient, maxMessageBytes } = options;
+  const { randomBytes, handleMessage, closeClient, maxMessageBytes, resolveAccount } = options;
 
   function send(client: ServerClient, payload: Record<string, unknown>): void {
     if (client.closed || !client.socket) return;
@@ -82,7 +83,7 @@ export function createWebSocketTransport(options: WebSocketTransportOptions) {
   }
 
   function attach(server: Server, clients: Set<ServerClient>): void {
-    server.on("upgrade", (request, socket) => {
+    server.on("upgrade", async (request, socket) => {
       if (new URL(request.url ?? "/", "http://localhost").pathname !== "/ws") {
         socket.destroy();
         return;
@@ -92,17 +93,30 @@ export function createWebSocketTransport(options: WebSocketTransportOptions) {
         socket.destroy();
         return;
       }
+      const cookieHeader = request.headers.cookie ?? "";
+      const sessionToken = cookieHeader.split(";").map(cookie => cookie.trim()).find(cookie => cookie.startsWith("clone_royale_session="))?.slice("clone_royale_session=".length) ?? "";
+      let account: { id: string; username: string } | null = null;
+      if (sessionToken) {
+        try {
+          account = await resolveAccount(sessionToken);
+        } catch {
+          socket.destroy();
+          return;
+        }
+      }
+      if (socket.destroyed) return;
       const accept = createHash("sha1").update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest("base64");
       socket.write(["HTTP/1.1 101 Switching Protocols", "Upgrade: websocket", "Connection: Upgrade", "Sec-WebSocket-Accept: " + accept, "", ""].join("\r\n"));
       const client: WebSocketClient = {
         id: randomBytes(12).toString("hex"),
-        guestId: null,
+        guestId: account?.id ?? null,
+        accountId: account?.id ?? null,
         resumeToken: randomBytes(32).toString("hex"),
         socket,
         buffer: Buffer.alloc(0),
         room: null,
         side: null,
-        name: "Guest",
+        name: account?.username.slice(0, 16) ?? "Guest",
         queued: false,
         closed: false,
         disconnected: false,

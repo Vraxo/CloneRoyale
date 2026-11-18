@@ -22,8 +22,8 @@ export function createPlayerMessageHandlers(options: MessageHandlerOptions): Rec
     "set-profile"(client, message) {
       const rawName = typeof message.name === "string" ? message.name : "";
       const name = rawName.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 16) || "Guest";
-      const guestId = typeof message.guestId === "string" && /^[a-f0-9-]{36}$/i.test(message.guestId)
-        ? message.guestId : client.guestId;
+      const guestId = client.accountId ?? (typeof message.guestId === "string" && /^[a-f0-9-]{36}$/i.test(message.guestId)
+        ? message.guestId : client.guestId);
       client.guestId = guestId;
       client.name = name;
       if (client.room) broadcast(client.room, { type: "players-updated", players: playerSummaries(client.room) });
