@@ -2431,9 +2431,15 @@ body, button, input, output, summary, label, small {
   background: rgba(5, 16, 30, .88);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .22s ease, visibility .22s ease;
+}
+.offline-setup.is-visible {
   opacity: 1;
   visibility: visible;
-  transition: opacity .22s ease, visibility .22s ease;
+  pointer-events: auto;
 }
 .offline-setup.is-hidden {
   opacity: 0;
