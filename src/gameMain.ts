@@ -10,7 +10,7 @@ import type { CardId } from "./game/types";
 import { isBattleReplay, type BattleReplay } from "./game/replay";
 
 const parameters = new URLSearchParams(window.location.search);
-const replayApiBase = (import.meta.env.VITE_MULTIPLAYER_SERVER_URL ?? "").replace(/\\/$/, "");
+const replayApiBase = (import.meta.env.VITE_MULTIPLAYER_SERVER_URL ?? "").replace(/\/$/, "");
 function replayApi(path: string): string { return replayApiBase + path; }
 const developerMode = parameters.get("mode") === "dev";
 document.body.dataset.mode = developerMode ? "developer" : "player";
