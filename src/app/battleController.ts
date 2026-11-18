@@ -14,7 +14,7 @@ import type { OnlineClient } from "../net/onlineClient";
 import { createBattleHud, type BattleHud } from "./battleHud";
 import { BattleActions } from "./battleActions";
 import { BattleSimulationClock } from "./battleSimulation";
-import { clearOnlineResumeToken } from "./onlineResumeToken";
+import { BattleOnline } from "./battleOnline";
 
 export class BattleController {
   private game: GameState;
@@ -31,8 +31,7 @@ export class BattleController {
   private readonly replayPlayback = new ReplayPlaybackSession();
   private lastReplay: BattleReplay | null = null;
   private lastReplayShareToken: string | null = null;
-  private onlineClient: OnlineClient | null = null;
-  private playerSide: Side = "blue";
+  private readonly online: BattleOnline;
   private readonly hud: BattleHud;
   private readonly actions: BattleActions;
 
@@ -51,17 +50,32 @@ export class BattleController {
     this.music = createBattleMusic();
     this.soundEffects = createSoundEffects();
     this.hud = createBattleHud(renderer);
+    this.online = new BattleOnline({
+      renderer,
+      music: this.music,
+      soundEffects: this.soundEffects,
+      hud: this.hud,
+      getGame: () => this.game,
+      setGame: (state) => { this.game = state; },
+      getSelectedCard: () => this.selectedCard,
+      setSelectedCard: (cardId) => { this.selectedCard = cardId; },
+      setHistoryDisabled: () => { this.history = null; },
+      setPaused: (value) => { this.paused = value; },
+      resetSimulation: () => this.simulation.reset(),
+      setPreviousGameOver: (value) => { this.previousGameOver = value; },
+      updateHud: () => this.updateHud()
+    });
     this.actions = new BattleActions({
       renderer,
       soundEffects: this.soundEffects,
       replayRecording: this.replayRecording,
       getGame: () => this.game,
-      getSide: () => this.playerSide,
+      getSide: () => this.online.side,
       getSelectedCard: () => this.selectedCard,
       setSelectedCard: (cardId) => { this.selectedCard = cardId; },
       isPaused: () => this.paused,
       isReplayActive: () => this.replayPlayback.isActive,
-      getOnlineClient: () => this.onlineClient,
+      getOnlineClient: () => this.online.client,
       getHistory: () => this.history,
       updateHud: () => this.updateHud()
     });
@@ -80,9 +94,9 @@ export class BattleController {
     this.history = createGameHistory(this.game);
   }
 
-  public get isOnline(): boolean { return this.onlineClient !== null; }
+  public get isOnline(): boolean { return this.online.isActive; }
 
-  public get side(): Side { return this.playerSide; }
+  public get side(): Side { return this.online.side; }
 
   public get currentSelectedCard(): CardId | null {
     return this.selectedCard;
@@ -173,25 +187,10 @@ export class BattleController {
   }
 
   public activateOnline(side: Side, state: GameState, client: OnlineClient): void {
-    this.onlineClient = client;
     this.lastReplay = null;
     this.lastReplayShareToken = null;
     document.body.dataset.replayAvailable = "false";
-    this.playerSide = side;
-    this.game = state;
-    this.history = null;
-    this.selectedCard = null;
-    this.paused = false;
-    this.simulation.reset();
-    this.previousGameOver = state.gameOver;
-    document.body.dataset.online = "true";
-    const modeDescription = document.getElementById("mode-description");
-    if (modeDescription) modeDescription.textContent = "Online match · " + side.toUpperCase();
-    this.music.start(state.time, state.phase);
-    this.renderer.setDeploymentArea(state, side, null);
-    this.renderer.render(state);
-    this.updateHud();
-    this.hud.setPaused(false, state);
+    this.online.activate(side, state, client);
   }
 
   public setOnlineNotice(message: string): void {
@@ -201,33 +200,11 @@ export class BattleController {
   }
 
   public applyOnlineState(state: GameState): void {
-    if (!this.onlineClient) return;
-    this.game = state;
-    this.music.update(state.time, state.phase);
-    for (const event of state.audioEvents) this.soundEffects.play(event);
-    if (state.gameOver && !this.previousGameOver) {
-      this.music.stop();
-      this.soundEffects.play(state.winner === "draw" ? "match-draw" : state.winner === this.playerSide ? "match-victory" : "match-defeat");
-    }
-    this.previousGameOver = state.gameOver;
-    if (state.gameOver) {
-      this.selectedCard = null;
-      this.renderer.setDeploymentArea(state, this.playerSide, null);
-      this.renderer.clearUnitPreview();
-    } else {
-      this.renderer.setDeploymentArea(state, this.playerSide, this.selectedCard);
-    }
+    this.online.applyState(state);
   }
 
   public leaveOnline(): void {
-    if (!this.onlineClient) return;
-    this.onlineClient.leave();
-    clearOnlineResumeToken();
-    this.onlineClient = null;
-    this.playerSide = "blue";
-    document.body.dataset.online = "false";
-    const modeDescription = document.getElementById("mode-description");
-    if (modeDescription) modeDescription.textContent = "Player vs AI · Live match";
+    if (!this.online.leave()) return;
     this.startNewBattle();
   }
 
@@ -243,10 +220,10 @@ export class BattleController {
     this.music.setPaused(this.paused || this.game.gameOver);
     if (value) {
       this.renderer.setPlacementPreview(null);
-      this.renderer.setDeploymentArea(this.game, this.playerSide, null);
+      this.renderer.setDeploymentArea(this.game, this.online.side, null);
       this.renderer.clearUnitPreview();
     } else {
-      this.renderer.setDeploymentArea(this.game, this.playerSide, this.selectedCard);
+      this.renderer.setDeploymentArea(this.game, this.online.side, this.selectedCard);
     }
   }
 
@@ -270,7 +247,7 @@ export class BattleController {
     this.selectedCard = null;
     this.actions.reset();
     this.renderer.setPlacementPreview(null);
-    this.renderer.setDeploymentArea(this.game, this.playerSide, null);
+    this.renderer.setDeploymentArea(this.game, this.online.side, null);
     this.renderer.clearUnitPreview();
     this.simulation.reset();
     this.history?.reset(this.game);
@@ -355,7 +332,7 @@ export class BattleController {
       this.paused,
       this.actions.currentPlacementMessage,
       this.history?.canStepBack() ?? false,
-      this.playerSide,
+      this.online.side,
       this.replayTick,
       this.replayDurationTicks
     );
