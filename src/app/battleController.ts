@@ -8,12 +8,11 @@ import { ReplayRecordingSession } from "../game/replayRecording";
 import { ReplayPlaybackSession } from "../game/replayPlayback";
 import { saveBattleReplay, saveReplayShareToken } from "../game/replayStorage";
 import { cardById, STARTER_DECK } from "../game/cards";
-import { playCard } from "../game/deployment";
-import { canPlaceCard, snapToArenaTile } from "../game/placement";
 import type { CardId, GameState, Lane, Side } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
 import { createBattleHud, type BattleHud } from "./battleHud";
+import { BattleActions } from "./battleActions";
 
 export class BattleController {
   private game: GameState;
@@ -33,8 +32,8 @@ export class BattleController {
   private lastReplayShareToken: string | null = null;
   private onlineClient: OnlineClient | null = null;
   private playerSide: Side = "blue";
-  private placementMessage = "Choose a card, then deploy on your side.";
   private readonly hud: BattleHud;
+  private readonly actions: BattleActions;
 
   public readonly music: BattleMusic;
   public readonly soundEffects: SoundEffects;
@@ -51,6 +50,20 @@ export class BattleController {
     this.music = createBattleMusic();
     this.soundEffects = createSoundEffects();
     this.hud = createBattleHud(renderer);
+    this.actions = new BattleActions({
+      renderer,
+      soundEffects: this.soundEffects,
+      replayRecording: this.replayRecording,
+      getGame: () => this.game,
+      getSide: () => this.playerSide,
+      getSelectedCard: () => this.selectedCard,
+      setSelectedCard: (cardId) => { this.selectedCard = cardId; },
+      isPaused: () => this.paused,
+      isReplayActive: () => this.replayPlayback.isActive,
+      getOnlineClient: () => this.onlineClient,
+      getHistory: () => this.history,
+      updateHud: () => this.updateHud()
+    });
     document.addEventListener("pointerdown", () => this.soundEffects.unlock(), {
       capture: true,
       once: true
@@ -253,7 +266,7 @@ export class BattleController {
     document.body.dataset.replayAvailable = "false";
     this.replayPlayback.exit();
     this.selectedCard = null;
-    this.placementMessage = "Choose a card, then deploy on your side.";
+    this.actions.reset();
     this.renderer.setPlacementPreview(null);
     this.renderer.setDeploymentArea(this.game, this.playerSide, null);
     this.renderer.clearUnitPreview();
@@ -267,112 +280,19 @@ export class BattleController {
   }
 
   public selectCard(cardId: CardId): void {
-    if (this.paused || this.game.gameOver || this.replayPlayback.isActive) return;
-
-    if (this.selectedCard === cardId) {
-      this.soundEffects.play("ui-click");
-      this.selectedCard = null;
-      this.placementMessage = "Choose a card, then deploy on your side.";
-    } else {
-      const card = cardById(cardId);
-      if (this.game.sides[this.playerSide].elixir < card.cost) {
-        this.soundEffects.play("ui-invalid");
-        this.placementMessage = `You need ${card.cost} elixir to play ${card.name}.`;
-        this.updateHud();
-        return;
-      }
-
-      this.soundEffects.play("ui-click");
-      this.selectedCard = cardId;
-      this.placementMessage = card.category === "spell"
-        ? `Click anywhere on the arena to cast ${card.name}.`
-        : `Place ${card.name} in your deployment area.`;
-    }
-
-    this.renderer.setPlacementPreview(null);
-    this.renderer.setDeploymentArea(this.game, this.playerSide, this.selectedCard);
-    this.renderer.clearUnitPreview();
-    this.updateHud();
+    this.actions.selectCard(cardId);
   }
 
   public playSelectedCardAt(clientX: number, clientY: number): void {
-    if (this.paused || this.game.gameOver) return;
-    const worldPoint = this.renderer.screenToWorld(clientX, clientY);
-    if (!worldPoint) return;
-    const point = snapToArenaTile(worldPoint);
-
-    if (!this.selectedCard) {
-      this.soundEffects.play("ui-invalid");
-      this.placementMessage = "Select a card first.";
-      this.updateHud();
-      return;
-    }
-
-    const cardId = this.selectedCard;
-    if (!canPlaceCard(this.game, this.playerSide, cardId, point.x, point.y)) {
-      this.soundEffects.play("ui-invalid");
-      this.placementMessage = cardById(cardId).category === "spell"
-        ? "That spell target is outside the arena or the card is unavailable."
-        : "Invalid deployment. Place troops and buildings in an unlocked deployment area.";
-      this.updateHud();
-      this.renderer.setPlacementPreview(point, false);
-      return;
-    }
-
-    if (this.onlineClient) {
-      this.onlineClient.playCard(cardId, point.x, point.y);
-      this.selectedCard = null;
-      this.placementMessage = `${cardById(cardId).name} deployed.`;
-      this.renderer.setPlacementPreview(null);
-      this.renderer.clearUnitPreview();
-      this.renderer.setDeploymentArea(this.game, this.playerSide, null);
-      this.updateHud();
-      return;
-    }
-
-    const lane: Lane = point.x < 360 ? "left" : "right";
-    if (!playCard(this.game, this.playerSide, cardId, lane, point.x, point.y, point)) {
-      this.soundEffects.play("ui-invalid");
-      this.placementMessage = "That card can no longer be played.";
-      this.updateHud();
-      return;
-    }
-
-    for (const event of this.game.audioEvents) this.soundEffects.play(event);
-    this.game.audioEvents = [];
-    this.replayRecording.recordDeployment(this.game, this.playerSide, cardId, point.x, point.y);
-    this.history?.record(this.game);
-    this.selectedCard = null;
-    this.placementMessage = `${cardById(cardId).name} deployed.`;
-    this.renderer.setPlacementPreview(null);
-    this.renderer.clearUnitPreview();
-    this.renderer.setDeploymentArea(this.game, "blue", null);
-    this.renderer.render(this.game);
-    this.updateHud();
+    this.actions.playSelectedCardAt(clientX, clientY);
   }
 
   public updatePlacementPreview(event: PointerEvent): void {
-    if (!this.selectedCard || this.paused || this.game.gameOver || this.replayPlayback.isActive) {
-      this.renderer.setPlacementPreview(null);
-      this.renderer.setDeploymentArea(this.game, this.playerSide, null);
-      this.renderer.clearUnitPreview();
-      return;
-    }
-
-    this.renderer.setDeploymentArea(this.game, this.playerSide, this.selectedCard);
-    const point = this.renderer.screenToWorld(event.clientX, event.clientY);
-    if (!point) {
-      this.renderer.setPlacementPreview(null);
-      this.renderer.clearUnitPreview();
-      return;
-    }
-    this.renderer.setUnitPreview(this.selectedCard, snapToArenaTile(point), this.playerSide);
-    this.renderer.setPlacementPreview(null);
+    this.actions.updatePlacementPreview(event);
   }
 
   public clearPointerPreview(): void {
-    this.renderer.setPlacementPreview(null);
-    this.renderer.clearUnitPreview();
+    this.actions.clearPointerPreview();
   }
 
   public stepForward(): void {
@@ -433,7 +353,7 @@ export class BattleController {
       this.game,
       this.selectedCard,
       this.paused,
-      this.placementMessage,
+      this.actions.currentPlacementMessage,
       this.history?.canStepBack() ?? false,
       this.playerSide,
       this.replayTick,
