@@ -15,6 +15,7 @@ import { initializeLobbyScreen } from "./app/lobbyScreen";
 import { initializeGameMenu } from "./app/gameMenu";
 import { initializeMatchLifecycle } from "./app/matchLifecycle";
 import { initializeMatchResults } from "./app/matchResults";
+import { initializeDeveloperMode } from "./app/developerMode";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -129,13 +130,4 @@ initializeMatchResults({ battle, client: onlineClient, startSoloBattle, setLobby
 
 onlineButton?.addEventListener("click", () => setGameMenuOpen(false));
 
-const modeButton = document.getElementById("mode-toggle");
-if (modeButton instanceof HTMLButtonElement) {
-  modeButton.textContent = developerMode ? "Player mode" : "Developer tools";
-  modeButton.addEventListener("click", () => {
-    const nextDeveloperMode = document.body.dataset.mode !== "developer";
-    if (nextDeveloperMode) battle.enableDebugTools();
-    document.body.dataset.mode = nextDeveloperMode ? "developer" : "player";
-    modeButton.textContent = nextDeveloperMode ? "Player mode" : "Developer tools";
-  });
-}
+initializeDeveloperMode(battle, developerMode);
