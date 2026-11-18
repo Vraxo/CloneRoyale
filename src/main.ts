@@ -7,6 +7,10 @@ const offlineProgressCount = document.querySelector<HTMLElement>("#offline-progr
 const offlineError = document.querySelector<HTMLElement>("#offline-setup-error");
 const offlineContinue = document.querySelector<HTMLButtonElement>("#offline-continue");
 
+function showOfflineSetup(): void {
+  offlineSetup?.classList.remove("is-hidden");
+}
+
 function hideOfflineSetup(): void {
   offlineSetup?.classList.add("is-hidden");
 }
@@ -29,6 +33,7 @@ function markOfflineReady(): void {
 }
 
 function showOfflineError(message: string): void {
+  showOfflineSetup();
   if (offlineStatus) offlineStatus.textContent = "The game can still be played online.";
   if (offlineError) {
     offlineError.textContent = message;
@@ -47,8 +52,9 @@ if (!("serviceWorker" in navigator)) {
     if (!data) return;
 
     if (data.type === "PRECACHE_PROGRESS" && typeof data.completed === "number" && typeof data.total === "number") {
+      showOfflineSetup();
       updateOfflineProgress(data.completed, data.total);
-      if (offlineStatus) offlineStatus.textContent = "Downloading and saving the game files. This only needs to happen once.";
+      if (offlineStatus) offlineStatus.textContent = "Saving the game files. Unchanged files are reused when the game updates.";
     } else if (data.type === "PRECACHE_COMPLETE") {
       markOfflineReady();
     } else if (data.type === "PRECACHE_ERROR") {
