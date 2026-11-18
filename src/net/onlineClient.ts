@@ -162,15 +162,12 @@ export class OnlineClient {
     if (!this.reconnectEnabled) return;
     try {
       await this.connect();
-      this.resumeFromStoredSession();
+      this.notifyListeners({ type: "connected" });
     } catch {
       if (this.reconnectEnabled) this.scheduleReconnect();
     }
   }
 
-  private resumeFromStoredSession(): void {
-    this.notifyListeners({ type: "connected" });
-  }
 
   private send(message: Record<string, unknown>): void {
     this.sendWithSocket(this.socket, message);
