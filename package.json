@@ -17,7 +17,8 @@
     "test:offline": "node scripts/offline-smoke-test.mjs",
     "test:replay": "node scripts/replay-smoke-test.mjs",
     "test:replay-archive": "node scripts/replay-archive-smoke-test.mjs",
-    "test:server-services": "node scripts/server-services-smoke-test.mjs"
+    "test:server-services": "node scripts/server-services-smoke-test.mjs",
+    "test:accounts": "node scripts/accounts-smoke-test.mjs"
   },
   "dependencies": {
     "pixi.js": "^8.23.0"
