@@ -280,7 +280,7 @@ function requestRematch(client) {
   for (const player of room.players.values()) player.rematchReady = false;
   room.seed = randomBytes(4).readUInt32BE(0);
   room.state = createGame(room.seed);
-  room.replayRecorder = new ReplayRecorder(room.seed, STARTER_DECK, undefined, "online");
+  room.replayRecorder = new ReplayRecorder(room.seed, STARTER_DECK, randomBytes(16).toString("hex"), "online");
   room.replaySent = false;
   room.lastUpdate = Date.now();
   room.accumulator = 0;
