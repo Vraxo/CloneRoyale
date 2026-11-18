@@ -4,6 +4,7 @@ import { SIMULATION_STEP } from "../game/simulation";
 import { SimulationRuntime } from "../runtime/simulationRuntime";
 import { createGameHistory } from "../game/history";
 import { ReplayPlayer, ReplayRecorder, isBattleReplay, type BattleReplay } from "../game/replay";
+import { saveBattleReplay, saveReplayShareToken } from "../game/replayStorage";
 import { cardById, STARTER_DECK } from "../game/cards";
 import { playCard } from "../game/deployment";
 import { canPlaceCard, snapToArenaTile } from "../game/placement";
@@ -100,19 +101,8 @@ export class BattleController {
     this.lastReplay = replay;
     this.lastReplayShareToken = typeof shareToken === "string" && /^[a-f0-9]{64}$/.test(shareToken) ? shareToken : null;
     document.body.dataset.replayAvailable = "true";
-    if (this.lastReplayShareToken) {
-      try {
-        const stored = JSON.parse(localStorage.getItem("cloneroyale.replay-share-tokens") ?? "{}") as Record<string, unknown>;
-        stored[replay.id] = this.lastReplayShareToken;
-        localStorage.setItem("cloneroyale.replay-share-tokens", JSON.stringify(stored));
-      } catch { /* Sharing remains available for this session. */ }
-    }
-    try {
-      const stored = JSON.parse(localStorage.getItem("cloneroyale.replays") ?? "[]") as unknown;
-      const replays = Array.isArray(stored) ? stored.filter(isBattleReplay) : [];
-      replays.unshift(replay);
-      localStorage.setItem("cloneroyale.replays", JSON.stringify(replays.slice(0, 20)));
-    } catch { /* Keep the replay available in memory when storage is unavailable. */ }
+    if (this.lastReplayShareToken) saveReplayShareToken(replay.id, this.lastReplayShareToken);
+    saveBattleReplay(replay);
     this.updateHud();
   }
 
@@ -473,12 +463,7 @@ export class BattleController {
     if (this.game.gameOver) {
       this.lastReplay = this.replayRecorder.finish(this.game);
       document.body.dataset.replayAvailable = "true";
-      try {
-        const stored = JSON.parse(localStorage.getItem("cloneroyale.replays") ?? "[]") as unknown;
-        const replays = Array.isArray(stored) ? stored.filter(isBattleReplay) : [];
-        replays.unshift(this.lastReplay);
-        localStorage.setItem("cloneroyale.replays", JSON.stringify(replays.slice(0, 20)));
-      } catch { /* Replay remains available in memory if storage is unavailable. */ }
+      saveBattleReplay(this.lastReplay);
       this.selectedCard = null;
       this.renderer.setPlacementPreview(null);
       this.renderer.setDeploymentArea(this.game, "blue", null);
