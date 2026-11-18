@@ -1,14 +1,25 @@
 import type { BattleReplay, ReplayRecorder } from "../src/game/replay";
 import type { CardId, GameState, Side } from "../src/game/types";
 
+export interface ServerSocket {
+  destroyed?: boolean;
+  writable?: boolean;
+  write(data: Uint8Array): unknown;
+  end(): unknown;
+}
+
 export interface ServerClient {
   id: string;
   guestId: string | null;
   name: string;
   room: ServerRoom | null;
   side: Side | null;
+  socket: ServerSocket | null;
+  buffer?: Uint8Array;
   disconnected: boolean;
+  closed: boolean;
   lastEmoteAt?: number;
+  lastSeen?: number;
   resumeToken: string;
   queued: boolean;
   rematchReady: boolean;
@@ -31,6 +42,13 @@ export interface ClientMessage {
   [key: string]: unknown;
 }
 
+export interface RandomBytesResult extends Uint8Array {
+  readUInt32BE(offset: number): number;
+  toString(encoding?: string): string;
+}
+
+export type RandomBytes = (size: number) => RandomBytesResult;
+
 export interface MessageHandlerOptions {
   send: (client: ServerClient, payload: Record<string, unknown>) => void;
   broadcast: (room: ServerRoom, payload: Record<string, unknown>) => void;
@@ -49,11 +67,4 @@ export interface MessageHandlerOptions {
 }
 
 export type MessageHandler = (client: ServerClient, message: ClientMessage) => void;
-
-export interface BattleActionMessage extends ClientMessage {
-  cardId?: unknown;
-  x?: unknown;
-  y?: unknown;
-}
-
 export type { BattleReplay, CardId, GameState, Side };
