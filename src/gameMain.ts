@@ -5,8 +5,6 @@ import { startBattleLoop } from "./app/battleLoop";
 import { OnlineClient } from "./net/onlineClient";
 import type { AudioEvent } from "./game/types";
 import { createMenuAudio } from "./audio/menuAudio";
-import { CARDS, STARTER_DECK } from "./game/cards";
-import type { CardId } from "./game/types";
 import { initializeReplayLibrary } from "./app/replayLibrary";
 import { createOnlineSession } from "./app/onlineSession";
 import { initializeDeckScreen } from "./app/deckScreen";
