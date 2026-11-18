@@ -10,6 +10,7 @@ import { createOnlineSession } from "./app/onlineSession";
 import { initializeDeckScreen } from "./app/deckScreen";
 import { initializeGuestProfile } from "./app/guestProfile";
 import { initializeBattleEmotes } from "./app/battleEmotes";
+import { createGameNavigation } from "./app/gameNavigation";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -30,19 +31,12 @@ await renderer.initialize(host);
 
 const battle = new BattleController(renderer, developerMode);
 const menuAudio = createMenuAudio();
+const navigation = createGameNavigation({ battle, menuAudio, setGameMenuOpen, openLobby });
+const { setGameScreen, startSoloBattle } = navigation;
 
 initializeDeckScreen(deck => battle.setPlayerDeck(deck), setGameMenuOpen);
-document.body.dataset.screen = "home";
 document.addEventListener("pointerdown", () => menuAudio.unlock(), true);
 document.addEventListener("keydown", () => menuAudio.unlock(), true);
-document.addEventListener("click", event => {
-  if (document.body.dataset.screen !== "home" || !(event.target instanceof Element)) return;
-  const button = event.target.closest("button");
-  if (!button) return;
-  if (button.id === "menu-play") menuAudio.playLaunch();
-  else if (button.id === "menu-settings") menuAudio.playTransition();
-  else menuAudio.playButton();
-}, true);
 menuAudio.startMusic();
 
 initializeAudioSettings(battle, menuAudio);
@@ -68,23 +62,6 @@ const leaveOnlineButton = document.getElementById("leave-online");
 const playAgainButton = document.getElementById("play-again");
 const leaveResultButton = document.getElementById("leave-result");
 const modeDescription = document.getElementById("mode-description");
-const menuPlayButton = document.getElementById("menu-play");
-const menuOnlineButton = document.getElementById("menu-online");
-const menuSettingsButton = document.getElementById("menu-settings");
-function setGameScreen(screen: "home" | "battle"): void {
-  document.body.dataset.screen = screen;
-  if (screen === "battle") {
-    menuAudio.stopMusic();
-    setGameMenuOpen(false);
-  } else {
-    menuAudio.startMusic();
-  }
-}
-function startSoloBattle(): void {
-  battle.startNewBattle();
-  setGameScreen("battle");
-}
-
 let opponentName: string | null = null;
 const guestProfile = initializeGuestProfile(profile => {
   if (onlineClient.isConnected) onlineClient.setProfile(profile.id, profile.name);
@@ -152,9 +129,6 @@ function openLobby(): void {
 
 
 onlineButton?.addEventListener("click", openLobby);
-menuPlayButton?.addEventListener("click", startSoloBattle);
-menuOnlineButton?.addEventListener("click", openLobby);
-menuSettingsButton?.addEventListener("click", () => setGameMenuOpen(true));
 findMatchButton?.addEventListener("click", async () => {
   if (!(await onlineSession.connect())) return;
   if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = true;
