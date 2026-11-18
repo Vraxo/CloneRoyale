@@ -486,12 +486,12 @@ lobby?.addEventListener("click", event => {
   if (event.target === lobby) closeLobbyButton?.click();
 });
 createRoomButton?.addEventListener("click", async () => {
-  if (!(await connectOnline())) return;
+  if (!(await onlineSession.connect())) return;
   onlineClient.createRoom();
   setLobbyStatus("Creating room…");
 });
 joinRoomButton?.addEventListener("click", async () => {
-  if (!(await connectOnline())) return;
+  if (!(await onlineSession.connect())) return;
   const code = joinCode instanceof HTMLInputElement ? joinCode.value.trim().toUpperCase() : "";
   if (code.length !== 5) { setLobbyStatus("Enter the five-character room code."); return; }
   onlineClient.joinRoom(code);
