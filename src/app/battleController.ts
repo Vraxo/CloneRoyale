@@ -3,6 +3,7 @@ import { createSoundEffects, type SoundEffects } from "../audio/soundEffects";
 import { SIMULATION_STEP } from "../game/simulation";
 import { SimulationRuntime } from "../runtime/simulationRuntime";
 import { createGameHistory } from "../game/history";
+import { ReplayPlayer, ReplayRecorder, isBattleReplay, type BattleReplay } from "../game/replay";
 import { cardById, STARTER_DECK } from "../game/cards";
 import { playCard } from "../game/deployment";
 import { canPlaceCard, snapToArenaTile } from "../game/placement";
@@ -22,6 +23,11 @@ export class BattleController {
   private previousGameOver = false;
   private selectedCard: CardId | null = null;
   private playerDeck: CardId[] = STARTER_DECK.slice();
+  private battleSeed: number;
+  private replayRecorder: ReplayRecorder;
+  private replayPlayer: ReplayPlayer | null = null;
+  private replayLiveState: GameState | null = null;
+  private lastReplay: BattleReplay | null = null;
   private onlineClient: OnlineClient | null = null;
   private playerSide: Side = "blue";
   private placementMessage = "Choose a card, then deploy on your side.";
@@ -34,8 +40,10 @@ export class BattleController {
     public readonly renderer: ArenaRenderer,
     enableDebugTools = false
   ) {
-    this.runtime = new SimulationRuntime(Date.now() >>> 0);
+    this.battleSeed = Date.now() >>> 0;
+    this.runtime = new SimulationRuntime(this.battleSeed);
     this.game = this.runtime.state;
+    this.replayRecorder = new ReplayRecorder(this.battleSeed, this.playerDeck);
     this.history = enableDebugTools ? createGameHistory(this.game) : null;
     this.music = createBattleMusic();
     this.soundEffects = createSoundEffects();
