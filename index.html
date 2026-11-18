@@ -92,6 +92,7 @@
           <nav class="cr-home-nav" aria-label="Main navigation">
             <button id="menu-decks" class="cr-nav-button" type="button"><span>▤</span><small>DECK</small></button>
             <button id="menu-settings" class="cr-nav-button" type="button"><span>⚙</span><small>SETTINGS</small></button>
+            <button id="menu-replays" class="cr-nav-button" type="button"><span>▶</span><small>REPLAYS</small></button>
             <button id="menu-online" class="cr-nav-button" type="button"><span>⚔</span><small>ONLINE</small></button>
             <button id="menu-play" class="cr-battle-button" type="button"><span class="cr-battle-swords">⚔</span><span><strong>BATTLE</strong><small>PLAY VS AI</small></span><b>›</b></button>
           </nav>
@@ -115,6 +116,24 @@
           </section>
         </div>
         <footer class="decks-footer"><span id="deck-feedback" role="status">Your deck is saved automatically.</span><button id="decks-done" type="button">DONE</button></footer>
+      </section>
+      <section id="replays-page" class="decks-page" aria-label="Replay library" hidden>
+        <header class="decks-header">
+          <button id="replays-back" class="decks-back" type="button" aria-label="Back to home">‹</button>
+          <div><span class="decks-eyebrow">MATCH ARCHIVE</span><h1>Replay Library</h1></div>
+          <button id="replays-refresh" class="secondary-button" type="button">↻ Refresh</button>
+        </header>
+        <div class="replays-content">
+          <section class="decks-active-section">
+            <div class="decks-section-heading"><div><span class="decks-eyebrow">SAVED ON THIS DEVICE</span><h2>Your replays</h2></div><span class="decks-hint">Solo and multiplayer matches</span></div>
+            <div id="local-replay-list" class="replay-list"><p class="replay-empty">No saved replays yet.</p></div>
+          </section>
+          <section class="decks-collection-section">
+            <div class="decks-section-heading"><div><span class="decks-eyebrow">COMMUNITY</span><h2>Public replays</h2></div><span class="decks-hint">Matches shared by players</span></div>
+            <div id="public-replay-list" class="replay-list"><p class="replay-empty">Loading public replays…</p></div>
+          </section>
+        </div>
+        <footer class="decks-footer"><span id="replay-library-status" role="status">Multiplayer replays are private until a participant shares them.</span><button id="replays-done" type="button">DONE</button></footer>
       </section>
       <header class="topbar">
         <a class="brand" href="/" aria-label="Clone Royale home">
@@ -181,6 +200,7 @@
                 <h2 id="result-title">Victory</h2>
                 <p id="result-summary">Crowns 1 – 0</p>
                 <button id="watch-replay" class="secondary-button" type="button" hidden>▶ Watch replay</button>
+                <button id="share-replay" class="secondary-button" type="button" hidden>↗ Share replay</button>
                 <button id="play-again" class="primary-button" type="button">Play again</button>
                 <button id="leave-result" class="secondary-button" type="button" hidden>Leave match</button>
               </div>
