@@ -5,6 +5,7 @@ import { randomBytes, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, playCard, ReplayRecorder, STARTER_DECK } from "../dist-server/simulation.js";
 import { createReplayArchive } from "./replayArchive.mjs";
+import { createMatchSimulation } from "./matchSimulation.mjs";
 
 const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
 const rooms = new Map();
@@ -395,29 +396,13 @@ server.on("upgrade", (request, socket) => {
   clients.add(client); socket.on("data", chunk => decodeFrames(client, chunk)); socket.on("close", () => closeClient(client)); socket.on("error", () => closeClient(client));
   send(client, { type: "connected" });
 });
-setInterval(() => {
-  for (const room of rooms.values()) {
-    if (!room.state || room.state.gameOver || room.players.size !== 2 || [...room.players.values()].some(player => player.disconnected)) continue;
-    const now = Date.now(); const elapsed = Math.min((now - room.lastUpdate) / 1000, 0.1); room.lastUpdate = now;
-    room.accumulator += elapsed;
-    while (room.accumulator >= SIMULATION_STEP) { stepGame(room.state, SIMULATION_STEP, null, true); room.accumulator -= SIMULATION_STEP; }
-    broadcast(room, { type: "state", state: room.state });
-    if (room.state.gameOver && !room.replaySent && room.replayRecorder) {
-      room.replaySent = true;
-      const replay = room.replayRecorder.finish(room.state);
-      replay.players = {
-        blue: [...room.players.values()].find(player => player.side === "blue")?.name ?? "Blue",
-        red: [...room.players.values()].find(player => player.side === "red")?.name ?? "Red"
-      };
-      const shareToken = randomBytes(32).toString("hex");
-      void saveReplay(replay, shareToken)
-        .then(() => broadcast(room, { type: "match-replay", replay, shareToken }))
-        .catch(error => {
-          console.error("Could not archive match replay:", error);
-          broadcast(room, { type: "match-replay", replay });
-        });
-    }
-    room.state.audioEvents = [];
-  }
-}, SIMULATION_STEP * 1000);
+const matchSimulation = createMatchSimulation({
+  rooms,
+  broadcast,
+  stepGame,
+  simulationStep: SIMULATION_STEP,
+  saveReplay: replayArchive.saveReplay,
+  randomBytes
+});
+matchSimulation.start();
 server.listen(PORT, "0.0.0.0", () => console.log("Clone Royale server listening on " + PORT));
