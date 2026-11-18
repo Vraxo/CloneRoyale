@@ -20,9 +20,9 @@ export function createMatchMessageHandlers(options: MessageHandlerOptions): Reco
 
     "play-card"(client, message) {
       const room = client.room;
-      if (!room?.state || !client.side) return;
-      const state = room.state;
+      const state = room?.state;
       const side = client.side;
+      if (!room || !state || !side) return;
       if (state.gameOver) return;
       const cardId = message.cardId;
       const x = Number(message.x);
