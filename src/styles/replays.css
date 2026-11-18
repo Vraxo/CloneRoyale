@@ -1,0 +1,66 @@
+/* Replay library and five-slot home navigation */
+body[data-screen="replays"] .main-menu { display: flex; }
+body[data-screen="replays"] .topbar,
+body[data-screen="replays"] .workspace { visibility: hidden; pointer-events: none; }
+.cr-home-nav { grid-template-columns: repeat(4, minmax(0, .82fr)) minmax(0, 2fr); }
+.replays-content {
+  display: grid;
+  gap: 18px;
+  width: min(920px, 100%);
+  margin: 17px auto 14px;
+}
+.replay-list { display: grid; gap: 8px; }
+.replay-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(178, 206, 225, .22);
+  border-radius: 7px;
+  background: rgba(5, 25, 45, .42);
+}
+.replay-row-details { display: grid; gap: 4px; min-width: 0; }
+.replay-row-details strong {
+  color: #ffe18a;
+  font-family: "Supercell Magic", sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+}
+.replay-row-details span {
+  color: #b7ccdc;
+  font-size: 9px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.replay-row-actions { display: flex; flex: 0 0 auto; gap: 6px; }
+.replay-row-actions button {
+  min-height: 32px;
+  padding: 5px 9px;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.replay-empty { margin: 0; padding: 14px 8px; color: #a8c6dd; font-size: 10px; }
+#replays-refresh { margin-left: auto; min-height: 38px; }
+@media (max-width: 760px) {
+  .cr-home-nav { grid-template-columns: repeat(4, minmax(0, .72fr)) minmax(0, 1.8fr); gap: 5px; }
+  .replays-content { gap: 12px; margin-top: 12px; }
+  .replay-row { align-items: flex-start; flex-direction: column; gap: 8px; padding: 9px; }
+  .replay-row-actions { width: 100%; }
+  .replay-row-actions button { flex: 1; }
+}
+@media (max-width: 420px) {
+  .cr-home-nav { grid-template-columns: repeat(4, minmax(0, .58fr)) minmax(0, 1.65fr); gap: 4px; }
+  .replay-row-details span { font-size: 8px; }
+  .replay-row-actions button { padding: 4px 6px; font-size: 8px; }
+}
+
+.share-replay-status {
+  min-height: 12px;
+  margin: 0;
+  color: #b9d9eb;
+  font-size: 9px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
