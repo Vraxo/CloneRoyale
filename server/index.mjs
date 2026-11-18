@@ -50,7 +50,7 @@ async function saveReplay(replay, shareToken) {
   if (!path) throw new Error("Invalid replay identifier.");
   const record = {
     replay,
-    visibility: "unlisted",
+    visibility: "public",
     shareTokenHash: createHash("sha256").update(shareToken).digest("hex")
   };
   const temporary = path + "." + randomBytes(6).toString("hex") + ".tmp";
@@ -370,7 +370,7 @@ const server = createServer(async (request, response) => {
     response.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }).end(JSON.stringify({ replays }));
     return;
   }
-  const replayMatch = requestUrl.pathname.match(/^\/api\/replays\/([a-f0-9]{32})(?:\/(publish))?$/);
+  const replayMatch = requestUrl.pathname.match(/^\/api\/replays\/([a-f0-9]{32})(?:\/(publish|unpublish))?$/);
   if (replayMatch) {
     const [, id, action] = replayMatch;
     const record = await readReplayRecord(id);
@@ -380,7 +380,7 @@ const server = createServer(async (request, response) => {
         .end(JSON.stringify({ replay: record.replay, visibility: record.visibility, summary: replaySummary(record) }));
       return;
     }
-    if (request.method === "POST" && action === "publish") {
+    if (request.method === "POST" && (action === "publish" || action === "unpublish")) {
       let body;
       try { body = await readRequestBody(request); } catch {
         response.writeHead(400, { "content-type": "application/json" }).end(JSON.stringify({ error: "Invalid request." }));
@@ -390,16 +390,16 @@ const server = createServer(async (request, response) => {
       const expectedHash = Buffer.from(record.shareTokenHash ?? "", "hex");
       const suppliedHash = createHash("sha256").update(supplied).digest();
       if (expectedHash.length !== suppliedHash.length || !timingSafeEqual(expectedHash, suppliedHash)) {
-        response.writeHead(403, { "content-type": "application/json" }).end(JSON.stringify({ error: "You don't have permission to publish this replay." }));
+        response.writeHead(403, { "content-type": "application/json" }).end(JSON.stringify({ error: "You don't have permission to change this replay's visibility." }));
         return;
       }
-      record.visibility = "public";
+      record.visibility = action === "publish" ? "public" : "unlisted";
       const path = replayFile(id);
       const temporary = path + "." + randomBytes(6).toString("hex") + ".tmp";
       await writeFile(temporary, JSON.stringify(record), { flag: "wx" });
       await rename(temporary, path);
       response.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" })
-        .end(JSON.stringify({ published: true, url: "/?replay=" + id, summary: replaySummary(record) }));
+        .end(JSON.stringify({ published: record.visibility === "public", visibility: record.visibility, url: "/?replay=" + id, summary: replaySummary(record) }));
       return;
     }
     response.writeHead(405, { allow: action ? "POST" : "GET" }).end("Method not allowed.");
