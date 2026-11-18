@@ -266,7 +266,20 @@ async function connectOnline(): Promise<boolean> {
     await onlineClient.connect();
     if (!onlineUnsubscribe) {
       onlineUnsubscribe = onlineClient.subscribe((message: OnlineMessage) => {
-        if (message.type === "assigned") {
+        if (message.type === "connection-status") {
+          const status = document.getElementById("network-status");
+          if (status) {
+            const labels = {
+              connecting: "CONNECTING TO SERVER",
+              connected: "SERVER CONNECTED",
+              reconnecting: "RECONNECTING TO SERVER",
+              disconnected: "SERVER DISCONNECTED"
+            } as const;
+            status.dataset.state = message.state;
+            status.textContent = labels[message.state];
+            status.hidden = message.state === "disconnected" && navigator.onLine;
+          }
+        } else if (message.type === "assigned") {
           if (message.resumeToken) localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
           document.body.dataset.onlineSide = message.side;
           if (message.publicMatch) {
