@@ -28,6 +28,7 @@ export class BattleController {
   private replayPlayer: ReplayPlayer | null = null;
   private replayLiveState: GameState | null = null;
   private lastReplay: BattleReplay | null = null;
+  private lastReplayShareToken: string | null = null;
   private onlineClient: OnlineClient | null = null;
   private playerSide: Side = "blue";
   private placementMessage = "Choose a card, then deploy on your side.";
@@ -92,11 +93,20 @@ export class BattleController {
   public get replayTick(): number { return this.replayPlayer?.tick ?? 0; }
   public get replayDurationTicks(): number { return this.replayPlayer?.durationTicks ?? 0; }
   public get completedReplay(): BattleReplay | null { return this.lastReplay; }
+  public get completedReplayShareToken(): string | null { return this.lastReplayShareToken; }
 
-  public applyOnlineReplay(replay: unknown): void {
+  public applyOnlineReplay(replay: unknown, shareToken?: string): void {
     if (!this.isOnline || !isBattleReplay(replay) || replay.mode !== "online") return;
     this.lastReplay = replay;
+    this.lastReplayShareToken = typeof shareToken === "string" && /^[a-f0-9]{64}$/.test(shareToken) ? shareToken : null;
     document.body.dataset.replayAvailable = "true";
+    if (this.lastReplayShareToken) {
+      try {
+        const stored = JSON.parse(localStorage.getItem("cloneroyale.replay-share-tokens") ?? "{}") as Record<string, unknown>;
+        stored[replay.id] = this.lastReplayShareToken;
+        localStorage.setItem("cloneroyale.replay-share-tokens", JSON.stringify(stored));
+      } catch { /* Sharing remains available for this session. */ }
+    }
     try {
       const stored = JSON.parse(localStorage.getItem("cloneroyale.replays") ?? "[]") as unknown;
       const replays = Array.isArray(stored) ? stored.filter(isBattleReplay) : [];
@@ -161,6 +171,7 @@ export class BattleController {
   public activateOnline(side: Side, state: GameState, client: OnlineClient): void {
     this.onlineClient = client;
     this.lastReplay = null;
+    this.lastReplayShareToken = null;
     document.body.dataset.replayAvailable = "false";
     this.playerSide = side;
     this.game = state;
