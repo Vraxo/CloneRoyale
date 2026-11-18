@@ -94,7 +94,6 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
     return { cardId: "baby-dragon", lane: cluster ? laneForX(cluster.x) : defaultLane };
   }
 
-  const enemyTank = threats.find((unit) => unit.hp > 650);
   const friendlySplashNearby = ownTroops.some((unit) =>
     unit.type === "baby-dragon" && Math.hypot(unit.x - (enemyTank?.x ?? 0), unit.y - (enemyTank?.y ?? 0)) < 180
   );
