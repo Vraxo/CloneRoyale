@@ -109,6 +109,7 @@ export function isBattleReplay(value: unknown): value is BattleReplay {
     && Number.isFinite(replay.seed)
     && Array.isArray(replay.deck)
     && replay.deck.length === 8
+    && typeof replay.durationTicks === "number"
     && Number.isInteger(replay.durationTicks)
     && replay.durationTicks >= 0
     && Array.isArray(replay.actions)
