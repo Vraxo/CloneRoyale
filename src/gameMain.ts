@@ -178,7 +178,7 @@ emotePicker?.addEventListener("click", event => {
   if (battle.isOnline) {
     onlineClient.sendEmote(emoteId);
   } else {
-    showBattleEmote("blue", emoteId, guestProfile.name);
+    showBattleEmote("blue", emoteId, guestProfile.getProfile().name);
   }
   if (emotePicker instanceof HTMLElement) emotePicker.hidden = true;
   emoteToggle?.setAttribute("aria-expanded", "false");
@@ -273,7 +273,7 @@ function leaveOnlineMatch(): void {
   onlineSession.unsubscribe();
   battle.leaveOnline();
   opponentName = null;
-  if (modeDescription) modeDescription.textContent = guestProfile.name + " · Live match";
+  if (modeDescription) modeDescription.textContent = guestProfile.getProfile().name + " · Live match";
   if (lobby instanceof HTMLDivElement) lobby.hidden = true;
   if (playAgainButton instanceof HTMLButtonElement) {
     playAgainButton.disabled = false;
