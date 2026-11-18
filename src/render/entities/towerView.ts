@@ -11,7 +11,7 @@ export class TowerView {
     this.id = tower.id;
 
     const teamColor = tower.side === "blue" ? 0x4b91d0 : 0xc9665d;
-    const size = tower.kind === "king" ? 30 : 25;
+    const size = tower.kind === "king" ? 2 * 30 : 1.5 * 30;
     const body = new Graphics();
 
     body.ellipse(0, 12, size + 7, size * 0.66).fill(0x344338);
@@ -26,7 +26,7 @@ export class TowerView {
   }
 
   public update(tower: Tower): void {
-    const size = tower.kind === "king" ? 30 : 25;
+    const size = tower.kind === "king" ? 2 * 30 : 1.5 * 30;
     const ratio = Math.max(0, Math.min(1, tower.hp / tower.maxHp));
 
     this.container.position.set(tower.x, tower.y);
