@@ -40,6 +40,7 @@ function loadPlayerDeck(): CardId[] {
   } catch { /* Restore the starter deck when stored data is invalid. */ }
   return STARTER_DECK.slice();
 }
+const ALL_CARD_IDS = Object.keys(CARDS) as CardId[];
 let playerDeck = loadPlayerDeck();
 let selectedDeckSlot = 0;
 battle.setPlayerDeck(playerDeck);
@@ -63,7 +64,7 @@ function makeDeckCard(cardId: CardId, slot: number, selected: boolean): HTMLButt
   cost.className = "deck-card-cost";
   cost.textContent = String(card.cost);
   const image = document.createElement("img");
-  image.src = "/cards/" + cardId + ".png";
+  image.src = "/cards/" + cardId + (cardId === "knight" ? ".svg" : ".png");
   image.alt = "";
   image.loading = "lazy";
   const name = document.createElement("span");
@@ -87,7 +88,7 @@ function renderDeckPage(): void {
     });
     deckSlots.append(card);
   });
-  STARTER_DECK.forEach(cardId => {
+  ALL_CARD_IDS.forEach(cardId => {
     const card = makeDeckCard(cardId, STARTER_DECK.indexOf(cardId), false);
     card.classList.add("collection-card");
     card.addEventListener("click", () => {
@@ -98,10 +99,12 @@ function renderDeckPage(): void {
       }
       const displaced = playerDeck[selectedDeckSlot];
       playerDeck[selectedDeckSlot] = cardId;
-      playerDeck[currentIndex] = displaced;
+      if (currentIndex >= 0) playerDeck[currentIndex] = displaced;
       localStorage.setItem(DECK_STORAGE_KEY, JSON.stringify(playerDeck));
       battle.setPlayerDeck(playerDeck);
-      if (deckFeedback) deckFeedback.textContent = CARDS[cardId].name + " swapped into slot " + (selectedDeckSlot + 1) + ".";
+      if (deckFeedback) deckFeedback.textContent = currentIndex >= 0
+        ? CARDS[cardId].name + " swapped into slot " + (selectedDeckSlot + 1) + "."
+        : CARDS[cardId].name + " added to your deck. " + CARDS[displaced].name + " returned to your collection.";
       renderDeckPage();
       renderHomeDeckPreview();
     });
