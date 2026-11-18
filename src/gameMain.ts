@@ -516,6 +516,8 @@ async function connectOnline(): Promise<boolean> {
           showBattleEmote(message.side, message.emoteId, message.name);
         } else if (message.type === "state") {
           battle.applyOnlineState(message.state);
+        } else if (message.type === "match-replay") {
+          battle.applyOnlineReplay(message.replay);
         } else if (message.type === "opponent-left") {
           if (battle.isOnline) {
             setLobbyStatus("Opponent left. You can leave this match and find another opponent.");
