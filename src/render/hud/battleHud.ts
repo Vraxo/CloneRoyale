@@ -100,6 +100,7 @@ export class BattleHud {
   public readonly container = new Container();
 
   private readonly graphics = new Graphics();
+  private readonly cardProgressGraphics = new Graphics();
   private readonly cardOverlayGraphics = new Graphics();
   private readonly cardArts = Array.from({ length: 4 }, () => new Sprite(Texture.EMPTY));
   private readonly nextCardArt = new Sprite(Texture.EMPTY);
@@ -122,6 +123,7 @@ export class BattleHud {
       this.graphics,
       this.nextCardArt,
       ...this.cardArts,
+      this.cardProgressGraphics,
       this.cardOverlayGraphics,
       ...this.cardGlyphs,
       ...this.cardNames,
@@ -172,6 +174,7 @@ export class BattleHud {
   ): void {
     const layout = calculateHudLayout(width, height);
     const graphics = this.graphics;
+    this.cardProgressGraphics.clear();
     const player = state.sides[side];
     const nextCardId = player.drawPile[0];
     this.lastHandCardIds = [...player.hand];
@@ -338,7 +341,7 @@ export class BattleHud {
 
       graphics
         .roundRect(rect.x, rect.y, rect.width, rect.height, 8)
-        .fill({ color: fill, alpha: affordable ? 1 : 0.54 });
+        .fill({ color: fill, alpha: affordable ? 1 : 0.72 });
       graphics
         .roundRect(rect.x, rect.y, rect.width, rect.height, 8)
         .stroke({ color: border, alpha: 1, width: isSelected ? 3 : 1.5 });
@@ -359,9 +362,42 @@ export class BattleHud {
           rect.width - 12,
           artHeight
         );
-        art.alpha = affordable ? 1 : 0.5;
+        art.alpha = 1;
       } else {
         art.texture = Texture.EMPTY;
+      }
+
+      if (card && !affordable) {
+        const progress = Math.max(0, Math.min(1, player.elixir / card.cost));
+        const centerX = rect.x + rect.width / 2;
+        const artHeight = Math.min(62, rect.height - 21);
+        const centerY = rect.y + artHeight / 2 + 3;
+        const radius = Math.max(8, Math.min(rect.width - 14, artHeight) * 0.43);
+        const startAngle = -Math.PI / 2;
+        const remainingAngle = (1 - progress) * Math.PI * 2;
+        const progressGraphics = this.cardProgressGraphics;
+
+        if (remainingAngle > 0.001) {
+          progressGraphics
+            .moveTo(centerX, centerY)
+            .lineTo(centerX, centerY - radius)
+            .arc(centerX, centerY, radius, startAngle, startAngle + remainingAngle)
+            .closePath()
+            .fill({ color: 0x07182b, alpha: 0.58 });
+        }
+
+        progressGraphics
+          .circle(centerX, centerY, radius + 2)
+          .stroke({ color: 0x101d31, alpha: 0.8, width: 3 });
+        if (progress > 0.002) {
+          progressGraphics
+            .moveTo(
+              centerX + (radius + 2) * Math.cos(startAngle),
+              centerY + (radius + 2) * Math.sin(startAngle)
+            )
+            .arc(centerX, centerY, radius + 2, startAngle, startAngle + progress * Math.PI * 2)
+            .stroke({ color: 0xd7b5f2, alpha: 0.98, width: 3 });
+        }
       }
 
       const glyph = this.cardGlyphs[index];
@@ -371,7 +407,7 @@ export class BattleHud {
       glyph.text = card ? cardGlyph(cardId) : "";
       glyph.anchor.set(0.5);
       glyph.position.set(rect.x + rect.width / 2, rect.y + rect.height * 0.38);
-      glyph.alpha = affordable ? 1 : 0.45;
+      glyph.alpha = affordable ? 1 : 0.7;
       glyph.style.fontSize = Math.max(16, Math.min(27, rect.width * 0.2));
 
       name.text = card?.name ?? "";
@@ -380,7 +416,7 @@ export class BattleHud {
       name.style.fontSize = Math.max(7, Math.min(9, rect.width * 0.075));
       name.style.wordWrap = true;
       name.style.wordWrapWidth = rect.width - 12;
-      name.alpha = affordable ? 1 : 0.52;
+      name.alpha = affordable ? 1 : 0.7;
 
       const badgeX = rect.x + rect.width - 14;
       const badgeY = rect.y + 14;
