@@ -14,7 +14,7 @@ for (let tick = 0; tick < 900; tick += 1) {
     assert.equal(playCard(original, "blue", "archers", "left", 180, 700, { x: 180, y: 700 }), true);
     recorder.record(original, "blue", "archers", 180, 700);
   }
-  if (tick === 180) {
+  if (tick === 300) {
     assert.equal(playCard(original, "blue", "giant", "right", 450, 700, { x: 450, y: 700 }), true);
     recorder.record(original, "blue", "giant", 450, 700);
   }
