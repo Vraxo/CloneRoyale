@@ -12,6 +12,7 @@ import { initializeGuestProfile } from "./app/guestProfile";
 import { initializeBattleEmotes } from "./app/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
 import { initializeLobbyScreen } from "./app/lobbyScreen";
+import { initializeGameMenu } from "./app/gameMenu";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -32,6 +33,7 @@ await renderer.initialize(host);
 
 const battle = new BattleController(renderer, developerMode);
 const menuAudio = createMenuAudio();
+const setGameMenuOpen = initializeGameMenu(menuAudio);
 let lobbyScreen: ReturnType<typeof initializeLobbyScreen> | null = null;
 function openLobby(): void { lobbyScreen?.openLobby(); }
 const navigation = createGameNavigation({ battle, menuAudio, setGameMenuOpen, openLobby });
@@ -165,26 +167,6 @@ playAgainButton?.addEventListener("click", () => {
   }
 });
 
-const gameMenuToggle = document.getElementById("game-menu-toggle");
-const closeGameMenuButton = document.getElementById("close-game-menu");
-function setGameMenuOpen(open: boolean): void {
-  document.body.dataset.controlsOpen = open ? "true" : "false";
-  gameMenuToggle?.setAttribute("aria-expanded", String(open));
-}
-closeGameMenuButton?.addEventListener("click", () => setGameMenuOpen(false));
-gameMenuToggle?.addEventListener("click", () => {
-  const open = document.body.dataset.controlsOpen !== "true";
-  menuAudio.playTransition();
-  setGameMenuOpen(open);
-});
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape") setGameMenuOpen(false);
-});
-document.addEventListener("pointerdown", event => {
-  if (document.body.dataset.controlsOpen !== "true" || !(event.target instanceof Element)) return;
-  if (event.target.closest(".control-panel, #game-menu-toggle")) return;
-  setGameMenuOpen(false);
-});
 onlineButton?.addEventListener("click", () => setGameMenuOpen(false));
 
 const modeButton = document.getElementById("mode-toggle");
