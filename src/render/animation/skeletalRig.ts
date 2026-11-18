@@ -99,7 +99,10 @@ export class SkeletalRig {
 
     if (style === "skeleton") addSword(this.rightArm.hand, 0xb8c6c2, 19, 2.5);
     if (style === "mini-pekka") addSword(this.rightArm.hand, 0xd5dfdf, 24, 4);
-    if (style === "knight") {\n      addSword(this.rightArm.hand, 0xe1e8ec, 21, 3.2);\n      this.addShield();\n    }
+    if (style === "knight") {
+      addSword(this.rightArm.hand, 0xe1e8ec, 21, 3.2);
+      this.addShield();
+    }
     if (style === "archer") this.addBow();
   }
 
