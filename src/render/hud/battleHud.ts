@@ -239,7 +239,7 @@ export class BattleHud {
     this.drawMatchClock(state, layout.width, graphics);
     this.drawCards(state, selectedCard, layout.cards, graphics, side);
     this.drawCardBadges(layout, selectedCard);
-    this.drawElixir(player.elixir, layout, graphics);
+    this.drawElixir(player.elixir, layout, graphics, state.time);
 
     this.placementHint.text = message;
     this.placementHint.anchor.set(0.5);
@@ -432,17 +432,40 @@ export class BattleHud {
   private drawElixir(
     elixir: number,
     layout: ReturnType<typeof calculateHudLayout>,
-    graphics: Graphics
+    graphics: Graphics,
+    time: number
   ): void {
     const meterX = layout.padding + 2;
     const meterY = layout.top + 112;
     const meterWidth = layout.width - layout.padding * 2 - 4;
+    const isFull = elixir >= 10;
+    const pulse = 0.5 + (Math.sin(time * 5) + 1) * 0.25;
+    const fillWidth = meterWidth * Math.max(0, Math.min(1, elixir / 10));
+
+    if (isFull) {
+      graphics
+        .roundRect(meterX - 4, meterY - 4, meterWidth + 8, 25, 12)
+        .stroke({ color: 0xd99aff, alpha: 0.16 + pulse * 0.16, width: 9 });
+      graphics
+        .roundRect(meterX - 2, meterY - 2, meterWidth + 4, 21, 10)
+        .stroke({ color: 0xe7baff, alpha: 0.38 + pulse * 0.25, width: 3 });
+    }
+
     graphics
       .roundRect(meterX, meterY, meterWidth, 17, 8)
       .fill({ color: 0x3c3048 });
     graphics
-      .roundRect(meterX, meterY, meterWidth * Math.max(0, Math.min(1, elixir / 10)), 17, 8)
-      .fill({ color: 0x9956c8 });
+      .roundRect(meterX, meterY, fillWidth, 17, 8)
+      .fill({ color: isFull ? 0xb96bea : 0x9956c8 });
+
+    if (isFull) {
+      graphics
+        .roundRect(meterX + 2, meterY + 2, Math.max(0, fillWidth - 4), 4, 2)
+        .fill({ color: 0xf4d9ff, alpha: 0.38 + pulse * 0.3 });
+      graphics
+        .roundRect(meterX, meterY, meterWidth, 17, 8)
+        .stroke({ color: 0xf0caff, alpha: 0.8 + pulse * 0.2, width: 1.5 });
+    }
 
     for (let tick = 1; tick < 10; tick += 1) {
       const x = meterX + meterWidth * tick / 10;
