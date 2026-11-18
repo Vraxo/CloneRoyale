@@ -111,7 +111,7 @@ export function isBattleReplay(value: unknown): value is BattleReplay {
   const replay = value as Partial<BattleReplay>;
   return replay.version === 1
     && (replay.mode === undefined || replay.mode === "solo" || replay.mode === "online")
-    && (replay.players === undefined || (typeof replay.players.blue === "string" && typeof replay.players.red === "string"))
+    && (replay.players === undefined || (typeof replay.players === "object" && replay.players !== null && typeof replay.players.blue === "string" && typeof replay.players.red === "string"))
     && typeof replay.id === "string"
     && Number.isFinite(replay.seed)
     && Array.isArray(replay.deck)
