@@ -13,6 +13,7 @@ import { initializeBattleEmotes } from "./app/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
 import { initializeLobbyScreen } from "./app/lobbyScreen";
 import { initializeGameMenu } from "./app/gameMenu";
+import { initializeMatchLifecycle } from "./app/matchLifecycle";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -54,9 +55,7 @@ battle.setPaused(true);
 const onlineClient = new OnlineClient();
 const lobbyStatus = document.getElementById("online-status");
 const onlineButton = document.getElementById("online-play");
-const leaveOnlineButton = document.getElementById("leave-online");
 const playAgainButton = document.getElementById("play-again");
-const leaveResultButton = document.getElementById("leave-result");
 const modeDescription = document.getElementById("mode-description");
 let opponentName: string | null = null;
 const guestProfile = initializeGuestProfile(profile => {
@@ -98,25 +97,10 @@ function setLobbyStatus(message: string): void {
   if (lobbyStatus) lobbyStatus.textContent = message;
 }
 
+let matchLifecycle: ReturnType<typeof initializeMatchLifecycle> | null = null;
 function setReconnectOverlay(visible: boolean, expired = false): void {
-  const overlay = document.getElementById("reconnect-overlay");
-  const title = document.getElementById("reconnect-title");
-  const description = document.getElementById("reconnect-description");
-  const spinner = document.getElementById("reconnect-spinner");
-  const leave = document.getElementById("reconnect-leave");
-  if (!(overlay instanceof HTMLDivElement)) return;
-  overlay.hidden = !visible;
-  if (title) title.textContent = expired ? "Match unavailable" : "Reconnecting…";
-  if (description) description.textContent = expired
-    ? "The server could not restore your previous match. You can return to the main menu."
-    : "Your match is being kept while we restore the connection. Please keep this screen open.";
-  if (spinner instanceof HTMLElement) spinner.hidden = expired;
-  if (leave instanceof HTMLButtonElement) leave.hidden = !expired;
+  matchLifecycle?.setReconnectOverlay(visible, expired);
 }
-document.getElementById("reconnect-leave")?.addEventListener("click", () => {
-  if (battle.isOnline) leaveOnlineMatch();
-  setGameScreen("home");
-});
 
 lobbyScreen = initializeLobbyScreen({
   client: onlineClient,
@@ -125,30 +109,16 @@ lobbyScreen = initializeLobbyScreen({
   setLobbyStatus
 });
 
-function leaveOnlineMatch(): void {
-  setReconnectOverlay(false);
-  battleEmotes?.reset();
-  onlineSession.unsubscribe();
-  battle.leaveOnline();
-  opponentName = null;
-  if (modeDescription) modeDescription.textContent = guestProfile.getProfile().name + " · Live match";
-  lobbyScreen?.hideLobby();
-  if (playAgainButton instanceof HTMLButtonElement) {
-    playAgainButton.disabled = false;
-    playAgainButton.textContent = "Play again";
-  }
-}
-leaveOnlineButton?.addEventListener("click", leaveOnlineMatch);
-leaveResultButton?.addEventListener("click", leaveOnlineMatch);
-const returnMainMenuButton = document.getElementById("return-main-menu");
-returnMainMenuButton?.addEventListener("click", () => {
-  if (battle.isOnline) {
-    leaveOnlineMatch();
-  } else {
-    battle.setPaused(true);
-  }
-  setGameScreen("home");
+matchLifecycle = initializeMatchLifecycle({
+  battle,
+  unsubscribe: onlineSession.unsubscribe,
+  resetEmotes: () => battleEmotes?.reset(),
+  getPlayerName: () => guestProfile.getProfile().name,
+  resetOpponent: () => { opponentName = null; },
+  hideLobby: () => lobbyScreen?.hideLobby(),
+  setGameScreen
 });
+const leaveOnlineMatch = matchLifecycle.leaveOnlineMatch;
 initializeReplayLibrary({
   battle,
   api: path => (import.meta.env.VITE_MULTIPLAYER_SERVER_URL ?? "").replace(/\/$/, "") + path,
