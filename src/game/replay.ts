@@ -1,4 +1,5 @@
 import { playCard } from "./deployment";
+import { CARDS } from "./cards";
 import { createGame, SIMULATION_STEP, stepGame } from "./simulation";
 import type { CardId, GameState, Lane, Side } from "./types";
 
@@ -109,6 +110,8 @@ export function isBattleReplay(value: unknown): value is BattleReplay {
     && Number.isFinite(replay.seed)
     && Array.isArray(replay.deck)
     && replay.deck.length === 8
+    && replay.deck.every(cardId => typeof cardId === "string" && Object.hasOwn(CARDS, cardId))
+    && new Set(replay.deck).size === 8
     && typeof replay.durationTicks === "number"
     && Number.isInteger(replay.durationTicks)
     && replay.durationTicks >= 0
@@ -119,6 +122,7 @@ export function isBattleReplay(value: unknown): value is BattleReplay {
       && action.tick <= replay.durationTicks!
       && (action.side === "blue" || action.side === "red")
       && typeof action.cardId === "string"
+      && Object.hasOwn(CARDS, action.cardId)
       && Number.isFinite(action.x)
       && Number.isFinite(action.y)
     );
