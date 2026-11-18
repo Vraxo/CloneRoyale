@@ -75,7 +75,8 @@ function testMatchmaking() {
   assert.equal(matchmaking.size, 2);
   const publicOpponent = makeClient("public-opponent");
   matchmaking.join(publicOpponent);
-  assert.equal(matchmaking.size, 0);
+  assert.equal(matchmaking.size, 1, "The unmatched third player must remain queued.");
+  assert.equal(third.queued, true);
   assert.equal(rooms.size, 1);
   assert.deepEqual(attached, [
     { id: "second", side: "blue" },
@@ -84,6 +85,13 @@ function testMatchmaking() {
   assert.equal([...rooms.values()][0].publicMatch, true);
   assert.equal(second.queued, false);
   assert.equal(publicOpponent.queued, false);
+  const nextOpponent = makeClient("next-opponent");
+  matchmaking.join(nextOpponent);
+  assert.equal(matchmaking.size, 0);
+  assert.deepEqual(attached.slice(2), [
+    { id: "third", side: "blue" },
+    { id: "next-opponent", side: "red" }
+  ], "Matchmaking must preserve FIFO order across successive matches.");
 
   const stale = makeClient("stale");
   matchmaking.join(stale);
