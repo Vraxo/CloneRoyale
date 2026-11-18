@@ -76,7 +76,8 @@ async function readRequestBody(request, maximumBytes = 4096) {
   }
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
-\nfunction send(client, payload) {
+
+function send(client, payload) {
   if (client.closed || !client.socket) return;
   const body = Buffer.from(JSON.stringify(payload));
   let header;
