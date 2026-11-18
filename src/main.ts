@@ -43,7 +43,7 @@ if (!("serviceWorker" in navigator)) {
   hideOfflineSetup();
 } else {
   navigator.serviceWorker.addEventListener("message", event => {
-    const data = event.data as { type?: string; completed?: number; total?: number; message?: string } | null;
+    const data = event.data as { type?: string; completed?: number; total?: number; message?: string; ready?: boolean } | null;
     if (!data) return;
 
     if (data.type === "PRECACHE_PROGRESS" && typeof data.completed === "number" && typeof data.total === "number") {
