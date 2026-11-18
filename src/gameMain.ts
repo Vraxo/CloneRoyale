@@ -124,7 +124,7 @@ function renderHomeDeckPreview(): void {
     const card = document.createElement("div");
     card.className = "cr-card-tile";
     const image = document.createElement("img");
-    image.src = "/cards/" + cardId + ".png";
+    image.src = "/cards/" + cardId + (cardId === "knight" ? ".svg" : ".png");
     image.alt = CARDS[cardId].name;
     const name = document.createElement("span");
     name.textContent = CARDS[cardId].name.toUpperCase();
