@@ -57,7 +57,7 @@ npm run build
 npm start
 ```
 
-Open the app and choose **Online play**. Use **Find match** in two browser sessions to be paired automatically, or use **Create private room** and share its code. For deployment, the included `render.yaml` describes a Render web service. Import the repository into Render and deploy the Blueprint. The free instance may sleep when idle, and room state is in memory, so active rooms are lost if the service restarts.
+Open the app and choose **Online play**. Use **Find match** in two browser sessions to be paired automatically, or use **Create private room** and share its code. For deployment, the included `render.yaml` describes a Render web service. Import the repository into Render and deploy the Blueprint. The free instance may sleep when idle, and room state is in memory, so active rooms are lost if the service restarts.\n\nCompleted multiplayer matches are also archived on the server under `data/replays/`. They remain unlisted by default; either participant can publish a replay from the result screen or Replay Library. Published matches appear in the public library and can be opened with a share link. Set `CLONEROYALE_REPLAY_DIR` to choose the archive directory. **For durable production storage, point this variable at a persistent volume.** The included Render free service does not attach persistent storage, so its local replay archive can be lost when the instance is restarted or redeployed; local self-hosted installs keep their archive on disk.
 
 ## Architecture
 
