@@ -3,7 +3,7 @@ import { createMatchmakingRoutes } from "./http/matchmakingRoutes.js";
 import { createReplayRoutes } from "./http/replayRoutes.js";
 import { createStaticFileHandler } from "./http/staticFiles.js";
 import type { createReplayArchive } from "./replayArchive.js";
-import type { createAccountStore } from "./accounts.js";
+import type { createAccountStore } from "./account/accounts.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { sendText } from "./http/httpUtils.js";
 
