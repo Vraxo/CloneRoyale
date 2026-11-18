@@ -109,6 +109,7 @@ export class BattleOnline {
     clearOnlineResumeToken();
     this.onlineClient = null;
     this.playerSide = "blue";
+    this.previousGameOver = false;
 
     document.body.dataset.online = "false";
     const modeDescription = document.getElementById("mode-description");
