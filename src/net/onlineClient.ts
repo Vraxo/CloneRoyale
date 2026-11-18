@@ -114,7 +114,10 @@ export class OnlineClient {
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
     this.reconnectTimer = null;
     this.reconnectAttempts = 0;
-    this.cancelConnection?.(new Error("Connection attempt cancelled."));
+    const cancelConnection = this.cancelConnection;
+    this.cancelConnection = null;
+    this.connectionPromise = null;
+    cancelConnection?.(new Error("Connection attempt cancelled."));
     const socket = this.socket;
     this.socket = null;
     this.sendWithSocket(socket, { type: "cancel-matchmaking" });
