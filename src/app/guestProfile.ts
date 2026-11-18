@@ -23,7 +23,6 @@ function loadGuestProfile(): GuestProfile {
 
 export function initializeGuestProfile(onProfileChanged: (profile: GuestProfile) => void): {
   getProfile: () => GuestProfile;
-  render: () => void;
 } {
   let profile = loadGuestProfile();
   const profileButton = document.getElementById("profile-button");
@@ -85,5 +84,5 @@ export function initializeGuestProfile(onProfileChanged: (profile: GuestProfile)
   });
 
   render();
-  return { getProfile: () => profile, render };
+  return { getProfile: () => profile };
 }
