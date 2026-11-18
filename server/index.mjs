@@ -105,7 +105,7 @@ function attachPlayer(room, client, side) {
   if (room.players.size === 2 && [...room.players.values()].every(player => !player.disconnected)) {
     room.seed = randomBytes(4).readUInt32BE(0);
     room.state = createGame(room.seed);
-    room.replayRecorder = new ReplayRecorder(room.seed, STARTER_DECK, undefined, "online");
+    room.replayRecorder = new ReplayRecorder(room.seed, STARTER_DECK, randomBytes(16).toString("hex"), "online");
     room.replaySent = false;
     room.lastUpdate = Date.now();
     broadcast(room, { type: "match-start", state: room.state, players: playerSummaries(room) });
