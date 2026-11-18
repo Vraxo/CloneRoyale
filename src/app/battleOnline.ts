@@ -11,7 +11,6 @@ interface BattleOnlineOptions {
   music: BattleMusic;
   soundEffects: SoundEffects;
   hud: BattleHud;
-  getGame(): GameState;
   setGame(state: GameState): void;
   getSelectedCard(): CardId | null;
   setSelectedCard(cardId: CardId | null): void;
@@ -23,37 +22,32 @@ interface BattleOnlineOptions {
 }
 
 export class BattleOnline {
-  private client: OnlineClient | null = null;
+  private onlineClient: OnlineClient | null = null;
   private playerSide: Side = "blue";
   private previousGameOver = false;
 
   public constructor(private readonly options: BattleOnlineOptions) {}
 
   public get isActive(): boolean {
-    return this.client !== null;
+    return this.onlineClient !== null;
   }
 
   public get side(): Side {
     return this.playerSide;
   }
 
-  public get clientConnection(): OnlineClient | null {
-    return this.client;
-  }
-
   public get client(): OnlineClient | null {
-    return this.clientConnection;
+    return this.onlineClient;
   }
 
   public activate(side: Side, state: GameState, client: OnlineClient): void {
-    this.client = client;
+    this.onlineClient = client;
     this.playerSide = side;
     this.options.setGame(state);
     this.options.setHistoryDisabled();
     this.options.setSelectedCard(null);
     this.options.setPaused(false);
     this.options.resetSimulation();
-    this.previousGameOver = state.gameOver;
     this.previousGameOver = state.gameOver;
     this.options.setPreviousGameOver(state.gameOver);
 
@@ -71,7 +65,7 @@ export class BattleOnline {
   }
 
   public applyState(state: GameState): void {
-    if (!this.client) return;
+    if (!this.onlineClient) return;
 
     const previousGameOver = this.previousGameOver;
     this.options.setGame(state);
@@ -92,6 +86,7 @@ export class BattleOnline {
       );
     }
 
+    this.previousGameOver = state.gameOver;
     this.options.setPreviousGameOver(state.gameOver);
 
     if (state.gameOver) {
@@ -108,11 +103,11 @@ export class BattleOnline {
   }
 
   public leave(): boolean {
-    if (!this.client) return false;
+    if (!this.onlineClient) return false;
 
-    this.client.leave();
+    this.onlineClient.leave();
     clearOnlineResumeToken();
-    this.client = null;
+    this.onlineClient = null;
     this.playerSide = "blue";
 
     document.body.dataset.online = "false";
