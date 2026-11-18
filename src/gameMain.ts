@@ -11,6 +11,7 @@ import { initializeDeckScreen } from "./app/deckScreen";
 import { initializeGuestProfile } from "./app/guestProfile";
 import { initializeBattleEmotes } from "./app/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
+import { initializeLobbyScreen } from "./app/lobbyScreen";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -31,6 +32,8 @@ await renderer.initialize(host);
 
 const battle = new BattleController(renderer, developerMode);
 const menuAudio = createMenuAudio();
+let lobbyScreen: ReturnType<typeof initializeLobbyScreen> | null = null;
+function openLobby(): void { lobbyScreen?.openLobby(); }
 const navigation = createGameNavigation({ battle, menuAudio, setGameMenuOpen, openLobby });
 const { setGameScreen, startSoloBattle } = navigation;
 
@@ -47,16 +50,7 @@ battle.initialize();
 battle.setPaused(true);
 
 const onlineClient = new OnlineClient();
-const lobby = document.getElementById("online-lobby");
 const lobbyStatus = document.getElementById("online-status");
-const roomCode = document.getElementById("room-code");
-const joinCode = document.getElementById("join-code");
-const findMatchButton = document.getElementById("find-match");
-const cancelMatchButton = document.getElementById("cancel-match");
-const privateRoomSection = document.getElementById("private-room-section");
-const createRoomButton = document.getElementById("create-room");
-const joinRoomButton = document.getElementById("join-room");
-const closeLobbyButton = document.getElementById("close-lobby");
 const onlineButton = document.getElementById("online-play");
 const leaveOnlineButton = document.getElementById("leave-online");
 const playAgainButton = document.getElementById("play-again");
@@ -122,52 +116,13 @@ document.getElementById("reconnect-leave")?.addEventListener("click", () => {
   setGameScreen("home");
 });
 
-function openLobby(): void {
-  if (lobby instanceof HTMLDivElement) lobby.hidden = false;
-  setLobbyStatus("Connect to the game server to create or join a room.");
-}
+lobbyScreen = initializeLobbyScreen({
+  client: onlineClient,
+  session: onlineSession,
+  battle,
+  setLobbyStatus
+});
 
-
-onlineButton?.addEventListener("click", openLobby);
-findMatchButton?.addEventListener("click", async () => {
-  if (!(await onlineSession.connect())) return;
-  if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = true;
-  if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = false;
-  if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = true;
-  setLobbyStatus("Searching for an opponent…");
-  onlineClient.findMatch();
-});
-cancelMatchButton?.addEventListener("click", () => {
-  onlineClient.cancelMatchmaking();
-  if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = true;
-  if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = false;
-  if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = false;
-});
-closeLobbyButton?.addEventListener("click", () => {
-  if (!battle.isOnline) {
-    onlineSession.unsubscribe();
-    onlineClient.leave();
-    if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = true;
-    if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = false;
-    if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = false;
-  }
-  if (lobby instanceof HTMLDivElement) lobby.hidden = true;
-});
-lobby?.addEventListener("click", event => {
-  if (event.target === lobby) closeLobbyButton?.click();
-});
-createRoomButton?.addEventListener("click", async () => {
-  if (!(await onlineSession.connect())) return;
-  onlineClient.createRoom();
-  setLobbyStatus("Creating room…");
-});
-joinRoomButton?.addEventListener("click", async () => {
-  if (!(await onlineSession.connect())) return;
-  const code = joinCode instanceof HTMLInputElement ? joinCode.value.trim().toUpperCase() : "";
-  if (code.length !== 5) { setLobbyStatus("Enter the five-character room code."); return; }
-  onlineClient.joinRoom(code);
-  setLobbyStatus("Joining room…");
-});
 function leaveOnlineMatch(): void {
   setReconnectOverlay(false);
   battleEmotes?.reset();
