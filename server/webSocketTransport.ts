@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
 import type { Server } from "node:http";
-import type { Socket } from "node:net";
+import type { Duplex } from "node:stream";
 import type { RandomBytes, ServerClient } from "./types.js";
 
 interface WebSocketClient extends ServerClient {
-  socket: Socket | null;
+  socket: Duplex | null;
   buffer: Buffer;
 }
 
