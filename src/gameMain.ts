@@ -743,21 +743,6 @@ async function publishReplay(id: string, token: string): Promise<void> {
     if (resultStatus) resultStatus.textContent = message;
   }
 }
-async function unpublishReplay(id: string, token: string): Promise<void> {
-  if (replayLibraryStatus) replayLibraryStatus.textContent = "Removing replay from the public library…";
-  try {
-    const response = await fetch(replayApi("/api/replays/" + encodeURIComponent(id) + "/unpublish"), {
-      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ shareToken: token })
-    });
-    const result = await response.json() as { error?: string; visibility?: string };
-    if (!response.ok || result.visibility !== "unlisted") throw new Error(result.error ?? "Could not hide replay.");
-    if (replayLibraryStatus) replayLibraryStatus.textContent = "Replay hidden from the public library. Its direct link still works.";
-    renderLocalReplays();
-    await refreshPublicReplays();
-  } catch (error) {
-    if (replayLibraryStatus) replayLibraryStatus.textContent = error instanceof Error ? error.message : "Could not hide replay.";
-  }
-}
 async function watchReplay(replay: unknown): Promise<void> {
   if (!isBattleReplay(replay)) return;
   replayReturnScreen = document.body.dataset.screen === "battle" ? "battle" : "home";
@@ -784,7 +769,6 @@ function renderLocalReplays(): void {
     const token = tokens[replay.id];
     if (replay.mode === "online" && token) {
       actions.push({ label: "↗ SHARE", run: () => publishReplay(replay.id, token) });
-      actions.push({ label: "HIDE FROM PUBLIC", run: () => unpublishReplay(replay.id, token) });
     }
     localReplayList.append(createReplayRow(replayResultLabel(replay.winner), subtitle, actions));
   }
