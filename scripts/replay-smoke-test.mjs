@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createGame, playCard, stepGame, SIMULATION_STEP } from "../dist-server/simulation.js";
-import { ReplayPlayer, ReplayRecorder, isBattleReplay } from "../dist-server/simulation.js";
+import { ReplayPlayer, ReplayRecorder, ReplayPlaybackSession, isBattleReplay } from "../dist-server/simulation.js";
 
 const seed = 123456;
 const deck = ["archers", "giant", "mini-pekka", "baby-dragon", "knight", "fireball", "cannon", "skeleton-army"];
@@ -32,11 +32,23 @@ assert.deepEqual(
   playback.state.towers.map(tower => Math.round(tower.hp * 100) / 100),
   original.towers.map(tower => Math.round(tower.hp * 100) / 100)
 );
+
+const playbackSession = new ReplayPlaybackSession();
+const liveState = createGame(seed + 2);
+assert.equal(playbackSession.start(liveState, { ...replay, version: 99 }), null);
+assert.ok(playbackSession.start(liveState, replay));
+assert.equal(playbackSession.isActive, true);
+assert.equal(playbackSession.start(playbackSession.step(), replay), null, "Nested replay starts should be rejected");
+
 const halfway = Math.floor(replay.durationTicks / 2);
 playback.seek(halfway);
 assert.equal(playback.tick, halfway);
 playback.seek(replay.durationTicks);
 assert.equal(playback.state.winner, original.winner);
+assert.equal(playbackSession.seek(halfway).time, playback.seek(halfway).time);
+assert.equal(playbackSession.exit(), liveState, "Exiting replay should restore the original live state");
+assert.equal(playbackSession.isActive, false);
+assert.equal(playbackSession.exit(), null);
 
 const onlineOriginal = createGame(seed + 1);
 const onlineRecorder = new ReplayRecorder(seed + 1, deck, "online-replay-smoke-test", "online");
