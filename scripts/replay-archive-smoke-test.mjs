@@ -19,7 +19,7 @@ await mkdir(directory, { recursive: true });
 await writeFile(join(directory, replayId + ".json"), JSON.stringify({
   replay, visibility: "public", shareTokenHash: createHash("sha256").update(shareToken).digest("hex")
 }));
-const server = spawn(process.execPath, ["server/index.mjs"], {
+const server = spawn(process.execPath, ["dist-server/index.js"], {
   env: { ...process.env, PORT: String(port), CLONEROYALE_REPLAY_DIR: directory },
   stdio: "ignore"
 });
