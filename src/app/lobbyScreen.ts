@@ -76,5 +76,9 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
     setLobbyStatus("Joining room…");
   });
 
-  return { openLobby };
+  function hideLobby(): void {
+    if (lobby instanceof HTMLDivElement) lobby.hidden = true;
+  }
+
+  return { openLobby, hideLobby };
 }
