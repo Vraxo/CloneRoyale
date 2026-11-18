@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { resolve } from "node:path";
 import { randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { createGame, createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, playCard, ReplayRecorder, STARTER_DECK, ReplayRecorder, STARTER_DECK } from "../dist-server/simulation.js";
+import { createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, playCard, ReplayRecorder, STARTER_DECK } from "../dist-server/simulation.js";
 import { createReplayArchive } from "./replayArchive.mjs";
 import { createHttpHandler } from "./httpHandler.mjs";
 import { createWebSocketTransport } from "./webSocketTransport.mjs";
