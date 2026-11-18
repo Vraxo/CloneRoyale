@@ -93,8 +93,21 @@ export class BattleController {
   public get replayDurationTicks(): number { return this.replayPlayer?.durationTicks ?? 0; }
   public get completedReplay(): BattleReplay | null { return this.lastReplay; }
 
+  public applyOnlineReplay(replay: unknown): void {
+    if (!this.isOnline || !isBattleReplay(replay) || replay.mode !== "online") return;
+    this.lastReplay = replay;
+    document.body.dataset.replayAvailable = "true";
+    try {
+      const stored = JSON.parse(localStorage.getItem("cloneroyale.replays") ?? "[]") as unknown;
+      const replays = Array.isArray(stored) ? stored.filter(isBattleReplay) : [];
+      replays.unshift(replay);
+      localStorage.setItem("cloneroyale.replays", JSON.stringify(replays.slice(0, 20)));
+    } catch { /* Keep the replay available in memory when storage is unavailable. */ }
+    this.updateHud();
+  }
+
   public startReplay(replay: unknown): boolean {
-    if (this.isOnline || !isBattleReplay(replay)) return false;
+    if (!isBattleReplay(replay)) return false;
     this.replayLiveState = this.game;
     this.replayPlayer = new ReplayPlayer(replay);
     document.body.dataset.replaying = "true";
@@ -147,6 +160,7 @@ export class BattleController {
 
   public activateOnline(side: Side, state: GameState, client: OnlineClient): void {
     this.onlineClient = client;
+    this.lastReplay = null;
     document.body.dataset.replayAvailable = "false";
     this.playerSide = side;
     this.game = state;
@@ -207,7 +221,7 @@ export class BattleController {
   }
 
   public setPaused(value: boolean): void {
-    if (this.isOnline) return;
+    if (this.isOnline && !this.replayPlayer) return;
     this.paused = value;
     this.hud.setPaused(value, this.game);
     this.music.setPaused(this.paused || this.game.gameOver);
@@ -388,7 +402,7 @@ export class BattleController {
   }
 
   public update(elapsedSeconds: number): void {
-    if (!this.isOnline && !this.paused && !this.game.gameOver) {
+    if ((!this.isOnline || this.replayPlayer !== null) && !this.paused && !this.game.gameOver) {
       this.accumulator += Math.min(elapsedSeconds, 0.1) * this.speed;
       while (this.accumulator >= SIMULATION_STEP) {
         this.advanceOneStep();
