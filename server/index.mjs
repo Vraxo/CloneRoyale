@@ -3,7 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 import { randomBytes, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, playCard } from "../dist-server/simulation.js";
+import { createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, playCard, ReplayRecorder, STARTER_DECK } from "../dist-server/simulation.js";
 
 const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
 const rooms = new Map();
@@ -42,7 +42,10 @@ function attachPlayer(room, client, side) {
   send(client, { type: "assigned", side, code: room.publicMatch ? null : room.code, publicMatch: room.publicMatch, resumeToken: client.resumeToken, name: client.name });
   if (!room.publicMatch) sendRoom(room);
   if (room.players.size === 2 && [...room.players.values()].every(player => !player.disconnected)) {
-    room.state = createGame(randomBytes(4).readUInt32BE(0));
+    room.seed = randomBytes(4).readUInt32BE(0);
+    room.state = createGame(room.seed);
+    room.replayRecorder = new ReplayRecorder(room.seed, STARTER_DECK, undefined, "online");
+    room.replaySent = false;
     room.lastUpdate = Date.now();
     broadcast(room, { type: "match-start", state: room.state, players: playerSummaries(room) });
   }
@@ -201,6 +204,7 @@ function handleMessage(client, message) {
   if (!canPlaceCard(state, side, cardId, point.x, point.y)) { send(client, { type: "action-error", message: "That card cannot be deployed there." }); return; }
   const lane = point.x < 360 ? "left" : "right";
   if (!playCard(state, side, cardId, lane, point.x, point.y, point)) { send(client, { type: "action-error", message: "That card is no longer available." }); return; }
+  client.room.replayRecorder?.record(state, side, cardId, point.x, point.y);
   broadcast(client.room, { type: "state", state });
   state.audioEvents = [];
 }
@@ -212,7 +216,10 @@ function requestRematch(client) {
   broadcast(room, { type: "rematch-status", ready, total: room.players.size });
   if (room.players.size !== 2 || ready !== 2) return;
   for (const player of room.players.values()) player.rematchReady = false;
-  room.state = createGame(randomBytes(4).readUInt32BE(0));
+  room.seed = randomBytes(4).readUInt32BE(0);
+  room.state = createGame(room.seed);
+  room.replayRecorder = new ReplayRecorder(room.seed, STARTER_DECK, undefined, "online");
+  room.replaySent = false;
   room.lastUpdate = Date.now();
   room.accumulator = 0;
   broadcast(room, { type: "rematch-start", state: room.state, players: playerSummaries(room) });
@@ -340,6 +347,11 @@ setInterval(() => {
     room.accumulator += elapsed;
     while (room.accumulator >= SIMULATION_STEP) { stepGame(room.state, SIMULATION_STEP, null, true); room.accumulator -= SIMULATION_STEP; }
     broadcast(room, { type: "state", state: room.state });
+    if (room.state.gameOver && !room.replaySent && room.replayRecorder) {
+      room.replaySent = true;
+      const replay = room.replayRecorder.finish(room.state);
+      broadcast(room, { type: "match-replay", replay });
+    }
     room.state.audioEvents = [];
   }
 }, SIMULATION_STEP * 1000);
