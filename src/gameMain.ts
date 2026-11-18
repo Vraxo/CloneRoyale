@@ -724,9 +724,15 @@ async function publishReplay(id: string, token: string): Promise<void> {
     const url = new URL(result.url, window.location.origin).toString();
     try { await navigator.clipboard.writeText(url); } catch { window.prompt("Copy this replay link:", url); }
     if (replayLibraryStatus) replayLibraryStatus.textContent = "Replay published. Share this link: " + url;
+    const resultStatus = document.getElementById("share-replay-status");
+    if (resultStatus) resultStatus.textContent = "Published · link copied to clipboard."; 
+    if (shareReplayButton instanceof HTMLButtonElement) shareReplayButton.textContent = "✓ LINK COPIED";
     await refreshPublicReplays();
   } catch (error) {
-    if (replayLibraryStatus) replayLibraryStatus.textContent = error instanceof Error ? error.message : "Could not publish replay.";
+    const message = error instanceof Error ? error.message : "Could not publish replay."; 
+    if (replayLibraryStatus) replayLibraryStatus.textContent = message;
+    const resultStatus = document.getElementById("share-replay-status");
+    if (resultStatus) resultStatus.textContent = message;
   }
 }
 async function watchReplay(replay: unknown): Promise<void> {
