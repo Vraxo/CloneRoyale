@@ -12,6 +12,20 @@
     <title>Clone Royale — Player vs AI</title>
   </head>
   <body>
+    <section id="offline-setup" class="offline-setup" aria-labelledby="offline-setup-title" aria-live="polite">
+      <div class="offline-setup-panel">
+        <div class="offline-setup-mark" aria-hidden="true">♜</div>
+        <span class="offline-setup-eyebrow">ONE-TIME SETUP</span>
+        <h2 id="offline-setup-title">Preparing your game</h2>
+        <p id="offline-setup-status">Saving the game to this device so it loads quickly next time.</p>
+        <div class="offline-progress-track" role="progressbar" aria-label="Preparing game files" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="offline-progress">
+          <span id="offline-progress-fill"></span>
+        </div>
+        <div class="offline-progress-meta"><strong id="offline-progress-percent">0%</strong><span id="offline-progress-count">Getting things ready…</span></div>
+        <p id="offline-setup-error" class="offline-setup-error" hidden></p>
+        <button id="offline-continue" class="offline-continue" type="button" hidden>Continue online</button>
+      </div>
+    </section>
     <div class="app-shell">
       <main id="main-menu" class="main-menu" aria-label="Main menu">
         <div class="cr-home-backdrop" aria-hidden="true">
