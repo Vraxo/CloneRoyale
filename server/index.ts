@@ -48,7 +48,8 @@ function resumePlayer(client: ServerClient, token: unknown): void { roomLifecycl
 function closeClient(client: ServerClient): void { roomLifecycle.closeClient(client); }
 
 function isSocketUsable(client: ServerClient): boolean {
-  return !client.closed && Boolean(client.socket) && !client.socket.destroyed && client.socket.writable;
+  const socket = client.socket;
+  return Boolean(!client.closed && socket && !socket.destroyed && socket.writable);
 }
 
 const matchmaking = createMatchmaking({
