@@ -15,7 +15,8 @@
     "start:server": "node server/index.mjs",
     "test:multiplayer": "node scripts/multiplayer-smoke-test.mjs",
     "test:offline": "node scripts/offline-smoke-test.mjs",
-    "test:replay": "node scripts/replay-smoke-test.mjs"
+    "test:replay": "node scripts/replay-smoke-test.mjs",
+    "test:replay-archive": "node scripts/replay-archive-smoke-test.mjs"
   },
   "dependencies": {
     "pixi.js": "^8.23.0"
