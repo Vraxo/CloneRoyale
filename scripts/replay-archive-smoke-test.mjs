@@ -49,13 +49,13 @@ try {
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ shareToken })
   });
   assert.equal(republished.status, 200);
-  assert.equal((await republished.json()).visibility, "public");
+  assert.equal((await republished.json()).published, true);
   const finalList = await fetch(baseUrl + "/api/replays");
   const entries = (await finalList.json()).replays;
   assert.equal(entries.length, 1);
   assert.equal(entries[0].id, replayId);
   assert.deepEqual(entries[0].players, { blue: "ArchiveBlue", red: "ArchiveRed" });
-  console.log("Replay archive smoke test passed: public-by-default listing, no unpublish endpoint, participant-only publishing, and direct replay links.");
+  console.log("Replay archive smoke test passed: public-by-default listing, no unpublish endpoint, participant-only link publishing, and direct replay links.");
 } finally {
   server.kill("SIGTERM");
   await Promise.race([new Promise(resolve => server.once("exit", resolve)), delay(1000)]);
