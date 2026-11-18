@@ -14,6 +14,7 @@ import { createGameNavigation } from "./app/gameNavigation";
 import { initializeLobbyScreen } from "./app/lobbyScreen";
 import { initializeGameMenu } from "./app/gameMenu";
 import { initializeMatchLifecycle } from "./app/matchLifecycle";
+import { initializeMatchResults } from "./app/matchResults";
 
 const parameters = new URLSearchParams(window.location.search);
 const developerMode = parameters.get("mode") === "dev";
@@ -55,7 +56,6 @@ battle.setPaused(true);
 const onlineClient = new OnlineClient();
 const lobbyStatus = document.getElementById("online-status");
 const onlineButton = document.getElementById("online-play");
-const playAgainButton = document.getElementById("play-again");
 const modeDescription = document.getElementById("mode-description");
 let opponentName: string | null = null;
 const guestProfile = initializeGuestProfile(profile => {
@@ -125,16 +125,7 @@ initializeReplayLibrary({
   setGameMenuOpen,
   replayId: parameters.get("replay")
 });
-playAgainButton?.addEventListener("click", () => {
-  if (battle.isOnline) {
-    onlineClient.requestRematch();
-    playAgainButton.setAttribute("disabled", "true");
-    playAgainButton.textContent = "Waiting for opponent…";
-    setLobbyStatus("Rematch requested. Waiting for your opponent…");
-  } else {
-    startSoloBattle();
-  }
-});
+initializeMatchResults({ battle, client: onlineClient, startSoloBattle, setLobbyStatus });
 
 onlineButton?.addEventListener("click", () => setGameMenuOpen(false));
 
