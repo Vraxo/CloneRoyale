@@ -81,7 +81,7 @@
         <section class="cr-home-lower" aria-label="Battle and cards">
           <div class="cr-deck-panel">
             <div class="cr-deck-heading"><span>YOUR BATTLE DECK</span><small>DECK 1</small></div>
-            <div class="cr-card-row">
+            <div id="home-deck-preview" class="cr-card-row">
               <div class="cr-card-tile"><img src="/cards/archers.png" alt="Archers" /><span>ARCHERS</span></div>
               <div class="cr-card-tile"><img src="/cards/giant.png" alt="Giant" /><span>GIANT</span></div>
               <div class="cr-card-tile"><img src="/cards/mini-pekka.png" alt="Mini P.E.K.K.A." /><span>MINI P.E.K.K.A.</span></div>
@@ -90,12 +90,32 @@
           </div>
 
           <nav class="cr-home-nav" aria-label="Main navigation">
+            <button id="menu-decks" class="cr-nav-button" type="button"><span>▤</span><small>DECK</small></button>
             <button id="menu-settings" class="cr-nav-button" type="button"><span>⚙</span><small>SETTINGS</small></button>
             <button id="menu-online" class="cr-nav-button" type="button"><span>⚔</span><small>ONLINE</small></button>
             <button id="menu-play" class="cr-battle-button" type="button"><span class="cr-battle-swords">⚔</span><span><strong>BATTLE</strong><small>PLAY VS AI</small></span><b>›</b></button>
           </nav>
         </section>
       </main>
+      <section id="decks-page" class="decks-page" aria-label="Deck builder" hidden>
+        <header class="decks-header">
+          <button id="decks-back" class="decks-back" type="button" aria-label="Back to home">‹</button>
+          <div><span class="decks-eyebrow">YOUR COLLECTION</span><h1>Battle Deck</h1></div>
+          <div class="decks-count"><strong id="deck-count">8/8</strong><span>CARDS</span></div>
+        </header>
+        <div class="decks-content">
+          <section class="decks-active-section">
+            <div class="decks-section-heading"><div><span class="decks-eyebrow">DECK 1</span><h2>Your battle deck</h2></div><span class="decks-hint">Select a slot, then choose a card to swap.</span></div>
+            <div id="deck-slots" class="deck-slots" aria-label="Current deck"></div>
+            <div class="deck-average"><span>AVERAGE ELIXIR</span><strong id="deck-average">3.6</strong><span class="elixir-drop">◆</span></div>
+          </section>
+          <section class="decks-collection-section">
+            <div class="decks-section-heading"><div><span class="decks-eyebrow">AVAILABLE CARDS</span><h2>Card collection</h2></div><span class="decks-hint">8 cards unlocked</span></div>
+            <div id="deck-collection" class="deck-collection" aria-label="Available cards"></div>
+          </section>
+        </div>
+        <footer class="decks-footer"><span id="deck-feedback" role="status">Your deck is saved automatically.</span><button id="decks-done" type="button">DONE</button></footer>
+      </section>
       <header class="topbar">
         <a class="brand" href="/" aria-label="Clone Royale home">
           <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
