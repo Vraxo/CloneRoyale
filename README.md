@@ -48,7 +48,7 @@ npm run build
 
 ## Online multiplayer
 
-The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Players can enter a public FIFO matchmaking queue and be paired automatically, or create private rooms with five-character invite codes. Players can still join as guests. An account foundation is being introduced separately; account registration and login are not exposed in the game yet.
+The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Players can enter a public FIFO matchmaking queue and be paired automatically, or create private rooms with five-character invite codes. Players can still join as guests. Optional accounts are available through the HTTP API; account registration and login UI will be added separately.
 
 For manual production-style startup:
 
@@ -59,7 +59,7 @@ npm start
 
 Open the app and choose **Online play**. Use **Find match** in two browser sessions to be paired automatically, or use **Create private room** and share its code. The recommended `Start Clone Royale.cmd` launcher runs the multiplayer server directly on your Windows PC and exposes it through **Tailscale Funnel**. There is no hosted application server in this setup: your PC is the host, and it must remain powered on with the server window and Tailscale running for others to connect. The optional `render.yaml` is an unused deployment template; the launcher does not use Render.\n\nCompleted real PvP matches are archived on the host PC under `data/replays/` (relative to the repository root) and appear in the public Replay Library automatically. Replays are written to disk, so they survive stopping and restarting the Node server, rebuilding the client, and rebooting Windows. The archive is not automatically backed up or replicated to other devices: back up this folder if you want to protect or migrate it. Set `CLONEROYALE_REPLAY_DIR` before starting the server to use a different archive directory.
 
-## Architecture
+## Accounts and authentication\n\nAccount registration and login are available at `POST /api/auth/register` and `POST /api/auth/login`. Both accept JSON with `username` and `password`, and return an account profile with an HttpOnly session cookie. `GET /api/auth/me` returns the signed-in account (or `null` for guests), and `POST /api/auth/logout` revokes the current session. Passwords are stored as salted scrypt hashes; session tokens are random, stored only as SHA-256 hashes, and expire after 30 days. Authentication attempts are rate-limited per remote IP. Guest play and existing multiplayer behavior remain available without an account.\n\nAccount data is stored on the host PC in `data/accounts/accounts.json` by default, separate from replay files and excluded from Git. Set `CLONEROYALE_ACCOUNT_FILE` to move the file to another location. Back up this file securely: it contains password hashes and active session hashes.\n\n## Architecture
 
 - `src/game/types.ts`: simulation data contracts.
 - `src/game/cards.ts`: card definitions and starter deck.
@@ -78,5 +78,5 @@ The authoritative multiplayer server is written in TypeScript under `server/`. I
 
 1. Add reconnection and safe handling for interrupted public matches.
 2. Add matchmaking protections and queue observability.
-3. Add persistent player accounts, profiles, and match history.
+3. Add account registration and login UI, then attach account identities to player profiles and match history.
 4. Introduce skill-based matchmaking once enough real matches exist.

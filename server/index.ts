@@ -10,6 +10,7 @@ import { createMatchmaking } from "./matchmaking.js";
 import { createRoomLifecycle } from "./roomLifecycle.js";
 import { createClientMessageHandler } from "./clientMessages.js";
 import { createMatchSimulation } from "./matchSimulation.js";
+import { createAccountStore } from "./accounts.js";
 
 const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
 const rooms = new Map();
@@ -22,6 +23,8 @@ const REPLAY_DIRECTORY = resolve(process.env.CLONEROYALE_REPLAY_DIR ?? resolve(f
 const MAX_MATCHMAKING_QUEUE = 200;
 const reconnectTimers = new Map();
 const replayArchive = createReplayArchive(REPLAY_DIRECTORY);
+const ACCOUNT_FILE = resolve(process.env.CLONEROYALE_ACCOUNT_FILE ?? resolve(fileURLToPath(new URL("../data/accounts/accounts.json", import.meta.url))));
+const accountStore = createAccountStore(ACCOUNT_FILE);
 
 function broadcast(room, payload) {
   for (const player of room.players.values()) send(player, payload);
@@ -60,6 +63,7 @@ const matchmaking = createMatchmaking({
 const server = createServer(createHttpHandler({
   root,
   replayArchive,
+  accountStore,
   pruneMatchmakingQueue: () => matchmaking.prune(),
   getMatchmakingStatus: () => ({
     connectedClients: [...clients].filter(isSocketUsable).length,
