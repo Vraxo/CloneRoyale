@@ -60,7 +60,7 @@ async function saveReplay(replay, shareToken) {
 async function listPublicReplays() {
   let names;
   try { names = await readdir(REPLAY_DIRECTORY); } catch { return []; }
-  const records = await Promise.all(names.filter(name => /^[a-f0-9]{32}\\.json$/.test(name)).map(async name => {
+  const records = await Promise.all(names.filter(name => /^[a-f0-9]{32}\.json$/.test(name)).map(async name => {
     const record = await readReplayRecord(name.slice(0, -5));
     return record?.visibility === "public" ? replaySummary(record) : null;
   }));
@@ -369,7 +369,7 @@ const server = createServer(async (request, response) => {
     response.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }).end(JSON.stringify({ replays }));
     return;
   }
-  const replayMatch = requestUrl.pathname.match(/^\\/api\\/replays\\/([a-f0-9]{32})(?:\\/(publish))?$/);
+  const replayMatch = requestUrl.pathname.match(/^\/api\/replays\\/([a-f0-9]{32})(?:\/(publish))?$/);
   if (replayMatch) {
     const [, id, action] = replayMatch;
     const record = await readReplayRecord(id);
