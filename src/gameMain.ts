@@ -9,6 +9,7 @@ import { initializeReplayLibrary } from "./app/replayLibrary";
 import { createOnlineSession } from "./app/onlineSession";
 import { initializeDeckScreen } from "./app/deckScreen";
 import { initializeGuestProfile } from "./app/guestProfile";
+import { initializeAccountPanel } from "./app/accountPanel";
 import { initializeBattleEmotes } from "./app/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
 import { initializeLobbyScreen } from "./app/lobbyScreen";
@@ -59,6 +60,7 @@ const lobbyStatus = document.getElementById("online-status");
 const onlineButton = document.getElementById("online-play");
 const modeDescription = document.getElementById("mode-description");
 let opponentName: string | null = null;
+initializeAccountPanel();
 const guestProfile = initializeGuestProfile(profile => {
   if (onlineClient.isConnected) onlineClient.setProfile(profile.id, profile.name);
   if (modeDescription) modeDescription.textContent = profile.name
