@@ -3,4 +3,5 @@ export { playCard } from "../src/game/deployment";
 export { canPlaceCard, snapToArenaTile } from "../src/game/placement";
 
 export { ReplayPlayer, ReplayRecorder, isBattleReplay } from "../src/game/replay";
+export { ReplayPlaybackSession } from "../src/game/replayPlayback";
 export { STARTER_DECK } from "../src/game/cards";
