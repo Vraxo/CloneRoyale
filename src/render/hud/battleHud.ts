@@ -368,7 +368,7 @@ export class BattleHud {
       .fill({ color: 0xffe4a0, alpha: 0.75 * alpha });
 
     this.notificationLabel.visible = true;
-    this.notificationLabel.text = subtitle ? title + "\\n" + subtitle : title;
+    this.notificationLabel.text = subtitle ? title + "\n" + subtitle : title;
     this.notificationLabel.anchor.set(0.5);
     this.notificationLabel.position.set(width / 2, y + bannerHeight / 2);
     this.notificationLabel.alpha = alpha;
