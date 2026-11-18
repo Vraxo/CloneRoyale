@@ -1,7 +1,7 @@
 import type { GameState, Side, Tower, Unit } from "./types";
 import { addProjectile } from "./projectiles";
 import { damageTarget } from "./effects";
-import { FIELD_HEIGHT, FIELD_WIDTH, LANE_X, otherSide } from "./state";
+import { FIELD_HEIGHT, FIELD_WIDTH, LANE_X, otherSide, RIVER_BOTTOM, RIVER_TOP } from "./state";
 
 function findEnemyUnit(
   state: GameState,
@@ -46,9 +46,7 @@ function enemyTowerFor(state: GameState, unit: Unit): Tower | null {
   return kingDistance < princessDistance ? king : princess;
 }
 
-const RIVER_TOP = 448;
-const RIVER_BOTTOM = 512;
-const BRIDGE_HALF_WIDTH = 44;
+const BRIDGE_HALF_WIDTH = 1.5 * 30;
 
 function riverBank(y: number): -1 | 0 | 1 {
   if (y < RIVER_TOP) return -1;
