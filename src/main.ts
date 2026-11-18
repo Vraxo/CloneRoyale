@@ -12,7 +12,7 @@ const mode = parameters.get("mode") ?? "player";
 if (mode === "simulation") {
   await import("./simulationMain");
 } else {
-  await import("./style.css");
+  await import("./styles/main.css");
   await import("./gameMain");
 }
 
