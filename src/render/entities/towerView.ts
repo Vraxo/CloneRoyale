@@ -1,5 +1,6 @@
 import { Container, Graphics } from "pixi.js";
 import type { Tower } from "../../game/types";
+import { ARENA_TILE_SIZE } from "../../game/state";
 
 export class TowerView {
   public readonly id: number;
@@ -11,7 +12,7 @@ export class TowerView {
     this.id = tower.id;
 
     const teamColor = tower.side === "blue" ? 0x4b91d0 : 0xc9665d;
-    const size = tower.kind === "king" ? 2 * 30 : 1.5 * 30;
+    const size = tower.kind === "king" ? 2 * ARENA_TILE_SIZE : 1.5 * ARENA_TILE_SIZE;
     const body = new Graphics();
 
     body.ellipse(0, 12, size + 7, size * 0.66).fill(0x344338);
