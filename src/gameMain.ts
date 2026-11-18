@@ -487,6 +487,10 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "players-updated") {
           updateOpponentLabel(message.players);
         } else if (message.type === "match-start") {
+          const shareButton = document.getElementById("share-replay");
+          if (shareButton instanceof HTMLButtonElement) { shareButton.hidden = true; shareButton.textContent = "↗ Share replay"; }
+          const shareStatus = document.getElementById("share-replay-status");
+          if (shareStatus) shareStatus.textContent = "";
           setGameScreen("battle");
           if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
           if (message.players) updateOpponentLabel(message.players);
@@ -508,6 +512,10 @@ async function connectOnline(): Promise<boolean> {
           }
           setLobbyStatus("Rematch requested. Waiting for your opponent…");
         } else if (message.type === "rematch-start") {
+          const shareButton = document.getElementById("share-replay");
+          if (shareButton instanceof HTMLButtonElement) { shareButton.hidden = true; shareButton.textContent = "↗ Share replay"; }
+          const shareStatus = document.getElementById("share-replay-status");
+          if (shareStatus) shareStatus.textContent = "";
           if (message.players) updateOpponentLabel(message.players);
           if (playAgainButton instanceof HTMLButtonElement) {
             playAgainButton.disabled = false;
