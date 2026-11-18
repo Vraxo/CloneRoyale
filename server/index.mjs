@@ -108,13 +108,13 @@ function handleMessage(client, message) {
   if (message.type === "rematch-ready") { requestRematch(client); return; }
   if (message.type === "find-match") { matchmaking.join(client); return; }
   if (message.type === "cancel-matchmaking") { matchmaking.remove(client, true); return; }
-  if (message.type === "create-room") { removeFromQueue(client); if (client.room) leaveRoom(client); createRoom(client); return; }
+  if (message.type === "create-room") { matchmaking.remove(client); if (client.room) leaveRoom(client); createRoom(client); return; }
   if (message.type === "join-room") {
     const room = rooms.get(String(message.code ?? "").trim().toUpperCase());
     if (!room) { send(client, { type: "error", message: "Room not found. Check the code and try again." }); return; }
     if (client.room === room) { sendRoom(room); return; }
     if (room.players.size >= 2 || room.state) { send(client, { type: "error", message: "That room is already full." }); return; }
-    removeFromQueue(client);
+    matchmaking.remove(client);
     if (client.room) leaveRoom(client);
     if (rooms.get(room.code) !== room || room.players.size >= 2 || room.state) {
       send(client, { type: "error", message: "That room is no longer available." });
@@ -123,7 +123,7 @@ function handleMessage(client, message) {
     attachPlayer(room, client, "red");
     return;
   }
-  if (message.type === "leave-room") { removeFromQueue(client); leaveRoom(client); return; }
+  if (message.type === "leave-room") { matchmaking.remove(client); leaveRoom(client); return; }
   if (message.type !== "play-card" || !client.room?.state || !client.side) return;
   const state = client.room.state; const side = client.side;
   if (state.gameOver) return;
@@ -188,7 +188,7 @@ function resumePlayer(client, token) {
 function closeClient(client) {
   if (client.closed) return;
   client.closed = true;
-  removeFromQueue(client);
+  matchmaking.remove(client);
   clients.delete(client.id);
   if (client.room && client.room.state && !client.room.state.gameOver) {
     const room = client.room;
@@ -209,7 +209,7 @@ function closeClient(client) {
 const server = createServer(createHttpHandler({
   root,
   replayArchive,
-  pruneMatchmakingQueue,
+  pruneMatchmakingQueue: () => matchmaking.prune(),
   getMatchmakingStatus: () => ({
     connectedClients: [...clients].filter(isSocketUsable).length,
     queuedPlayers: matchmaking.size,
