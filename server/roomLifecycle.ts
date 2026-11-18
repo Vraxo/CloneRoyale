@@ -1,5 +1,5 @@
 import { ReplayRecorder } from "../src/game/replay.js";
-import type { CardId, Side } from "../src/game/types.js";
+import type { CardId, Side } from "../src/game/types/index.js";
 import type { RandomBytes, ServerClient, ServerRoom } from "./types.js";
 
 interface RoomLifecycleOptions {
@@ -152,7 +152,7 @@ export function createRoomLifecycle(options: RoomLifecycleOptions) {
     if (client.closed) return;
     client.closed = true;
     removeFromMatchmaking(client);
-    clients.delete(client.id);
+    clients.delete(client);
     if (client.room && client.room.state && !client.room.state.gameOver) {
       const room = client.room;
       client.disconnected = true;
