@@ -18,6 +18,7 @@ export interface BattleReplay {
   seed: number;
   deck: CardId[];
   mode?: "solo" | "online";
+  players?: { blue: string; red: string };
   durationTicks: number;
   winner: Side | "draw" | null;
   actions: ReplayAction[];
@@ -110,6 +111,7 @@ export function isBattleReplay(value: unknown): value is BattleReplay {
   const replay = value as Partial<BattleReplay>;
   return replay.version === 1
     && (replay.mode === undefined || replay.mode === "solo" || replay.mode === "online")
+    && (replay.players === undefined || (typeof replay.players.blue === "string" && typeof replay.players.red === "string"))
     && typeof replay.id === "string"
     && Number.isFinite(replay.seed)
     && Array.isArray(replay.deck)
