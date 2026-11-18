@@ -32,6 +32,10 @@ export class BattleActions {
     return this.placementMessage;
   }
 
+  public setNotice(message: string): void {
+    this.placementMessage = message;
+  }
+
   public reset(): void {
     this.placementMessage = "Choose a card, then deploy on your side.";
     this.clearSelection();
