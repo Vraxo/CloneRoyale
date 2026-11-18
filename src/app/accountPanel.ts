@@ -35,6 +35,10 @@ export function initializeAccountPanel(): void {
   let busy = false;
 
   if (!accountForm || !username || !password || !submit) return;
+  const formElement = accountForm as HTMLFormElement;
+  const usernameElement = username as HTMLInputElement;
+  const passwordElement = password as HTMLInputElement;
+  const submitElement = submit as HTMLButtonElement;
 
   function showError(message: string): void {
     if (error) error.textContent = message;
@@ -42,27 +46,27 @@ export function initializeAccountPanel(): void {
 
   function setBusy(value: boolean): void {
     busy = value;
-    submit.disabled = value;
+    submitElement.disabled = value;
     if (logoutButton instanceof HTMLButtonElement) logoutButton.disabled = value;
     if (loginTab instanceof HTMLButtonElement) loginTab.disabled = value;
     if (registerTab instanceof HTMLButtonElement) registerTab.disabled = value;
-    submit.textContent = value ? "PLEASE WAIT…" : mode === "login" ? "SIGN IN" : "CREATE ACCOUNT";
+    submitElement.textContent = value ? "PLEASE WAIT…" : mode === "login" ? "SIGN IN" : "CREATE ACCOUNT";
   }
 
   function render(): void {
     const authenticated = account !== null;
-    accountForm.hidden = authenticated;
+    formElement.hidden = authenticated;
     if (signedIn instanceof HTMLElement) signedIn.hidden = !authenticated;
     if (signedInLabel) signedInLabel.textContent = account?.username ?? "";
     if (loginTab instanceof HTMLButtonElement) loginTab.setAttribute("aria-pressed", String(mode === "login"));
     if (registerTab instanceof HTMLButtonElement) registerTab.setAttribute("aria-pressed", String(mode === "register"));
-    password.autocomplete = mode === "login" ? "current-password" : "new-password";
-    password.minLength = mode === "register" ? 12 : 1;
-    password.placeholder = mode === "register" ? "At least 12 characters" : "Your password";
+    passwordElement.autocomplete = mode === "login" ? "current-password" : "new-password";
+    passwordElement.minLength = mode === "register" ? 12 : 1;
+    passwordElement.placeholder = mode === "register" ? "At least 12 characters" : "Your password";
     if (helper) helper.textContent = mode === "register"
       ? "Use 3–20 letters, numbers or underscores for your username. Passwords must be at least 12 characters."
       : "Sign in with the username and password you used when creating your account.";
-    submit.textContent = mode === "login" ? "SIGN IN" : "CREATE ACCOUNT";
+    submitElement.textContent = mode === "login" ? "SIGN IN" : "CREATE ACCOUNT";
   }
 
   function setMode(nextMode: AuthMode): void {
@@ -70,8 +74,8 @@ export function initializeAccountPanel(): void {
     mode = nextMode;
     showError("");
     render();
-    password.value = "";
-    password.focus();
+    passwordElement.value = "";
+    passwordElement.focus();
   }
 
   async function request(path: string, body?: { username?: string; password?: string }): Promise<AuthResponse> {
@@ -102,12 +106,12 @@ export function initializeAccountPanel(): void {
     }
   }
 
-  accountForm.addEventListener("submit", async event => {
+  formElement.addEventListener("submit", async event => {
     event.preventDefault();
     if (busy || account) return;
 
-    const name = username.value.trim();
-    const secret = password.value;
+    const name = usernameElement.value.trim();
+    const secret = passwordElement.value;
     if (!name || !secret) {
       showError("Enter your username and password.");
       return;
@@ -132,7 +136,7 @@ export function initializeAccountPanel(): void {
       });
       account = result.account ?? null;
       if (!account) throw new Error("The server did not return an account.");
-      password.value = "";
+      passwordElement.value = "";
       render();
     } catch (caught) {
       showError(caught instanceof Error
@@ -154,8 +158,8 @@ export function initializeAccountPanel(): void {
     try {
       await request("/api/auth/logout", {});
       account = null;
-      username.value = "";
-      password.value = "";
+      usernameElement.value = "";
+      passwordElement.value = "";
       mode = "login";
       render();
     } catch (caught) {
