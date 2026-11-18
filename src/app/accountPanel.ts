@@ -63,12 +63,12 @@ export function initializeAccountPanel(): void {
       ? "Use 3–20 letters, numbers or underscores for your username. Passwords must be at least 12 characters."
       : "Sign in with the username and password you used when creating your account.";
     submit.textContent = mode === "login" ? "SIGN IN" : "CREATE ACCOUNT";
-    showError("");
   }
 
   function setMode(nextMode: AuthMode): void {
     if (busy || account) return;
     mode = nextMode;
+    showError("");
     render();
     password.value = "";
     password.focus();
@@ -90,9 +90,12 @@ export function initializeAccountPanel(): void {
   async function restoreSession(): Promise<void> {
     try {
       const result = await request("/api/auth/me");
-      account = result.account ?? null;
-      render();
+      if (!busy) {
+        account = result.account ?? null;
+        render();
+      }
     } catch {
+      if (busy) return;
       showError(navigator.onLine
         ? "Account services are unavailable right now. You can still play as a guest."
         : "You're offline. Account sign-in needs an internet connection; guest play is still available.");
