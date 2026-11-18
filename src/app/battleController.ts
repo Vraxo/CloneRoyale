@@ -147,6 +147,7 @@ export class BattleController {
 
   public activateOnline(side: Side, state: GameState, client: OnlineClient): void {
     this.onlineClient = client;
+    document.body.dataset.replayAvailable = "false";
     this.playerSide = side;
     this.game = state;
     this.history = null;
@@ -421,6 +422,16 @@ export class BattleController {
       this.replayTick,
       this.replayDurationTicks
     );
+    const replayTime = document.getElementById("replay-time");
+    if (replayTime) {
+      const format = (seconds: number): string => {
+        const safe = Math.max(0, Math.floor(seconds));
+        return String(Math.floor(safe / 60)).padStart(2, "0") + ":" + String(safe % 60).padStart(2, "0");
+      };
+      replayTime.textContent = format(this.replayTick / 30) + " / " + format(this.replayDurationTicks / 30);
+    }
+    const replayPlayButton = document.getElementById("replay-play");
+    if (replayPlayButton && this.isReplaying) replayPlayButton.textContent = this.paused ? "▶ PLAY" : "Ⅱ PAUSE";
   }
 
   private advanceOneStep(): void {
