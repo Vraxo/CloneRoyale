@@ -10,7 +10,7 @@ import {
   STARTER_DECK,
   stepGame
 } from "./simulation.js";
-import { createAccountStore } from "./accounts.js";
+import { createAccountStore } from "./account/accounts.js";
 import { createClientMessageHandler } from "./clientMessages.js";
 import { createHttpHandler } from "./httpHandler.js";
 import { createMatchSimulation } from "./matchSimulation.js";
@@ -24,10 +24,9 @@ import type {
   ServerRoom
 } from "./types.js";
 
-const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
-const rooms = new Map<string, ServerRoom>();
-const clients = new Set<ServerClient>();
-const matchmakingQueue: ServerClient[] = [];
+const SERVER_ROOT = resolve(
+  fileURLToPath(new URL("../dist/", import.meta.url))
+);
 
 const PORT = Number(process.env.PORT ?? 3001);
 const MAX_MESSAGE_BYTES = 16_384;
@@ -35,22 +34,28 @@ const RECONNECT_GRACE_SECONDS = 30;
 const MAX_MATCHMAKING_QUEUE = 200;
 
 const REPLAY_DIRECTORY = resolve(
-  process.env.CLONEROYALE_REPLAY_DIR ??
-    resolve(fileURLToPath(new URL("../data/replays/", import.meta.url)))
-);
-const ACCOUNT_FILE = resolve(
-  process.env.CLONEROYALE_ACCOUNT_FILE ??
-    resolve(fileURLToPath(new URL("../data/accounts/accounts.json", import.meta.url)))
+  process.env.CLONEROYALE_REPLAY_DIR
+    ?? fileURLToPath(new URL("../data/replays/", import.meta.url))
 );
 
-const reconnectTimers = new Map();
+const ACCOUNT_FILE = resolve(
+  process.env.CLONEROYALE_ACCOUNT_FILE
+    ?? fileURLToPath(new URL("../data/accounts/accounts.json", import.meta.url))
+);
+
+const rooms = new Map<string, ServerRoom>();
+const clients = new Set<ServerClient>();
+const matchmakingQueue: ServerClient[] = [];
+const reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 const replayArchive = createReplayArchive(REPLAY_DIRECTORY);
 const accountStore = createAccountStore(ACCOUNT_FILE);
 
-function broadcast(
-  room: ServerRoom,
-  payload: Record<string, unknown>
-): void {
+function send(client: ServerClient, payload: Record<string, unknown>): void {
+  websocketTransport.send(client, payload);
+}
+
+function broadcast(room: ServerRoom, payload: Record<string, unknown>): void {
   for (const player of room.players.values()) {
     send(player, payload);
   }
@@ -108,10 +113,10 @@ function isSocketUsable(client: ServerClient): boolean {
   const socket = client.socket;
 
   return Boolean(
-    !client.closed &&
-      socket &&
-      !socket.destroyed &&
-      socket.writable
+    !client.closed
+    && socket
+    && !socket.destroyed
+    && socket.writable
   );
 }
 
@@ -125,23 +130,22 @@ const matchmaking = createMatchmaking({
   maxQueue: MAX_MATCHMAKING_QUEUE
 });
 
-const server = createServer(
-  createHttpHandler({
-    root,
-    replayArchive,
-    accountStore,
-    pruneMatchmakingQueue: () => matchmaking.prune(),
-    getMatchmakingStatus: () => ({
-      connectedClients: [...clients].filter(isSocketUsable).length,
-      queuedPlayers: matchmaking.size,
-      activePublicMatches: [...rooms.values()].filter(
-        room => room.publicMatch && room.state && !room.state.gameOver
-      ).length,
-      privateRooms: [...rooms.values()].filter(room => !room.publicMatch)
-        .length
-    })
+const httpHandler = createHttpHandler({
+  root: SERVER_ROOT,
+  replayArchive,
+  accountStore,
+  pruneMatchmakingQueue: () => matchmaking.prune(),
+  getMatchmakingStatus: () => ({
+    connectedClients: [...clients].filter(isSocketUsable).length,
+    queuedPlayers: matchmaking.size,
+    activePublicMatches: [...rooms.values()].filter(room =>
+      room.publicMatch && room.state && !room.state.gameOver
+    ).length,
+    privateRooms: [...rooms.values()].filter(room => !room.publicMatch).length
   })
-);
+});
+
+const server = createServer(httpHandler);
 
 let handleClientMessage: MessageHandler = () => {};
 
@@ -159,8 +163,6 @@ const websocketTransport = createWebSocketTransport({
   maxMessageBytes: MAX_MESSAGE_BYTES,
   resolveAccount: token => accountStore.resolveSession(token)
 });
-
-const send = websocketTransport.send;
 
 roomLifecycle = createRoomLifecycle({
   rooms,
