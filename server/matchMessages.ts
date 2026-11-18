@@ -1,5 +1,5 @@
 import { canPlaceCard, snapToArenaTile, playCard } from "./simulation.js";
-import type { CardId } from "../src/game/types.js";
+import type { CardId } from "../src/game/types/index.js";
 import type { ClientMessage, MessageHandlerOptions, ServerClient } from "./types.js";
 
 export function createMatchMessageHandlers(options: MessageHandlerOptions): Record<string, (client: ServerClient, message: ClientMessage) => void> {
@@ -19,8 +19,8 @@ export function createMatchMessageHandlers(options: MessageHandlerOptions): Reco
     },
 
     "play-card"(client, message) {
-      if (!client.room?.state || !client.side) return;
       const room = client.room;
+      if (!room?.state || !client.side) return;
       const state = room.state;
       const side = client.side;
       if (state.gameOver) return;
