@@ -94,6 +94,7 @@ battle.setPaused(true);
 
 const onlineClient = new OnlineClient();
 let onlineUnsubscribe: (() => void) | null = null;
+let connectionStatusUnsubscribe: (() => void) | null = null;
 const lobby = document.getElementById("online-lobby");
 const lobbyStatus = document.getElementById("online-status");
 const roomCode = document.getElementById("room-code");
@@ -260,27 +261,34 @@ function openLobby(): void {
   setLobbyStatus("Connect to the game server to create or join a room.");
 }
 
+function renderConnectionStatus(state: "connecting" | "connected" | "reconnecting" | "disconnected"): void {
+  const status = document.getElementById("network-status");
+  if (!status) return;
+  const labels = {
+    connecting: "CONNECTING TO SERVER",
+    connected: "SERVER CONNECTED",
+    reconnecting: "RECONNECTING TO SERVER",
+    disconnected: "SERVER DISCONNECTED"
+  } as const;
+  const visibleState = navigator.onLine ? state : "offline";
+  status.dataset.state = visibleState;
+  status.textContent = visibleState === "offline" ? "NO INTERNET · SOLO PLAY AVAILABLE" : labels[state];
+  status.hidden = false;
+}
+
 async function connectOnline(): Promise<boolean> {
   setLobbyStatus("Connecting to multiplayer server…");
+  const connection = onlineClient.connect();
+  if (!connectionStatusUnsubscribe) {
+    connectionStatusUnsubscribe = onlineClient.subscribe(message => {
+      if (message.type === "connection-status") renderConnectionStatus(message.state);
+    });
+  }
   try {
-    await onlineClient.connect();
+    await connection;
     if (!onlineUnsubscribe) {
       onlineUnsubscribe = onlineClient.subscribe((message: OnlineMessage) => {
-        if (message.type === "connection-status") {
-          const status = document.getElementById("network-status");
-          if (status) {
-            const labels = {
-              connecting: "CONNECTING TO SERVER",
-              connected: "SERVER CONNECTED",
-              reconnecting: "RECONNECTING TO SERVER",
-              disconnected: "SERVER DISCONNECTED"
-            } as const;
-            const state = navigator.onLine ? message.state : "offline";
-            status.dataset.state = state;
-            status.textContent = state === "offline" ? "NO INTERNET · SOLO PLAY AVAILABLE" : labels[state];
-            status.hidden = false;
-          }
-        } else if (message.type === "assigned") {
+        if (message.type === "assigned") {
           if (message.resumeToken) localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
           document.body.dataset.onlineSide = message.side;
           if (message.publicMatch) {
