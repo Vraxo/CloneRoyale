@@ -27,7 +27,7 @@ for (const file of files) {
   revision.update(file.content);
 }
 const cacheName = "clone-royale-" + revision.digest("hex").slice(0, 12);
-const urls = files.map(file => file.path);
+const urls = ["/", ...files.map(file => file.path)];
 
 const worker = `const CACHE_NAME = ${JSON.stringify(cacheName)};
 const PRECACHE_URLS = ${JSON.stringify(urls)};
