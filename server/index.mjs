@@ -291,7 +291,7 @@ function decodeFrames(client, chunk) {
 }
 function contentType(path) {
   const ext = extname(path);
-  return ({ ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".ogg": "audio/ogg", ".opus": "audio/opus", ".woff2": "font/woff2", ".svg": "image/svg+xml" })[ext] ?? "application/octet-stream";
+  return ({ ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".ogg": "audio/ogg", ".opus": "audio/opus", ".woff2": "font/woff2", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json; charset=utf-8" })[ext] ?? "application/octet-stream";
 }
 const server = createServer(async (request, response) => {
   if (request.url === "/healthz") { response.writeHead(200, { "content-type": "text/plain" }).end("ok"); return; }
@@ -313,7 +313,10 @@ const server = createServer(async (request, response) => {
   try {
     const info = await stat(filePath); if (info.isDirectory()) filePath = resolve(filePath, "index.html");
     const content = await readFile(filePath);
-    response.writeHead(200, { "content-type": contentType(filePath), "cache-control": filePath.endsWith(".html") ? "no-cache" : "public, max-age=31536000, immutable" }).end(content);
+    const cacheControl = filePath.endsWith(".html") || filePath.endsWith("service-worker.js") || filePath.endsWith(".webmanifest")
+      ? "no-cache"
+      : "public, max-age=31536000, immutable";
+    response.writeHead(200, { "content-type": contentType(filePath), "cache-control": cacheControl }).end(content);
   } catch {
     try { const content = await readFile(resolve(root, "index.html")); response.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(content); }
     catch { response.writeHead(404).end("Not found. Build the client with npm run build."); }
