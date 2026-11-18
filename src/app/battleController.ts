@@ -13,6 +13,7 @@ import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
 import { createBattleHud, type BattleHud } from "./battleHud";
 import { BattleActions } from "./battleActions";
+import { clearOnlineResumeToken } from "./onlineResumeToken";
 
 export class BattleController {
   private game: GameState;
@@ -221,6 +222,7 @@ export class BattleController {
   public leaveOnline(): void {
     if (!this.onlineClient) return;
     this.onlineClient.leave();
+    clearOnlineResumeToken();
     this.onlineClient = null;
     this.playerSide = "blue";
     document.body.dataset.online = "false";

@@ -1,5 +1,6 @@
 import type { BattleController } from "./battleController";
 import type { OnlineClient } from "../net/onlineClient";
+import { clearOnlineResumeToken } from "./onlineResumeToken";
 
 type LobbySession = {
   connect: () => Promise<boolean>;
@@ -48,6 +49,7 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
     if (!battle.isOnline) {
       session.unsubscribe();
       client.leave();
+      clearOnlineResumeToken();
       if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = true;
       if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = false;
       if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = false;

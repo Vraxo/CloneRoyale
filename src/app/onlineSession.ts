@@ -1,6 +1,7 @@
 import type { BattleController } from "./battleController";
 import type { OnlineClient, OnlineMessage } from "../net/onlineClient";
 import type { Side } from "../game/types";
+import { clearOnlineResumeToken, readOnlineResumeToken, saveOnlineResumeToken } from "./onlineResumeToken";
 
 type OnlineProfile = { id: string; name: string };
 type OnlinePlayer = { side: Side; name: string };
@@ -45,7 +46,7 @@ export function createOnlineSession(options: OnlineSessionOptions) {
 
   function handleMessage(message: OnlineMessage): void {
     if (message.type === "assigned") {
-      if (message.resumeToken) localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
+      if (message.resumeToken) saveOnlineResumeToken(message.resumeToken);
       document.body.dataset.onlineSide = message.side;
       if (message.publicMatch) {
         if (lobby instanceof HTMLDivElement) lobby.hidden = true;
@@ -57,7 +58,7 @@ export function createOnlineSession(options: OnlineSessionOptions) {
     } else if (message.type === "resumed") {
       setReconnectOverlay(false);
       const profile = getProfile();
-      localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
+      saveOnlineResumeToken(message.resumeToken);
       document.body.dataset.onlineSide = message.side;
       client.setProfile(profile.id, profile.name);
       if (message.players) updateOpponentLabel(message.players);
@@ -72,8 +73,12 @@ export function createOnlineSession(options: OnlineSessionOptions) {
         if (lobby instanceof HTMLDivElement) lobby.hidden = true;
         setLobbyStatus("Connection restored. Back in the match.");
       } else setLobbyStatus("Connection restored. Waiting for your opponent…");
+    } else if (message.type === "connected") {
+      const profile = getProfile();
+      client.setProfile(profile.id, profile.name);
+      client.resume(readOnlineResumeToken());
     } else if (message.type === "resume-failed") {
-      localStorage.removeItem("cloneroyale.resume-token");
+      clearOnlineResumeToken();
       setLobbyStatus("Your previous match is no longer available. You can find a new match.");
       if (battle.isOnline) setReconnectOverlay(true, true);
     } else if (message.type === "connection-lost") {
@@ -174,7 +179,7 @@ export function createOnlineSession(options: OnlineSessionOptions) {
         messageUnsubscribe = client.subscribe(handleMessage);
         const profile = getProfile();
         client.setProfile(profile.id, profile.name);
-        client.resume();
+        client.resume(readOnlineResumeToken());
       }
       return true;
     } catch (error) {
