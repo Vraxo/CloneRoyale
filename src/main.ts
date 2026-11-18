@@ -101,7 +101,10 @@ installHelp?.addEventListener("click", event => {
 let deferredInstallPrompt: { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> } | null = null;
 
 function updateNetworkStatus(): void {
-  if (networkStatus) networkStatus.hidden = navigator.onLine;
+  if (!networkStatus) return;
+  networkStatus.hidden = navigator.onLine;
+  networkStatus.dataset.state = navigator.onLine ? "" : "offline";
+  networkStatus.textContent = navigator.onLine ? "" : "NO INTERNET · SOLO PLAY AVAILABLE";
 }
 
 window.addEventListener("online", updateNetworkStatus);
