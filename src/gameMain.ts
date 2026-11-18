@@ -275,9 +275,10 @@ async function connectOnline(): Promise<boolean> {
               reconnecting: "RECONNECTING TO SERVER",
               disconnected: "SERVER DISCONNECTED"
             } as const;
-            status.dataset.state = message.state;
-            status.textContent = labels[message.state];
-            status.hidden = message.state === "disconnected" && navigator.onLine;
+            const state = navigator.onLine ? message.state : "offline";
+            status.dataset.state = state;
+            status.textContent = state === "offline" ? "NO INTERNET · SOLO PLAY AVAILABLE" : labels[state];
+            status.hidden = false;
           }
         } else if (message.type === "assigned") {
           if (message.resumeToken) localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
