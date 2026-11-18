@@ -48,7 +48,7 @@ npm run build
 
 ## Online multiplayer
 
-The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Players can enter a public FIFO matchmaking queue and be paired automatically, or create private rooms with five-character invite codes. Players join as guests, with no account or password storage.
+The app runs as a single Node service that serves the Vite client and hosts the authoritative WebSocket match server. Players can enter a public FIFO matchmaking queue and be paired automatically, or create private rooms with five-character invite codes. Players can still join as guests. An account foundation is being introduced separately; account registration and login are not exposed in the game yet.
 
 For manual production-style startup:
 
