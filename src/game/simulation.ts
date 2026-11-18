@@ -74,10 +74,10 @@ export function createGame(seed = 20261115): GameState {
 
   addTower(state, "red", "princess", "left", LANE_X.left, 150);
   addTower(state, "red", "princess", "right", LANE_X.right, 150);
-  addTower(state, "red", "king", "center", 360, 78);
+  addTower(state, "red", "king", "center", 270, 78);
   addTower(state, "blue", "princess", "left", LANE_X.left, 810);
   addTower(state, "blue", "princess", "right", LANE_X.right, 810);
-  addTower(state, "blue", "king", "center", 360, 882);
+  addTower(state, "blue", "king", "center", 270, 882);
 
   return state;
 }
