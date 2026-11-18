@@ -6,4 +6,5 @@ export type CardId =
   | "skeleton-army"
   | "cannon"
   | "fireball"
-  | "arrows";
+  | "arrows"
+  | "knight";
