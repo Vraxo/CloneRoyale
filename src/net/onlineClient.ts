@@ -1,4 +1,5 @@
 import type { CardId, GameState, Side } from "../game/types";
+import type { BattleReplay } from "../game/replay";
 
 export type ConnectionState = "connecting" | "connected" | "reconnecting" | "disconnected";
 export type OnlineMessage =
@@ -18,6 +19,7 @@ export type OnlineMessage =
   | { type: "rematch-status"; ready: number; total: number }
   | { type: "rematch-start"; state: GameState; players?: { side: Side; name: string }[] }
   | { type: "state"; state: GameState }
+  | { type: "match-replay"; replay: BattleReplay }
   | { type: "emote"; side: Side; emoteId: number; name: string }
   | { type: "opponent-left" }
   | { type: "action-error"; message: string }
