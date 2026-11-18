@@ -1,19 +1,19 @@
 export function initializeNetworkStatus(): void {
-  const status = document.querySelector<HTMLElement>("#network-status");
-  if (!status) return;
+  const networkStatus = document.querySelector<HTMLElement>("#network-status");
+  if (!networkStatus) return;
 
   function update(): void {
     if (!navigator.onLine) {
-      status.hidden = false;
-      status.dataset.state = "offline";
-      status.textContent = "NO INTERNET · SOLO PLAY AVAILABLE";
+      networkStatus.hidden = false;
+      networkStatus.dataset.state = "offline";
+      networkStatus.textContent = "NO INTERNET · SOLO PLAY AVAILABLE";
       return;
     }
 
-    if (status.dataset.state === "offline") {
-      status.hidden = true;
-      status.dataset.state = "";
-      status.textContent = "";
+    if (networkStatus.dataset.state === "offline") {
+      networkStatus.hidden = true;
+      networkStatus.dataset.state = "";
+      networkStatus.textContent = "";
     }
   }
 
