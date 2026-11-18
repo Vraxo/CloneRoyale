@@ -256,6 +256,26 @@ function setLobbyStatus(message: string): void {
   if (lobbyStatus) lobbyStatus.textContent = message;
 }
 
+function setReconnectOverlay(visible: boolean, expired = false): void {
+  const overlay = document.getElementById("reconnect-overlay");
+  const title = document.getElementById("reconnect-title");
+  const description = document.getElementById("reconnect-description");
+  const spinner = document.getElementById("reconnect-spinner");
+  const leave = document.getElementById("reconnect-leave");
+  if (!(overlay instanceof HTMLDivElement)) return;
+  overlay.hidden = !visible;
+  if (title) title.textContent = expired ? "Match unavailable" : "Reconnecting…";
+  if (description) description.textContent = expired
+    ? "The server could not restore your previous match. You can return to the main menu."
+    : "Your match is being kept while we restore the connection. Please keep this screen open.";
+  if (spinner instanceof HTMLElement) spinner.hidden = expired;
+  if (leave instanceof HTMLButtonElement) leave.hidden = !expired;
+}
+document.getElementById("reconnect-leave")?.addEventListener("click", () => {
+  if (battle.isOnline) leaveOnlineMatch();
+  setGameScreen("home");
+});
+
 function openLobby(): void {
   if (lobby instanceof HTMLDivElement) lobby.hidden = false;
   setLobbyStatus("Connect to the game server to create or join a room.");
@@ -304,6 +324,7 @@ async function connectOnline(): Promise<boolean> {
           onlineClient.setProfile(guestProfile.id, guestProfile.name);
           if (message.players) updateOpponentLabel(message.players);
           if (message.state) {
+            setReconnectOverlay(false);
             setGameScreen("battle");
             if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
             battle.activateOnline(message.side, message.state, onlineClient);
@@ -317,8 +338,12 @@ async function connectOnline(): Promise<boolean> {
         } else if (message.type === "resume-failed") {
           localStorage.removeItem("cloneroyale.resume-token");
           setLobbyStatus("Your previous match is no longer available. You can find a new match.");
+          if (battle.isOnline) setReconnectOverlay(true, true);
         } else if (message.type === "connection-lost") {
-          if (battle.isOnline) battle.setOnlineNotice("Connection lost. Reconnecting…");
+          if (battle.isOnline) {
+            setReconnectOverlay(true);
+            battle.setOnlineNotice("Connection lost. Reconnecting…");
+          }
         } else if (message.type === "opponent-disconnected") {
           battle.setOnlineNotice("Opponent disconnected. Pausing for up to " + message.graceSeconds + " seconds while they reconnect.");
         } else if (message.type === "opponent-reconnected") {
