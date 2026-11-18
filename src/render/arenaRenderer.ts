@@ -283,7 +283,7 @@ export class ArenaRenderer {
       cardId,
       type: definition.type,
       kind: category,
-      lane: x < 360 ? "left" : "right",
+      lane: x < WORLD_WIDTH / 2 ? "left" : "right",
       x,
       y,
       hp: definition.hp,
