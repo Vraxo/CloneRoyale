@@ -3,7 +3,7 @@ import { createSoundEffects, type SoundEffects } from "../audio/soundEffects";
 import { SIMULATION_STEP } from "../game/simulation";
 import { SimulationRuntime } from "../runtime/simulationRuntime";
 import { createGameHistory } from "../game/history";
-import { cardById } from "../game/cards";
+import { cardById, STARTER_DECK } from "../game/cards";
 import { playCard } from "../game/deployment";
 import { canPlaceCard, snapToArenaTile } from "../game/placement";
 import type { CardId, GameState, Lane, Side } from "../game/types";
@@ -21,6 +21,7 @@ export class BattleController {
   private lastHudUpdate = 0;
   private previousGameOver = false;
   private selectedCard: CardId | null = null;
+  private playerDeck: CardId[] = STARTER_DECK.slice();
   private onlineClient: OnlineClient | null = null;
   private playerSide: Side = "blue";
   private placementMessage = "Choose a card, then deploy on your side.";
@@ -60,6 +61,19 @@ export class BattleController {
 
   public get currentSelectedCard(): CardId | null {
     return this.selectedCard;
+  }
+
+  public setPlayerDeck(deck: CardId[]): void {
+    if (deck.length !== 8 || new Set(deck).size !== 8) return;
+    this.playerDeck = deck.slice();
+    this.applyPlayerDeck();
+    this.updateHud();
+  }
+
+  private applyPlayerDeck(): void {
+    const player = this.game.sides.blue;
+    player.hand = this.playerDeck.slice(0, 4);
+    player.drawPile = this.playerDeck.slice(4);
   }
 
   public get state(): GameState {
@@ -162,6 +176,7 @@ export class BattleController {
     this.soundEffects.stopAll();
     this.runtime.reset((Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0);
     this.game = this.runtime.state;
+    this.applyPlayerDeck();
     this.selectedCard = null;
     this.placementMessage = "Choose a card, then deploy on your side.";
     this.renderer.setPlacementPreview(null);
