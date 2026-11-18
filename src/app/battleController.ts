@@ -55,7 +55,6 @@ export class BattleController {
       music: this.music,
       soundEffects: this.soundEffects,
       hud: this.hud,
-      getGame: () => this.game,
       setGame: (state) => { this.game = state; },
       getSelectedCard: () => this.selectedCard,
       setSelectedCard: (cardId) => { this.selectedCard = cardId; },
