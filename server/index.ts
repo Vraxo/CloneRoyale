@@ -10,7 +10,7 @@ import {
   STARTER_DECK,
   stepGame
 } from "./simulation.js";
-import { createAccountStore } from "./accounts.js";
+import { createAccountStore } from "./account/accounts.js";
 import { createClientMessageHandler } from "./clientMessages.js";
 import { createHttpHandler } from "./httpHandler.js";
 import { createMatchSimulation } from "./matchSimulation.js";
