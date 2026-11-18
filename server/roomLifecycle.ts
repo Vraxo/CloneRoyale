@@ -115,6 +115,10 @@ export function createRoomLifecycle(options: RoomLifecycleOptions) {
     for (const room of rooms.values()) {
       const player = [...room.players.values()].find(candidate => candidate.resumeToken === token);
       if (!player || !player.disconnected) continue;
+      if ((player.accountId ?? null) !== (client.accountId ?? null)) {
+        send(client, { type: "resume-failed" });
+        return;
+      }
       const timer = reconnectTimers.get(token);
       if (timer) clearTimeout(timer);
       reconnectTimers.delete(token);
@@ -123,6 +127,7 @@ export function createRoomLifecycle(options: RoomLifecycleOptions) {
       client.side = player.side;
       client.resumeToken = token;
       client.name = player.name;
+      client.guestId = player.guestId;
       client.disconnected = false;
       client.queued = false;
       client.rematchReady = false;
