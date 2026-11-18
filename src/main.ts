@@ -76,6 +76,45 @@ if (!("serviceWorker" in navigator)) {
     .catch(() => showOfflineError("Automatic offline setup is unavailable in this browser. You can still play while connected."));
 }
 
+
+const installButton = document.querySelector<HTMLButtonElement>("#install-game");
+const networkStatus = document.querySelector<HTMLElement>("#network-status");
+let deferredInstallPrompt: { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> } | null = null;
+
+function updateNetworkStatus(): void {
+  if (networkStatus) networkStatus.hidden = navigator.onLine;
+}
+
+window.addEventListener("online", updateNetworkStatus);
+window.addEventListener("offline", updateNetworkStatus);
+updateNetworkStatus();
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  deferredInstallPrompt = event as Event & {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+  };
+  if (installButton) installButton.hidden = false;
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  if (installButton) installButton.hidden = true;
+});
+
+installButton?.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) return;
+  const prompt = deferredInstallPrompt;
+  deferredInstallPrompt = null;
+  installButton.hidden = true;
+  await prompt.prompt();
+  const choice = await prompt.userChoice;
+  if (choice.outcome === "dismissed" && deferredInstallPrompt === null) {
+    // The browser may dispatch beforeinstallprompt again if installation remains available.
+  }
+});
+
 const parameters = new URLSearchParams(window.location.search);
 const mode = parameters.get("mode") ?? "player";
 
