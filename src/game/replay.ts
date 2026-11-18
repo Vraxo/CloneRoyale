@@ -17,6 +17,7 @@ export interface BattleReplay {
   createdAt: number;
   seed: number;
   deck: CardId[];
+  mode?: "solo" | "online";
   durationTicks: number;
   winner: Side | "draw" | null;
   actions: ReplayAction[];
@@ -28,7 +29,8 @@ export class ReplayRecorder {
   public constructor(
     private readonly seed: number,
     private readonly deck: CardId[],
-    private readonly id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+    private readonly id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    private readonly mode: "solo" | "online" = "solo"
   ) {}
 
   public record(state: GameState, side: Side, cardId: CardId, x: number, y: number): void {
@@ -48,6 +50,7 @@ export class ReplayRecorder {
       createdAt: Date.now(),
       seed: this.seed,
       deck: this.deck.slice(),
+      mode: this.mode,
       durationTicks: Math.max(0, Math.round(state.time / SIMULATION_STEP)),
       winner: state.winner,
       actions: this.actions.map(action => ({ ...action }))
@@ -80,7 +83,7 @@ export class ReplayPlayer {
         y: action.y
       });
     }
-    stepGame(this.currentState, SIMULATION_STEP, "red");
+    stepGame(this.currentState, SIMULATION_STEP, this.replay.mode === "online" ? null : "red", this.replay.mode === "online");
     this.currentTick += 1;
     return this.currentState;
   }
@@ -106,6 +109,7 @@ export function isBattleReplay(value: unknown): value is BattleReplay {
   if (!value || typeof value !== "object") return false;
   const replay = value as Partial<BattleReplay>;
   return replay.version === 1
+    && (replay.mode === undefined || replay.mode === "solo" || replay.mode === "online")
     && typeof replay.id === "string"
     && Number.isFinite(replay.seed)
     && Array.isArray(replay.deck)
