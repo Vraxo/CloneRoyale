@@ -3394,3 +3394,12 @@ body[data-screen="replays"] .workspace { visibility: hidden; pointer-events: non
   .replay-row-details span { font-size: 8px; }
   .replay-row-actions button { padding: 4px 6px; font-size: 8px; }
 }
+
+.share-replay-status {
+  min-height: 12px;
+  margin: 0;
+  color: #b9d9eb;
+  font-size: 9px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
