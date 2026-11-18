@@ -5,7 +5,7 @@ import { createGame, playCard, stepGame } from "../dist-server/simulation.js";
 
 const port = 31771;
 const baseUrl = "http://127.0.0.1:" + port;
-const server = spawn(process.execPath, ["server/index.mjs"], {
+const server = spawn(process.execPath, ["dist-server/index.js"], {
   env: { ...process.env, PORT: String(port) },
   stdio: "inherit"
 });
