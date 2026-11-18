@@ -102,9 +102,15 @@ let deferredInstallPrompt: { prompt: () => Promise<void>; userChoice: Promise<{ 
 
 function updateNetworkStatus(): void {
   if (!networkStatus) return;
-  networkStatus.hidden = navigator.onLine;
-  networkStatus.dataset.state = navigator.onLine ? "" : "offline";
-  networkStatus.textContent = navigator.onLine ? "" : "NO INTERNET · SOLO PLAY AVAILABLE";
+  if (!navigator.onLine) {
+    networkStatus.hidden = false;
+    networkStatus.dataset.state = "offline";
+    networkStatus.textContent = "NO INTERNET · SOLO PLAY AVAILABLE";
+  } else if (networkStatus.dataset.state === "offline") {
+    networkStatus.hidden = true;
+    networkStatus.dataset.state = "";
+    networkStatus.textContent = "";
+  }
 }
 
 window.addEventListener("online", updateNetworkStatus);
