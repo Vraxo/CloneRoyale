@@ -14,7 +14,8 @@ const CARD_ART: Record<CardId, string> = {
   "skeleton-army": "/cards/skeleton-army.png",
   cannon: "/cards/cannon.png",
   fireball: "/cards/fireball.png",
-  arrows: "/cards/arrows.png"
+  arrows: "/cards/arrows.png",
+  knight: "/cards/knight.svg"
 };
 
 function formatClock(seconds: number): string {
@@ -72,6 +73,7 @@ function cardGlyph(cardId: CardId | undefined): string {
     case "cannon": return "C";
     case "fireball": return "F";
     case "arrows": return "↗";
+    case "knight": return "K";
     default: return "";
   }
 }
