@@ -118,7 +118,6 @@ matchLifecycle = initializeMatchLifecycle({
   hideLobby: () => lobbyScreen?.hideLobby(),
   setGameScreen
 });
-const leaveOnlineMatch = matchLifecycle.leaveOnlineMatch;
 initializeReplayLibrary({
   battle,
   api: path => (import.meta.env.VITE_MULTIPLAYER_SERVER_URL ?? "").replace(/\/$/, "") + path,
