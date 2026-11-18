@@ -48,7 +48,10 @@ export function createReplayLibraryApi(api: (path: string) => string) {
     const response = await fetch(api("/api/replays/" + encodeURIComponent(id)));
     if (!response.ok) throw new Error("Replay not found.");
     const payload = await readJson(response);
-    if (!isRecord(payload) || !isBattleReplay(payload.replay) || payload.replay.id !== id) {
+    if (!isRecord(payload) || !isBattleReplay(payload.replay) || payload.replay.id !== id
+      || !Number.isFinite(payload.replay.createdAt)
+      || !(payload.replay.winner === null || payload.replay.winner === "blue"
+        || payload.replay.winner === "red" || payload.replay.winner === "draw")) {
       throw new Error("The replay server returned an invalid replay.");
     }
     return payload.replay;
