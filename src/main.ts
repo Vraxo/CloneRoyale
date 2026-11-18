@@ -79,6 +79,25 @@ if (!("serviceWorker" in navigator)) {
 
 const installButton = document.querySelector<HTMLButtonElement>("#install-game");
 const networkStatus = document.querySelector<HTMLElement>("#network-status");
+const installHelp = document.querySelector<HTMLElement>("#install-help");
+const closeInstallHelp = document.querySelector<HTMLButtonElement>("#close-install-help");
+const isIosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent)
+  || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isStandaloneApp = window.matchMedia("(display-mode: standalone)").matches
+  || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+if (isIosDevice && !isStandaloneApp && installButton) {
+  installButton.hidden = false;
+  installButton.innerHTML = '<span aria-hidden="true">＋</span> ADD TO HOME SCREEN';
+}
+
+function closeInstallHelpPanel(): void {
+  if (installHelp) installHelp.hidden = true;
+}
+closeInstallHelp?.addEventListener("click", closeInstallHelpPanel);
+installHelp?.addEventListener("click", event => {
+  if (event.target === installHelp) closeInstallHelpPanel();
+});
 let deferredInstallPrompt: { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> } | null = null;
 
 function updateNetworkStatus(): void {
