@@ -1,5 +1,5 @@
 import { Graphics } from "pixi.js";
-import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, RIVER_BOTTOM, RIVER_TOP } from "../../game/state";
+import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, KING_TOWER_Y, RIVER_BOTTOM, RIVER_TOP } from "../../game/state";
 
 export const WORLD_WIDTH = FIELD_WIDTH;
 export const WORLD_HEIGHT = FIELD_HEIGHT;
@@ -53,8 +53,8 @@ export function createArenaView(): Graphics {
 
   for (const laneX of [FIELD_WIDTH * 7 / 36, FIELD_WIDTH * 29 / 36]) {
     const laneSegments = [
-      { top: 78, height: RIVER_TOP - 78 },
-      { top: RIVER_BOTTOM, height: 882 - RIVER_BOTTOM }
+      { top: KING_TOWER_Y, height: RIVER_TOP - KING_TOWER_Y },
+      { top: FIELD_HEIGHT - KING_TOWER_Y, height: FIELD_HEIGHT - KING_TOWER_Y - RIVER_BOTTOM }
     ];
 
     for (const segment of laneSegments) {
@@ -72,23 +72,23 @@ export function createArenaView(): Graphics {
 
   drawLanePath(g, [
     { x: FIELD_WIDTH * 7 / 36, y: RIVER_TOP },
-    { x: FIELD_WIDTH * 7 / 36, y: 78 },
-    { x: FIELD_WIDTH / 2, y: 78 }
+    { x: FIELD_WIDTH * 7 / 36, y: KING_TOWER_Y },
+    { x: FIELD_WIDTH / 2, y: KING_TOWER_Y }
   ]);
   drawLanePath(g, [
     { x: FIELD_WIDTH * 29 / 36, y: RIVER_TOP },
-    { x: FIELD_WIDTH * 29 / 36, y: 78 },
-    { x: FIELD_WIDTH / 2, y: 78 }
+    { x: FIELD_WIDTH * 29 / 36, y: KING_TOWER_Y },
+    { x: FIELD_WIDTH / 2, y: KING_TOWER_Y }
   ]);
   drawLanePath(g, [
     { x: FIELD_WIDTH * 7 / 36, y: RIVER_BOTTOM },
-    { x: FIELD_WIDTH * 7 / 36, y: 882 },
-    { x: FIELD_WIDTH / 2, y: 882 }
+    { x: FIELD_WIDTH * 7 / 36, y: FIELD_HEIGHT - KING_TOWER_Y },
+    { x: FIELD_WIDTH / 2, y: FIELD_HEIGHT - KING_TOWER_Y }
   ]);
   drawLanePath(g, [
     { x: FIELD_WIDTH * 29 / 36, y: RIVER_BOTTOM },
-    { x: FIELD_WIDTH * 29 / 36, y: 882 },
-    { x: FIELD_WIDTH / 2, y: 882 }
+    { x: FIELD_WIDTH * 29 / 36, y: FIELD_HEIGHT - KING_TOWER_Y },
+    { x: FIELD_WIDTH / 2, y: FIELD_HEIGHT - KING_TOWER_Y }
   ]);
 
   g.rect(24, RIVER_TOP, WORLD_WIDTH - 48, RIVER_BOTTOM - RIVER_TOP).fill(0x4b94a0);
