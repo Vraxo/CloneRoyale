@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createGame, playCard, stepGame, SIMULATION_STEP } from "../dist-server/simulation.js";
-import { ReplayPlayer, ReplayRecorder, isBattleReplay } from "../dist-server/replay.js";
+import { ReplayPlayer, ReplayRecorder, isBattleReplay } from "../dist-server/simulation.js";
 
 const seed = 123456;
 const deck = ["archers", "giant", "mini-pekka", "baby-dragon", "knight", "fireball", "cannon", "skeleton-army"];
