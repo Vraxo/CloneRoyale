@@ -1,5 +1,5 @@
-import type { CardId, GameState, Side } from "../game/types";
-import type { BattleReplay } from "../game/replay";
+import type { GameState, Side } from "../game/types";
+import { isBattleReplay, type BattleReplay } from "../game/replay";
 
 export type ConnectionState = "connecting" | "connected" | "reconnecting" | "disconnected";
 
@@ -58,10 +58,7 @@ function isGameState(value: unknown): value is GameState {
 }
 
 function isReplay(value: unknown): value is BattleReplay {
-  return isRecord(value)
-    && typeof value.id === "string"
-    && (value.mode === "online" || value.mode === "solo")
-    && Array.isArray(value.actions);
+  return isBattleReplay(value);
 }
 
 export function isOnlineMessage(value: unknown): value is OnlineMessage {
