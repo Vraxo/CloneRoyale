@@ -1,6 +1,8 @@
 import type { CardId, GameState, Side } from "../game/types";
 
+export type ConnectionState = "connecting" | "connected" | "reconnecting" | "disconnected";
 export type OnlineMessage =
+  | { type: "connection-status"; state: ConnectionState }
   | { type: "connected" }
   | { type: "assigned"; side: Side; code: string | null; publicMatch?: boolean; resumeToken?: string; name?: string }
   | { type: "players-updated"; players: { side: Side; name: string }[] }
@@ -26,20 +28,41 @@ export class OnlineClient {
   private readonly listeners = new Set<(message: OnlineMessage) => void>();
   private reconnectEnabled = false;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private connectionPromise: Promise<void> | null = null;
+  private reconnectAttempts = 0;
+  private connectionState: ConnectionState = "disconnected";
 
   public connect(): Promise<void> {
     if (this.socket?.readyState === WebSocket.OPEN) return Promise.resolve();
+    if (this.connectionPromise) return this.connectionPromise;
+
     const configured = import.meta.env.VITE_MULTIPLAYER_SERVER_URL;
     const url = configured
       ? configured.replace(/^http/, "ws").replace(/\/$/, "") + "/ws"
       : (window.location.protocol === "https:" ? "wss://" : "ws://")
         + window.location.hostname + (import.meta.env.DEV ? ":3001" : (window.location.port ? ":" + window.location.port : "")) + "/ws";
+
     this.reconnectEnabled = true;
-    this.socket = new WebSocket(url);
-    return new Promise((resolve, reject) => {
-      const socket = this.socket!;
-      socket.addEventListener("open", () => resolve(), { once: true });
-      socket.addEventListener("error", () => reject(new Error("Could not connect to the game server.")), { once: true });
+    this.setConnectionState(this.reconnectAttempts > 0 ? "reconnecting" : "connecting");
+    const socket = new WebSocket(url);
+    this.socket = socket;
+
+    this.connectionPromise = new Promise<void>((resolve, reject) => {
+      let settled = false;
+      const finish = (error?: Error): void => {
+        if (settled) return;
+        settled = true;
+        this.connectionPromise = null;
+        if (error) reject(error);
+        else {
+          this.reconnectAttempts = 0;
+          this.setConnectionState("connected");
+          resolve();
+        }
+      };
+
+      socket.addEventListener("open", () => finish(), { once: true });
+      socket.addEventListener("error", () => finish(new Error("Could not connect to the game server.")), { once: true });
       socket.addEventListener("message", event => {
         try {
           const message = JSON.parse(String(event.data)) as OnlineMessage;
@@ -48,16 +71,21 @@ export class OnlineClient {
       });
       socket.addEventListener("close", () => {
         if (this.socket === socket) this.socket = null;
-        if (!this.reconnectEnabled) return;
+        finish(new Error("The connection to the game server was closed."));
+        if (!this.reconnectEnabled) {
+          this.setConnectionState("disconnected");
+          return;
+        }
         for (const listener of this.listeners) listener({ type: "connection-lost" });
-        if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
-        this.reconnectTimer = setTimeout(() => { this.reconnectTimer = null; void this.reconnect(); }, 1200);
+        this.scheduleReconnect();
       });
     });
+    return this.connectionPromise;
   }
 
   public subscribe(listener: (message: OnlineMessage) => void): () => void {
     this.listeners.add(listener);
+    listener({ type: "connection-status", state: this.connectionState });
     return () => this.listeners.delete(listener);
   }
 
@@ -84,20 +112,41 @@ export class OnlineClient {
     this.reconnectEnabled = false;
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
     this.reconnectTimer = null;
+    this.reconnectAttempts = 0;
     localStorage.removeItem("cloneroyale.resume-token");
     this.send({ type: "cancel-matchmaking" });
     this.send({ type: "leave-room" });
-    this.socket?.close();
+    const socket = this.socket;
     this.socket = null;
+    socket?.close();
+    this.setConnectionState("disconnected");
+  }
+
+  private setConnectionState(state: ConnectionState): void {
+    if (this.connectionState === state) return;
+    this.connectionState = state;
+    for (const listener of this.listeners) listener({ type: "connection-status", state });
+  }
+
+  private scheduleReconnect(): void {
+    if (!this.reconnectEnabled || this.reconnectTimer) return;
+    this.reconnectAttempts++;
+    const baseDelay = Math.min(30000, 1000 * (2 ** Math.min(this.reconnectAttempts - 1, 5)));
+    const delay = Math.round(baseDelay * (0.8 + Math.random() * 0.4));
+    this.setConnectionState("reconnecting");
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      void this.reconnect();
+    }, delay);
   }
 
   private async reconnect(): Promise<void> {
     if (!this.reconnectEnabled) return;
-    try { await this.connect(); this.resume(); }
-    catch {
-      if (!this.reconnectEnabled) return;
-      if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = setTimeout(() => { this.reconnectTimer = null; void this.reconnect(); }, 2000);
+    try {
+      await this.connect();
+      this.resume();
+    } catch {
+      if (this.reconnectEnabled) this.scheduleReconnect();
     }
   }
 
