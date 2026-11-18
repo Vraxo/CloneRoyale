@@ -6,6 +6,7 @@ import { createGame, stepGame, SIMULATION_STEP, canPlaceCard, snapToArenaTile, p
 import { createReplayArchive } from "./replayArchive.mjs";
 import { createHttpHandler } from "./httpHandler.mjs";
 import { createWebSocketTransport } from "./webSocketTransport.mjs";
+import { createMatchmaking } from "./matchmaking.mjs";
 import { createMatchSimulation } from "./matchSimulation.mjs";
 
 const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
@@ -50,84 +51,15 @@ function attachPlayer(room, client, side) {
 function isSocketUsable(client) {
   return !client.closed && Boolean(client.socket) && !client.socket.destroyed && client.socket.writable;
 }
-function pruneMatchmakingQueue() {
-  let changed = false;
-  for (let index = matchmakingQueue.length - 1; index >= 0; index -= 1) {
-    const client = matchmakingQueue[index];
-    if (isSocketUsable(client) && !client.room) continue;
-    matchmakingQueue.splice(index, 1);
-    client.queued = false;
-    changed = true;
-  }
-  if (changed) broadcastQueueStatus();
-  return changed;
-}
-function removeFromQueue(client, notify = false) {
-  const index = matchmakingQueue.indexOf(client);
-  if (index < 0) return false;
-  matchmakingQueue.splice(index, 1);
-  client.queued = false;
-  if (notify) send(client, { type: "queue-cancelled" });
-  broadcastQueueStatus();
-  return true;
-}
-function broadcastQueueStatus() {
-  const waiting = matchmakingQueue.length;
-  matchmakingQueue.forEach((client, index) => {
-    send(client, { type: "queue-status", waiting, position: index + 1 });
-  });
-}
-function startMatchedRoom(first, second) {
-  if (!isSocketUsable(first) || !isSocketUsable(second) || first.room || second.room) return false;
-  first.queued = false;
-  second.queued = false;
-  const room = { code: "PUBLIC-" + randomBytes(8).toString("hex"), players: new Map(), state: null, lastUpdate: Date.now(), accumulator: 0, publicMatch: true };
-  rooms.set(room.code, room);
-  attachPlayer(room, first, "blue");
-  attachPlayer(room, second, "red");
-  return true;
-}
-function joinMatchmaking(client) {
-  if (!isSocketUsable(client)) return;
-  if (client.room) {
-    send(client, { type: "error", message: "Leave your current room before searching for another match." });
-    return;
-  }
-  pruneMatchmakingQueue();
-  if (client.queued) {
-    const index = matchmakingQueue.indexOf(client);
-    send(client, { type: "queue-status", waiting: matchmakingQueue.length, position: index + 1 });
-    return;
-  }
-  let opponent = null;
-  while (matchmakingQueue.length > 0 && !opponent) {
-    const candidate = matchmakingQueue.shift();
-    candidate.queued = false;
-    if (isSocketUsable(candidate) && !candidate.room) opponent = candidate;
-  }
-  if (opponent) {
-    client.queued = false;
-    if (!startMatchedRoom(opponent, client)) {
-      if (isSocketUsable(opponent) && !opponent.room) {
-        matchmakingQueue.unshift(opponent);
-        opponent.queued = true;
-      }
-      if (matchmakingQueue.length < MAX_MATCHMAKING_QUEUE) {
-        matchmakingQueue.push(client);
-        client.queued = true;
-      } else send(client, { type: "error", message: "The matchmaking queue is full. Please try again shortly." });
-    }
-    broadcastQueueStatus();
-    return;
-  }
-  if (matchmakingQueue.length >= MAX_MATCHMAKING_QUEUE) {
-    send(client, { type: "error", message: "The matchmaking queue is full. Please try again shortly." });
-    return;
-  }
-  matchmakingQueue.push(client);
-  client.queued = true;
-  broadcastQueueStatus();
-}
+const matchmaking = createMatchmaking({
+  queue: matchmakingQueue,
+  rooms,
+  randomBytes,
+  attachPlayer,
+  isSocketUsable,
+  send: (client, payload) => send(client, payload),
+  maxQueue: MAX_MATCHMAKING_QUEUE
+});
 function createRoom(client) {
   let code;
   do { code = makeCode(); } while (rooms.has(code));
@@ -174,8 +106,8 @@ function handleMessage(client, message) {
     return;
   }
   if (message.type === "rematch-ready") { requestRematch(client); return; }
-  if (message.type === "find-match") { joinMatchmaking(client); return; }
-  if (message.type === "cancel-matchmaking") { removeFromQueue(client, true); return; }
+  if (message.type === "find-match") { matchmaking.join(client); return; }
+  if (message.type === "cancel-matchmaking") { matchmaking.remove(client, true); return; }
   if (message.type === "create-room") { removeFromQueue(client); if (client.room) leaveRoom(client); createRoom(client); return; }
   if (message.type === "join-room") {
     const room = rooms.get(String(message.code ?? "").trim().toUpperCase());
@@ -280,7 +212,7 @@ const server = createServer(createHttpHandler({
   pruneMatchmakingQueue,
   getMatchmakingStatus: () => ({
     connectedClients: [...clients].filter(isSocketUsable).length,
-    queuedPlayers: matchmakingQueue.length,
+    queuedPlayers: matchmaking.size,
     activePublicMatches: [...rooms.values()].filter(room => room.publicMatch && room.state && !room.state.gameOver).length,
     privateRooms: [...rooms.values()].filter(room => !room.publicMatch).length
   })
