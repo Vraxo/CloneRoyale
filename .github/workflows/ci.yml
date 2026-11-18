@@ -18,6 +18,7 @@ jobs:
       - run: npm run build
       - run: npm run test:multiplayer
       - run: npm run test:server-services
+      - run: npm run test:accounts
       - run: npm run test:replay
       - run: npm run test:replay-archive
       - run: npm run test:offline
