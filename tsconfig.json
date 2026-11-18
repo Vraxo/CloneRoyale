@@ -28,7 +28,6 @@
     "server/clientMessages.ts",
     "server/matchmaking.ts",
     "server/roomLifecycle.ts",
-    "server/matchSimulation.ts",
-    "server/accounts.ts"
+    "server/matchSimulation.ts"
   ]
 }
