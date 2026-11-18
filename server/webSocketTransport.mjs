@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 export function createWebSocketTransport(options) {
   const { randomBytes, handleMessage, closeClient, maxMessageBytes } = options;
 
