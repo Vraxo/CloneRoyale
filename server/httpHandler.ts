@@ -2,15 +2,22 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { createReplayArchive } from "./replayArchive.js";
+import type { createAccountStore } from "./accounts.js";
 
 type ReplayArchive = ReturnType<typeof createReplayArchive>;
+type AccountStore = ReturnType<typeof createAccountStore>;
 
 interface HttpHandlerOptions {
   root: string;
   replayArchive: ReplayArchive;
+  accountStore: AccountStore;
   getMatchmakingStatus: () => Record<string, number>;
   pruneMatchmakingQueue: () => unknown;
 }
+
+const SESSION_COOKIE = "clone_royale_session";
+const AUTH_WINDOW_MS = 15 * 60 * 1000;
+const AUTH_ATTEMPT_LIMIT = 10;
 
 async function readRequestBody(request: IncomingMessage, maximumBytes = 4096): Promise<any> {
   const chunks: Buffer[] = [];
@@ -29,8 +36,105 @@ function contentType(path: string): string {
   return ({ ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".ogg": "audio/ogg", ".opus": "audio/opus", ".woff2": "font/woff2", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json; charset=utf-8" } as Record<string, string>)[ext] ?? "application/octet-stream";
 }
 
+function readSessionCookie(request: IncomingMessage): string {
+  const cookies = request.headers.cookie?.split(";") ?? [];
+  for (const cookie of cookies) {
+    const separator = cookie.indexOf("=");
+    if (separator < 0 || cookie.slice(0, separator).trim() !== SESSION_COOKIE) continue;
+    return cookie.slice(separator + 1).trim();
+  }
+  return "";
+}
+
+function sessionCookie(token: string, maxAge: number): string {
+  return SESSION_COOKIE + "=" + token + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=" + maxAge;
+}
+
+function sendJson(response: ServerResponse, status: number, body: Record<string, unknown>, headers: Record<string, string> = {}): void {
+  response.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers });
+  response.end(JSON.stringify(body));
+}
+
 export function createHttpHandler(options: HttpHandlerOptions) {
-  const { root, replayArchive, getMatchmakingStatus, pruneMatchmakingQueue } = options;
+  const { root, replayArchive, accountStore, getMatchmakingStatus, pruneMatchmakingQueue } = options;
+  const authAttempts = new Map<string, { count: number; resetAt: number }>();
+
+  function allowAuthAttempt(request: IncomingMessage, response: ServerResponse): boolean {
+    const now = Date.now();
+    const address = request.socket.remoteAddress ?? "unknown";
+    let attempt = authAttempts.get(address);
+    if (!attempt || attempt.resetAt <= now) {
+      attempt = { count: 0, resetAt: now + AUTH_WINDOW_MS };
+      authAttempts.set(address, attempt);
+    }
+    if (attempt.count >= AUTH_ATTEMPT_LIMIT) {
+      sendJson(response, 429, { error: "Too many authentication attempts. Please try again later." }, {
+        "retry-after": String(Math.max(1, Math.ceil((attempt.resetAt - now) / 1000)))
+      });
+      return false;
+    }
+    attempt.count += 1;
+    if (authAttempts.size > 5000) {
+      for (const [key, value] of authAttempts) if (value.resetAt <= now) authAttempts.delete(key);
+    }
+    return true;
+  }
+
+  async function handleAuth(request: IncomingMessage, response: ServerResponse, pathname: string): Promise<boolean> {
+    if (!pathname.startsWith("/api/auth/")) return false;
+
+    if (pathname === "/api/auth/me" && request.method === "GET") {
+      const account = await accountStore.resolveSession(readSessionCookie(request));
+      sendJson(response, 200, { account });
+      return true;
+    }
+
+    if (pathname === "/api/auth/logout" && request.method === "POST") {
+      const token = readSessionCookie(request);
+      if (token) await accountStore.revokeSession(token);
+      sendJson(response, 200, { loggedOut: true }, { "set-cookie": sessionCookie("", 0) });
+      return true;
+    }
+
+    if ((pathname !== "/api/auth/register" && pathname !== "/api/auth/login") || request.method !== "POST") {
+      sendJson(response, 404, { error: "Not found." });
+      return true;
+    }
+
+    if (!allowAuthAttempt(request, response)) return true;
+
+    let body: any;
+    try {
+      body = await readRequestBody(request, 2048);
+    } catch {
+      sendJson(response, 400, { error: "Invalid JSON request." });
+      return true;
+    }
+
+    const username = typeof body?.username === "string" ? body.username : "";
+    const password = typeof body?.password === "string" ? body.password : "";
+    try {
+      const account = pathname.endsWith("/register")
+        ? await accountStore.createAccount(username, password)
+        : await accountStore.authenticate(username, password);
+
+      if (!account) {
+        sendJson(response, 401, { error: "Incorrect username or password." });
+        return true;
+      }
+
+      const session = await accountStore.createSession(account.id);
+      const maxAge = Math.max(0, Math.floor((session.expiresAt - Date.now()) / 1000));
+      sendJson(response, pathname.endsWith("/register") ? 201 : 200, { account }, {
+        "set-cookie": sessionCookie(session.token, maxAge)
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create account.";
+      const duplicate = message.includes("already taken");
+      sendJson(response, duplicate ? 409 : 400, { error: message });
+    }
+    return true;
+  }
 
   return async function handleHttpRequest(request: IncomingMessage, response: ServerResponse): Promise<void> {
     if (request.url === "/healthz") {
@@ -39,6 +143,8 @@ export function createHttpHandler(options: HttpHandlerOptions) {
     }
 
     const requestUrl = new URL(request.url ?? "/", "http://localhost");
+    if (await handleAuth(request, response, requestUrl.pathname)) return;
+
     if (requestUrl.pathname === "/api/replays" && request.method === "GET") {
       const replays = await replayArchive.listPublicReplays();
       response.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }).end(JSON.stringify({ replays }));
