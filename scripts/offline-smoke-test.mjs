@@ -4,12 +4,13 @@ import vm from "node:vm";
 
 const workerSource = await readFile("dist/service-worker.js", "utf8");
 const cacheName = workerSource.match(/const CACHE_NAME = ("[^"]+");/)?.[1];
-const precacheMatch = workerSource.match(/const PRECACHE_URLS = (\\[[^;]+\\]);/);
+const precacheStart = workerSource.indexOf("const PRECACHE_URLS = ") + "const PRECACHE_URLS = ".length;
+const precacheEnd = workerSource.indexOf(";", precacheStart);
 assert.ok(cacheName, "Generated service worker must declare its cache name.");
-assert.ok(precacheMatch, "Generated service worker must declare its precache list.");
+assert.ok(precacheStart >= "const PRECACHE_URLS = ".length && precacheEnd > precacheStart, "Generated service worker must declare its precache list.");
 
 const currentCacheName = JSON.parse(cacheName);
-const precacheUrls = JSON.parse(precacheMatch[1]);
+const precacheUrls = JSON.parse(workerSource.slice(precacheStart, precacheEnd));
 assert.ok(precacheUrls.includes("/"), "The app shell must be included in the offline cache.");
 assert.ok(precacheUrls.length > 1, "The offline cache should include built game assets.");
 
