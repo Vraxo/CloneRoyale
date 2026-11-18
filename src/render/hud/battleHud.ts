@@ -310,7 +310,7 @@ export class BattleHud {
       && previousRemaining !== null && remaining !== null
       && previousRemaining > MATCH_RULES.doubleElixirStartsAt
       && remaining <= MATCH_RULES.doubleElixirStartsAt) {
-      this.showMatchNotification("DOUBLE ELIXIR!", "ELIXIR GENERATES 2× FASTER", 0xd8a0ff, 3200);
+      this.showMatchNotification("DOUBLE ELIXIR!", "1 MINUTE LEFT · 2× ELIXIR", 0xd8a0ff, 3200);
     } else if (this.previousPhase === "overtime" && state.phase === "overtime"
       && this.previousTime < MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeTripleElixirStartsAt
       && state.time >= MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeTripleElixirStartsAt) {
