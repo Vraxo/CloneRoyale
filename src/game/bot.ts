@@ -1,5 +1,6 @@
 import { cardById } from "./cards";
 import type { CardId, GameState, Lane, Side, Unit } from "./types";
+import { FIELD_WIDTH, LANE_X } from "./state";
 
 export interface BotDecision {
   cardId: CardId;
@@ -7,8 +8,6 @@ export interface BotDecision {
   targetX?: number;
   targetY?: number;
 }
-
-const LANE_X: Record<Lane, number> = { left: 205, right: 515 };
 
 function otherSide(side: Side): Side {
   return side === "blue" ? "red" : "blue";
@@ -19,7 +18,7 @@ function isOnOwnHalf(unit: Unit, side: Side): boolean {
 }
 
 function laneForX(x: number): Lane {
-  return x < 360 ? "left" : "right";
+  return x < FIELD_WIDTH / 2 ? "left" : "right";
 }
 
 function bestEnemyCluster(enemies: Unit[], radius: number): { x: number; y: number; count: number; units: Unit[] } | null {
