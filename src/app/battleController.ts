@@ -258,6 +258,9 @@ export class BattleController {
     this.game = this.runtime.state;
     this.applyPlayerDeck();
     this.replayRecorder = new ReplayRecorder(this.battleSeed, this.playerDeck);
+    this.lastReplay = null;
+    this.lastReplayShareToken = null;
+    document.body.dataset.replayAvailable = "false";
     this.replayPlayer = null;
     this.replayLiveState = null;
     this.selectedCard = null;
