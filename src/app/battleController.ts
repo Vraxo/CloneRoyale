@@ -7,7 +7,7 @@ import { isBattleReplay, type BattleReplay } from "../game/replay";
 import { ReplayRecordingSession } from "../game/replayRecording";
 import { ReplayPlaybackSession } from "../game/replayPlayback";
 import { saveBattleReplay, saveReplayShareToken } from "../game/replayStorage";
-import { cardById, STARTER_DECK } from "../game/cards";
+import { STARTER_DECK } from "../game/cards";
 import type { CardId, GameState, Side } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
