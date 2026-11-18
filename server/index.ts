@@ -79,7 +79,8 @@ const websocketTransport = createWebSocketTransport({
   randomBytes,
   handleMessage,
   closeClient,
-  maxMessageBytes: MAX_MESSAGE_BYTES
+  maxMessageBytes: MAX_MESSAGE_BYTES,
+  resolveAccount: token => accountStore.resolveSession(token)
 });
 const send = websocketTransport.send;
 
