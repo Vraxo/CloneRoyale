@@ -40,12 +40,24 @@ async function notifyClients(message) {
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
+    const previousNames = (await caches.keys()).filter(name => name.startsWith("clone-royale-") && name !== CACHE_NAME);
+    const previousCaches = await Promise.all(previousNames.map(name => caches.open(name)));
     let completed = 0;
     await notifyClients({ type: "PRECACHE_PROGRESS", completed, total: PRECACHE_URLS.length });
 
     try {
       for (const url of PRECACHE_URLS) {
-        const response = await fetch(url, { cache: "reload" });
+        // Vite's /assets files carry content hashes, so an identical URL is immutable.
+        // Reuse those responses and only download newly generated assets.
+        let response;
+        if (/^\\/assets\\//.test(url)) {
+          for (const previousCache of previousCaches) {
+            response = await previousCache.match(url);
+            if (response) break;
+          }
+        }
+
+        if (!response) response = await fetch(url, { cache: "reload" });
         if (!response.ok) throw new Error("Could not download " + url + " (" + response.status + ").");
         await cache.put(url, response);
         completed += 1;
