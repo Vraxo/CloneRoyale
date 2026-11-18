@@ -4,12 +4,12 @@ import { randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { createGame, stepGame, SIMULATION_STEP, ReplayRecorder, STARTER_DECK } from "./simulation.js";
 import { createReplayArchive } from "./replayArchive.js";
-import { createHttpHandler } from "./httpHandler.mjs";
-import { createWebSocketTransport } from "./webSocketTransport.mjs";
+import { createHttpHandler } from "./httpHandler.js";
+import { createWebSocketTransport } from "./webSocketTransport.js";
 import { createMatchmaking } from "./matchmaking.js";
 import { createRoomLifecycle } from "./roomLifecycle.js";
 import { createClientMessageHandler } from "./clientMessages.js";
-import { createMatchSimulation } from "./matchSimulation.mjs";
+import { createMatchSimulation } from "./matchSimulation.js";
 
 const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
 const rooms = new Map();
