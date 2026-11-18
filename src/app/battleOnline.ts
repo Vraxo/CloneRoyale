@@ -1,6 +1,6 @@
 import type { BattleMusic } from "../audio/battleMusic";
 import type { SoundEffects } from "../audio/soundEffects";
-import type { GameState, Side } from "../game/types";
+import type { CardId, GameState, Side } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
 import type { BattleHud } from "./battleHud";
@@ -13,8 +13,8 @@ interface BattleOnlineOptions {
   hud: BattleHud;
   getGame(): GameState;
   setGame(state: GameState): void;
-  getSelectedCard(): string | null;
-  setSelectedCard(cardId: null): void;
+  getSelectedCard(): CardId | null;
+  setSelectedCard(cardId: CardId | null): void;
   setHistoryDisabled(): void;
   setPaused(value: boolean): void;
   resetSimulation(): void;
@@ -25,6 +25,7 @@ interface BattleOnlineOptions {
 export class BattleOnline {
   private client: OnlineClient | null = null;
   private playerSide: Side = "blue";
+  private previousGameOver = false;
 
   public constructor(private readonly options: BattleOnlineOptions) {}
 
@@ -52,6 +53,8 @@ export class BattleOnline {
     this.options.setSelectedCard(null);
     this.options.setPaused(false);
     this.options.resetSimulation();
+    this.previousGameOver = state.gameOver;
+    this.previousGameOver = state.gameOver;
     this.options.setPreviousGameOver(state.gameOver);
 
     document.body.dataset.online = "true";
@@ -70,6 +73,7 @@ export class BattleOnline {
   public applyState(state: GameState): void {
     if (!this.client) return;
 
+    const previousGameOver = this.previousGameOver;
     this.options.setGame(state);
     this.options.music.update(state.time, state.phase);
 
@@ -77,7 +81,6 @@ export class BattleOnline {
       this.options.soundEffects.play(event);
     }
 
-    const previousGameOver = this.options.getGame().gameOver;
     if (state.gameOver && !previousGameOver) {
       this.options.music.stop();
       this.options.soundEffects.play(
@@ -99,7 +102,7 @@ export class BattleOnline {
       this.options.renderer.setDeploymentArea(
         state,
         this.playerSide,
-        this.options.getSelectedCard() as never
+        this.options.getSelectedCard()
       );
     }
   }
