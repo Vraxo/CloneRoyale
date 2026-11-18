@@ -1,3 +1,7 @@
+if ("serviceWorker" in navigator) {
+  void navigator.serviceWorker.register("/service-worker.js").catch(() => undefined);
+}
+
 const parameters = new URLSearchParams(window.location.search);
 const mode = parameters.get("mode") ?? "player";
 
