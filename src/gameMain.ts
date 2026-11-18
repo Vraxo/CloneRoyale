@@ -10,6 +10,8 @@ import type { CardId } from "./game/types";
 import { isBattleReplay, type BattleReplay } from "./game/replay";
 
 const parameters = new URLSearchParams(window.location.search);
+const replayApiBase = (import.meta.env.VITE_MULTIPLAYER_SERVER_URL ?? "").replace(/\\/$/, "");
+function replayApi(path: string): string { return replayApiBase + path; }
 const developerMode = parameters.get("mode") === "dev";
 document.body.dataset.mode = developerMode ? "developer" : "player";
 
@@ -714,7 +716,7 @@ function createReplayRow(title: string, subtitle: string, actions: { label: stri
 async function publishReplay(id: string, token: string): Promise<void> {
   if (replayLibraryStatus) replayLibraryStatus.textContent = "Publishing replay…";
   try {
-    const response = await fetch("/api/replays/" + encodeURIComponent(id) + "/publish", {
+    const response = await fetch(replayApi("/api/replays/" + encodeURIComponent(id) + "/publish"), {
       method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ shareToken: token })
     });
     const result = await response.json() as { error?: string; url?: string; published?: boolean };
@@ -760,7 +762,7 @@ async function refreshPublicReplays(): Promise<void> {
   publicReplayList.replaceChildren();
   const loading = document.createElement("p"); loading.className = "replay-empty"; loading.textContent = "Loading public replays…"; publicReplayList.append(loading);
   try {
-    const response = await fetch("/api/replays", { cache: "no-store" });
+    const response = await fetch(replayApi("/api/replays"), { cache: "no-store" });
     if (!response.ok) throw new Error("Replay library is unavailable.");
     const data = await response.json() as { replays?: { id: string; createdAt: number; durationSeconds: number; winner: string | null; players: { blue: string; red: string } }[] };
     publicReplayList.replaceChildren();
@@ -769,7 +771,7 @@ async function refreshPublicReplays(): Promise<void> {
     for (const replay of replays) {
       const subtitle = replay.players.blue + " vs " + replay.players.red + " · " + replayResultLabel(replay.winner) + " · " + formatReplayDuration(replay.durationSeconds) + " · " + new Date(replay.createdAt).toLocaleString();
       publicReplayList.append(createReplayRow(replayResultLabel(replay.winner), subtitle, [
-        { label: "▶ WATCH", run: async () => { const result = await fetch("/api/replays/" + encodeURIComponent(replay.id)); if (!result.ok) throw new Error("Replay not found."); const payload = await result.json() as { replay?: BattleReplay }; await watchReplay(payload.replay); } },
+        { label: "▶ WATCH", run: async () => { const result = await fetch(replayApi("/api/replays/" + encodeURIComponent(replay.id))); if (!result.ok) throw new Error("Replay not found."); const payload = await result.json() as { replay?: BattleReplay }; await watchReplay(payload.replay); } },
         { label: "↗ COPY LINK", run: async () => { const url = new URL("/?replay=" + encodeURIComponent(replay.id), window.location.origin).toString(); try { await navigator.clipboard.writeText(url); if (replayLibraryStatus) replayLibraryStatus.textContent = "Replay link copied: " + url; } catch { window.prompt("Copy this replay link:", url); } } }
       ]));
     }
@@ -815,7 +817,7 @@ document.getElementById("replays-refresh")?.addEventListener("click", () => { re
 if (parameters.has("replay")) {
   const replayId = parameters.get("replay") ?? "";
   if (/^[a-f0-9]{32}$/.test(replayId)) {
-    void fetch("/api/replays/" + replayId).then(async response => {
+    void fetch(replayApi("/api/replays/" + replayId)).then(async response => {
       if (!response.ok) throw new Error("This replay link is invalid or no longer available.");
       const payload = await response.json() as { replay?: BattleReplay };
       await watchReplay(payload.replay);
