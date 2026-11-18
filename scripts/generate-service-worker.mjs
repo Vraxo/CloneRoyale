@@ -50,7 +50,7 @@ self.addEventListener("install", event => {
         // Vite's /assets files carry content hashes, so an identical URL is immutable.
         // Reuse those responses and only download newly generated assets.
         let response;
-        if (/^\\/assets\\//.test(url)) {
+        if (url.startsWith("/assets/")) {
           for (const previousCache of previousCaches) {
             response = await previousCache.match(url);
             if (response) break;
