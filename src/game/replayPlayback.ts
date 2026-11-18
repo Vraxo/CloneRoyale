@@ -11,7 +11,7 @@ export class ReplayPlaybackSession {
   public get isFinished(): boolean { return this.player?.isFinished ?? false; }
 
   public start(liveState: GameState, replay: unknown): GameState | null {
-    if (!isBattleReplay(replay)) return null;
+    if (this.player || !isBattleReplay(replay)) return null;
     this.liveState = liveState;
     this.player = new ReplayPlayer(replay);
     return this.player.state;
