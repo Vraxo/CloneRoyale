@@ -18,10 +18,6 @@ export function createMatchmakingRoutes(options: MatchmakingRouteOptions) {
       return false;
     }
 
-    if (request.method !== "GET") {
-      sendJson(response, 405, { error: "Method not allowed." }, { allow: "GET" });
-      return true;
-    }
 
     pruneMatchmakingQueue();
     sendJson(response, 200, getMatchmakingStatus());
