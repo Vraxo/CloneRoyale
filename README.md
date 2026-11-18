@@ -70,6 +70,10 @@ Open the app and choose **Online play**. Use **Find match** in two browser sessi
 
 The simulation does not import PixiJS or access the DOM. Keep that boundary intact: rendering must never decide whether an attack hits or how much damage is dealt.
 
+## Server architecture
+
+The authoritative multiplayer server is written in TypeScript under `server/`. Its entry point is `server/index.ts`; focused modules handle WebSocket transport, HTTP requests, matchmaking, room lifecycle, client messages, match simulation, and replay archiving. The production build compiles the server to `dist-server/index.js`, which is what `npm start` runs. The standalone simulation and service bundles are also built for automated tests.
+
 ## Next milestones
 
 1. Add reconnection and safe handling for interrupted public matches.
