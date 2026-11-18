@@ -13,6 +13,7 @@ import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
 import { createBattleHud, type BattleHud } from "./battleHud";
 import { BattleActions } from "./battleActions";
+import { BattleSimulationClock } from "./battleSimulation";
 import { clearOnlineResumeToken } from "./onlineResumeToken";
 
 export class BattleController {
@@ -20,8 +21,7 @@ export class BattleController {
   private readonly runtime: SimulationRuntime;
   private history: ReturnType<typeof createGameHistory> | null;
   private paused = false;
-  private speed = 1;
-  private accumulator = 0;
+  private readonly simulation = new BattleSimulationClock();
   private lastHudUpdate = 0;
   private previousGameOver = false;
   private selectedCard: CardId | null = null;
@@ -128,8 +128,8 @@ export class BattleController {
     this.game = replayState;
     this.selectedCard = null;
     this.paused = false;
-    this.speed = 1;
-    this.accumulator = 0;
+    this.simulation.setSpeed(1);
+    this.simulation.reset();
     this.renderer.setPlacementPreview(null);
     this.renderer.setDeploymentArea(this.game, "blue", null);
     this.renderer.clearUnitPreview();
@@ -143,7 +143,7 @@ export class BattleController {
     const replayState = this.replayPlayback.seek(tick);
     if (!replayState) return;
     this.game = replayState;
-    this.accumulator = 0;
+    this.simulation.reset();
     this.renderer.render(this.game);
     this.updateHud();
   }
@@ -154,7 +154,7 @@ export class BattleController {
     this.game = liveState;
     document.body.dataset.replaying = "false";
     this.paused = true;
-    this.accumulator = 0;
+    this.simulation.reset();
     this.renderer.setDeploymentArea(this.game, "blue", null);
     this.renderer.render(this.game);
     this.updateHud();
@@ -182,7 +182,7 @@ export class BattleController {
     this.history = null;
     this.selectedCard = null;
     this.paused = false;
-    this.accumulator = 0;
+    this.simulation.reset();
     this.previousGameOver = state.gameOver;
     document.body.dataset.online = "true";
     const modeDescription = document.getElementById("mode-description");
@@ -272,7 +272,7 @@ export class BattleController {
     this.renderer.setPlacementPreview(null);
     this.renderer.setDeploymentArea(this.game, this.playerSide, null);
     this.renderer.clearUnitPreview();
-    this.accumulator = 0;
+    this.simulation.reset();
     this.history?.reset(this.game);
     this.previousGameOver = false;
     this.setPaused(false);
@@ -311,7 +311,7 @@ export class BattleController {
     this.actions.reset();
     this.renderer.setPlacementPreview(null);
     this.soundEffects.stopAll();
-    this.accumulator = 0;
+    this.simulation.reset();
     this.setPaused(true);
     this.previousGameOver = this.game.gameOver;
     this.music.seek(this.game.time, this.game.phase);
@@ -321,20 +321,18 @@ export class BattleController {
   }
 
   public setSpeed(speed: number): void {
-    this.speed = speed;
+    this.simulation.setSpeed(speed);
     this.music.setSpeed(speed);
     this.soundEffects.setSpeed(speed);
   }
 
   public update(elapsedSeconds: number): void {
-    if ((!this.isOnline || this.replayPlayback.isActive) && !this.paused && !this.game.gameOver) {
-      this.accumulator += Math.min(elapsedSeconds, 0.1) * this.speed;
-      while (this.accumulator >= SIMULATION_STEP) {
-        this.advanceOneStep();
-        this.accumulator -= SIMULATION_STEP;
-        if (this.game.gameOver) break;
-      }
-    }
+    this.simulation.advance(
+      elapsedSeconds,
+      (!this.isOnline || this.replayPlayback.isActive) && !this.paused && !this.game.gameOver,
+      () => this.advanceOneStep(),
+      () => this.game.gameOver
+    );
 
     if (this.game.gameOver && !this.previousGameOver) {
       this.music.stop();
@@ -392,7 +390,7 @@ export class BattleController {
       this.music.stop();
       this.soundEffects.play(this.game.winner === "draw" ? "match-draw" : this.game.winner === "blue" ? "match-victory" : "match-defeat");
       this.previousGameOver = true;
-      this.accumulator = 0;
+      this.simulation.reset();
       this.updateHud();
     }
   }
