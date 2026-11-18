@@ -78,7 +78,8 @@ const self = {
     async matchAll() { return []; },
     async claim() {}
   },
-  async skipWaiting() {}
+  async skipWaiting() {},
+  addEventListener(type, listener) { listeners.set(type, listener); }
 };
 
 const context = {
@@ -91,7 +92,6 @@ const context = {
   Error
 };
 vm.runInNewContext(workerSource, context);
-self.addEventListener = (type, listener) => listeners.set(type, listener);
 
 async function dispatch(type, event) {
   const listener = listeners.get(type);
