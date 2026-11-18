@@ -3,7 +3,6 @@ import { BattleController } from "./app/battleController";
 import { bindBattleInput } from "./app/battleInput";
 import { startBattleLoop } from "./app/battleLoop";
 import { OnlineClient } from "./net/onlineClient";
-import type { AudioEvent } from "./game/types";
 import { createMenuAudio } from "./audio/menuAudio";
 import { initializeAudioSettings } from "./audio/audioSettings";
 import { initializeReplayLibrary } from "./app/replayLibrary";
