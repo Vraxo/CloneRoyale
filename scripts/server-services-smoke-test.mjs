@@ -207,7 +207,7 @@ function testRoomLifecycle() {
   assert.equal(replacement.side, "blue");
   assert.equal(replacement.name, host.name);
   assert.equal(replacement.disconnected, false);
-  assert.equal(clients.has(replacement.id), true);
+  assert.equal(clients.has(replacement), true);
   assert.equal(sent.get(replacement.id).at(-1).type, "resumed");
   assert.equal(broadcasts.at(-1).message.type, "opponent-reconnected");
 
