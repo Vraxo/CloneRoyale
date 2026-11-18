@@ -54,19 +54,25 @@
         </div>
 
         <header class="cr-home-header">
-          <button id="menu-profile" class="cr-player-chip" type="button" aria-label="Edit player profile">
-            <span class="cr-player-avatar">♙</span>
-            <span class="cr-player-copy"><small>PLAYER</small><strong id="menu-profile-name">Guest</strong></span>
-            <span class="cr-player-chevron">⌄</span>
-          </button>
-          <div class="cr-trophy-chip"><span>🏆</span><strong>0</strong><small>TROPHIES</small></div>
+          <div class="cr-home-player-group">
+            <button id="menu-profile" class="cr-player-chip" type="button" aria-label="Edit player profile">
+              <span class="cr-player-avatar">♙</span>
+              <span class="cr-player-copy"><small>PLAYER</small><strong id="menu-profile-name">Guest</strong></span>
+              <span class="cr-player-chevron">⌄</span>
+            </button>
+            <div class="cr-trophy-chip"><span>🏆</span><strong>0</strong><small>TROPHIES</small></div>
+          </div>
+          <div class="cr-resource-group" aria-label="Player resources">
+            <div class="cr-resource-chip cr-gold-chip"><span class="cr-resource-icon">●</span><strong>0</strong><b>＋</b></div>
+            <div class="cr-resource-chip cr-gem-chip"><span class="cr-resource-icon">◆</span><strong>0</strong><b>＋</b></div>
+          </div>
           <button id="install-game" class="cr-install-button" type="button" hidden><span aria-hidden="true">↓</span> INSTALL</button>
           <div id="network-status" class="cr-network-status" role="status" aria-live="polite" hidden>NO INTERNET · SOLO PLAY AVAILABLE</div>
         </header>
 
         <section class="cr-home-center" aria-label="Arena">
           <div class="cr-arena-title">
-            <span class="cr-arena-kicker">YOUR BATTLEFIELD</span>
+            <span class="cr-arena-kicker">TROPHY ROAD</span>
             <h1>TRAINING <span>CAMP</span></h1>
             <span class="cr-arena-subtitle"><i></i> ARENA 1 <i></i></span>
           </div>
@@ -74,16 +80,12 @@
 
         <section class="cr-home-lower" aria-label="Battle and cards">
           <div class="cr-deck-panel">
-            <div class="cr-deck-heading"><span>YOUR CARDS</span><small>COLLECTION</small></div>
+            <div class="cr-deck-heading"><span>YOUR BATTLE DECK</span><small>DECK 1</small></div>
             <div class="cr-card-row">
               <div class="cr-card-tile"><img src="/cards/archers.png" alt="Archers" /><span>ARCHERS</span></div>
               <div class="cr-card-tile"><img src="/cards/giant.png" alt="Giant" /><span>GIANT</span></div>
               <div class="cr-card-tile"><img src="/cards/mini-pekka.png" alt="Mini P.E.K.K.A." /><span>MINI P.E.K.K.A.</span></div>
               <div class="cr-card-tile"><img src="/cards/baby-dragon.png" alt="Baby Dragon" /><span>BABY DRAGON</span></div>
-              <div class="cr-card-tile"><img src="/cards/skeleton-army.png" alt="Skeleton Army" /><span>SKELETON ARMY</span></div>
-              <div class="cr-card-tile"><img src="/cards/cannon.png" alt="Cannon" /><span>CANNON</span></div>
-              <div class="cr-card-tile"><img src="/cards/fireball.png" alt="Fireball" /><span>FIREBALL</span></div>
-              <div class="cr-card-tile"><img src="/cards/arrows.png" alt="Arrows" /><span>ARROWS</span></div>
             </div>
           </div>
 
