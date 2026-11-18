@@ -48,49 +48,64 @@ function testMatchmaking() {
 
   const first = makeClient("first");
   const second = makeClient("second");
-  const third = makeClient("third");
-
   matchmaking.join(first);
   assert.equal(matchmaking.size, 1);
   assert.equal(first.queued, true);
   assert.deepEqual(messages.get("first").at(-1), { type: "queue-status", waiting: 1, position: 1 });
 
-  matchmaking.join(first);
-  assert.equal(matchmaking.size, 1, "Repeated join must not duplicate a player.");
-  assert.deepEqual(messages.get("first").at(-1), { type: "queue-status", waiting: 1, position: 1 });
-
   matchmaking.join(second);
-  assert.equal(matchmaking.size, 2);
-  matchmaking.join(third);
-  assert.equal(matchmaking.size, 2, "The configured queue capacity must be enforced.");
-  assert.match(messages.get("third").at(-1).message, /queue is full/);
-
-  assert.equal(matchmaking.remove(first, true), true);
-  assert.equal(first.queued, false);
-  assert.equal(matchmaking.remove(first), false);
-  assert.deepEqual(messages.get("first").at(-1), { type: "queue-cancelled" });
-  assert.equal(matchmaking.size, 1);
-
-  matchmaking.join(third);
-  assert.equal(matchmaking.size, 2);
-  const publicOpponent = makeClient("public-opponent");
-  matchmaking.join(publicOpponent);
-  assert.equal(matchmaking.size, 1, "The unmatched third player must remain queued.");
-  assert.equal(third.queued, true);
-  assert.equal(rooms.size, 1);
+  assert.equal(matchmaking.size, 0, "The second player should immediately match with the first.");
   assert.deepEqual(attached, [
-    { id: "second", side: "blue" },
-    { id: "public-opponent", side: "red" }
+    { id: "first", side: "blue" },
+    { id: "second", side: "red" }
   ]);
-  assert.equal([...rooms.values()][0].publicMatch, true);
+  assert.equal(first.queued, false);
   assert.equal(second.queued, false);
-  assert.equal(publicOpponent.queued, false);
-  const nextOpponent = makeClient("next-opponent");
-  matchmaking.join(nextOpponent);
+  assert.equal(rooms.size, 1);
+  assert.equal([...rooms.values()][0].publicMatch, true);
+
+  const third = makeClient("third");
+  matchmaking.join(third);
+  matchmaking.join(third);
+  assert.equal(matchmaking.size, 1, "Repeated search requests must not duplicate a queue entry.");
+  assert.deepEqual(messages.get("third").at(-1), { type: "queue-status", waiting: 1, position: 1 });
+  assert.equal(matchmaking.remove(third, true), true);
+  assert.equal(third.queued, false);
+  assert.equal(matchmaking.remove(third), false);
+  assert.deepEqual(messages.get("third").at(-1), { type: "queue-cancelled" });
   assert.equal(matchmaking.size, 0);
-  assert.deepEqual(attached.slice(2), [
-    { id: "third", side: "blue" },
-    { id: "next-opponent", side: "red" }
+
+  const fifoQueue = [makeClient("fifo-first"), makeClient("fifo-second")];
+  fifoQueue.forEach(client => { client.queued = true; });
+  const fifoAttached = [];
+  const fifoRooms = new Map();
+  const fifo = createMatchmaking({
+    queue: fifoQueue,
+    rooms: fifoRooms,
+    randomBytes: createRandomBytes(),
+    attachPlayer: (room, client, side) => {
+      client.room = room;
+      client.side = side;
+      room.players.set(client.id, client);
+      fifoAttached.push({ id: client.id, side });
+    },
+    isSocketUsable: client => !client.closed && Boolean(client.socket),
+    send,
+    maxQueue: 2
+  });
+  const thirdPlayer = makeClient("fifo-opponent-one");
+  fifo.join(thirdPlayer);
+  assert.equal(fifo.size, 1);
+  assert.deepEqual(fifoAttached, [
+    { id: "fifo-first", side: "blue" },
+    { id: "fifo-opponent-one", side: "red" }
+  ]);
+  const fourthPlayer = makeClient("fifo-opponent-two");
+  fifo.join(fourthPlayer);
+  assert.equal(fifo.size, 0);
+  assert.deepEqual(fifoAttached.slice(2), [
+    { id: "fifo-second", side: "blue" },
+    { id: "fifo-opponent-two", side: "red" }
   ], "Matchmaking must preserve FIFO order across successive matches.");
 
   const stale = makeClient("stale");
@@ -100,8 +115,20 @@ function testMatchmaking() {
   assert.equal(matchmaking.size, 0);
   assert.equal(stale.queued, false);
   assert.equal(matchmaking.prune(), false);
-}
 
+  const fullMessages = [];
+  const full = createMatchmaking({
+    queue: [],
+    rooms: new Map(),
+    randomBytes: createRandomBytes(),
+    attachPlayer: () => assert.fail("A zero-capacity queue cannot create a match."),
+    isSocketUsable: client => !client.closed && Boolean(client.socket),
+    send: (_client, message) => fullMessages.push(message),
+    maxQueue: 0
+  });
+  full.join(makeClient("rejected"));
+  assert.match(fullMessages.at(-1).message, /queue is full/);
+}
 function testRoomLifecycle() {
   const rooms = new Map();
   const clients = new Set();
