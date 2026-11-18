@@ -116,6 +116,7 @@ export class BattleHud {
   private readonly elixirMax = createHudText(8, 0xc1a5d8);
   private readonly placementHint = createHudText(9, 0xc5d9ee);
   private readonly matchClockLabel = createHudText(19, 0xf4eedc, "Supercell Magic");
+  private readonly clockModeLabel = createHudText(8, 0xf4d8ff, "Supercell Magic");
 
   public constructor() {
     this.container.eventMode = "none";
@@ -135,6 +136,7 @@ export class BattleHud {
       this.elixirMax,
       this.placementHint,
       this.matchClockLabel,
+      this.clockModeLabel,
     );
 
     this.nextCardArt.eventMode = "none";
@@ -273,30 +275,99 @@ export class BattleHud {
   }
 
   private drawMatchClock(state: GameState, width: number, graphics: Graphics): void {
-    const clockWidth = 92;
-    const clockHeight = 34;
+    const clockWidth = 104;
+    const clockHeight = 36;
     const x = (width - clockWidth) / 2;
-    const y = 12;
-
+    const y = 10;
     const remaining = remainingMatchSeconds(state);
-    const countdownActive = remaining !== null && remaining > 0 && remaining <= 10;
+    const lastTenSeconds = remaining !== null && remaining > 0 && remaining <= 10;
+    const doubleElixir = state.phase === "regulation"
+      ? state.time >= MATCH_RULES.doubleElixirStartsAt
+      : state.phase === "overtime" && state.time < MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeTripleElixirStartsAt;
+    const tripleElixir = state.phase === "overtime"
+      && state.time >= MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeTripleElixirStartsAt;
+    const overtime = state.phase === "overtime";
+    const tiebreaker = state.phase === "tiebreaker";
+    const pulse = 0.5 + (Math.sin(state.time * 5) + 1) * 0.25;
+    const urgentPulse = 0.5 + (Math.sin(state.time * 11) + 1) * 0.25;
+
+    const accent = lastTenSeconds || tripleElixir || tiebreaker
+      ? 0xf07855
+      : overtime
+        ? 0xe56d54
+        : doubleElixir
+          ? 0xc78aff
+          : 0xffcf55;
+    const background = lastTenSeconds || tripleElixir || tiebreaker
+      ? 0x482522
+      : overtime
+        ? 0x42272d
+        : doubleElixir
+          ? 0x302342
+          : 0x102d50;
+
+    if (doubleElixir || overtime || tripleElixir || lastTenSeconds || tiebreaker) {
+      const intensity = lastTenSeconds ? 0.25 + urgentPulse * 0.22 : 0.13 + pulse * 0.13;
+      graphics
+        .roundRect(x - 5, y - 5, clockWidth + 10, clockHeight + 10, 13)
+        .stroke({ color: accent, alpha: intensity, width: lastTenSeconds ? 8 : 6 });
+    }
+
     graphics
       .roundRect(x, y, clockWidth, clockHeight, 9)
-      .fill({ color: countdownActive ? 0x4a2928 : 0x102d50, alpha: 0.99 });
+      .fill({ color: background, alpha: 0.99 });
     graphics
       .roundRect(x, y, clockWidth, clockHeight, 9)
       .stroke({
-        color: countdownActive ? 0xe36b58 : 0xffcf55,
-        alpha: 0.95,
-        width: countdownActive ? 2 : 1.5
+        color: accent,
+        alpha: lastTenSeconds ? 0.72 + urgentPulse * 0.28 : 0.9,
+        width: lastTenSeconds ? 2.5 : 1.7
       });
 
+    if (doubleElixir && !overtime && !lastTenSeconds) {
+      graphics.circle(x + 8, y + clockHeight / 2, 2.2).fill({ color: 0xe3b8ff, alpha: 0.9 });
+      graphics.circle(x + clockWidth - 8, y + clockHeight / 2, 2.2).fill({ color: 0xe3b8ff, alpha: 0.9 });
+    }
+    if (lastTenSeconds) {
+      graphics
+        .roundRect(x + 3, y + 3, clockWidth - 6, clockHeight - 6, 7)
+        .stroke({ color: 0xffa18b, alpha: 0.18 + urgentPulse * 0.25, width: 1.5 });
+    }
+
     this.matchClockLabel.text = matchClock(state);
-    this.matchClockLabel.style.fill = countdownActive ? 0xff8b78 : 0xfff3cf;
+    this.matchClockLabel.style.fill = lastTenSeconds || tiebreaker
+      ? 0xffa18b
+      : tripleElixir
+        ? 0xffb18c
+        : overtime
+          ? 0xffc0a6
+          : doubleElixir
+            ? 0xe5c5ff
+            : 0xfff3cf;
+    this.matchClockLabel.style.fontSize = lastTenSeconds ? 21 : 19;
     this.matchClockLabel.anchor.set(0.5);
     this.matchClockLabel.position.set(width / 2, y + clockHeight / 2);
+
+    const modeLabel = tiebreaker
+      ? "TIEBREAKER"
+      : tripleElixir
+        ? "TRIPLE ELIXIR"
+        : overtime
+          ? "OVERTIME · 2× ELIXIR"
+          : doubleElixir
+            ? remaining !== null && remaining <= 60 && remaining > 55
+              ? "60 SECONDS LEFT · 2×"
+              : "DOUBLE ELIXIR"
+            : "";
+    this.clockModeLabel.text = modeLabel;
+    this.clockModeLabel.visible = modeLabel.length > 0;
+    this.clockModeLabel.anchor.set(0.5);
+    this.clockModeLabel.position.set(width / 2, y + clockHeight + 11);
+    this.clockModeLabel.style.fill = accent;
+    this.clockModeLabel.style.fontSize = 8;
+    this.clockModeLabel.alpha = lastTenSeconds ? 0.7 + urgentPulse * 0.3 : 0.92;
   }
-  private drawCardBadges(
+    private drawCardBadges(
     layout: ReturnType<typeof calculateHudLayout>,
     selectedCard: CardId | null
   ): void {
