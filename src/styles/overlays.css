@@ -1,0 +1,494 @@
+/* Centered game/settings popup */
+body[data-controls-open="true"]::before {
+  content: "";
+  position: fixed;
+  z-index: 11;
+  inset: 0;
+  background: rgba(2, 10, 22, .68);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.control-panel {
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  width: min(430px, calc(100vw - 28px));
+  max-height: min( min(820px, calc(100dvh - 32px)), 92dvh);
+  transform: translate(-50%, -50%);
+  border-radius: 17px;
+}
+body[data-controls-open="true"] .control-panel {
+  animation: controls-center-enter .18s ease-out;
+}
+.game-menu-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  margin: -5px -5px -5px auto;
+  border-radius: 9px;
+  font-size: 24px;
+  line-height: 1;
+}
+@keyframes controls-center-enter {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 8px)) scale(.98); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@media (max-width: 640px) {
+  .control-panel {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    width: min(430px, calc(100vw - 24px));
+    max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    transform: translate(-50%, -50%);
+    border-radius: 15px;
+  }
+}
+
+
+/* Classic Clash Royale popup treatment — based on in-game Settings and Player Profile references. */
+.online-lobby {
+  background: rgba(2, 9, 22, .72);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.online-lobby-panel,
+.control-panel {
+  isolation: isolate;
+  color: #193957;
+  border: 4px solid #627f98;
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.68), transparent 24%),
+    linear-gradient(180deg, #e8f1f6 0%, #cbdde8 100%);
+  box-shadow:
+    0 0 0 2px #263f5b,
+    0 7px 0 #203a57,
+    0 16px 36px rgba(0, 8, 24, .58),
+    inset 0 0 0 2px rgba(255,255,255,.72),
+    inset 0 -4px 0 rgba(74, 106, 132, .18);
+}
+
+.online-lobby-panel::before,
+.control-panel::before {
+  position: absolute;
+  z-index: -1;
+  inset: 4px;
+  border: 1px solid rgba(255,255,255,.58);
+  border-radius: 5px;
+  content: "";
+  pointer-events: none;
+}
+
+.online-lobby-panel {
+  position: relative;
+  width: min(100%, 410px);
+  padding: 20px;
+  border-color: #748da4;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.72), transparent 24%),
+    linear-gradient(180deg, #eaf2f7, #cbdde8);
+}
+
+.online-lobby-panel .section-heading {
+  align-items: center;
+  margin: -20px -20px 17px;
+  padding: 10px 12px;
+  border-bottom: 3px solid #8ba6bc;
+  background: linear-gradient(180deg, #788ca4 0%, #536c88 100%);
+  box-shadow: inset 0 2px rgba(255,255,255,.28), inset 0 -2px rgba(20,42,68,.24);
+}
+
+.online-lobby-panel .eyebrow,
+.control-panel .eyebrow {
+  color: #fff;
+  font-family: "Supercell Magic", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-shadow: 1px 2px 0 #253c59, -1px -1px 0 #253c59, 1px -1px 0 #253c59, -1px 1px 0 #253c59;
+}
+
+.online-lobby-panel h2 {
+  margin: 0 0 8px;
+  color: #254767;
+  font-family: "Supercell Magic", sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  text-shadow: 0 1px rgba(255,255,255,.9);
+}
+
+.online-lobby-panel .lobby-description {
+  color: #49647d;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.lobby-close {
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  border: 2px solid #fff;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #ff7770, #d82d36 72%, #a91f2a);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 20px;
+  text-shadow: 0 1px 1px rgba(0,0,0,.45);
+  box-shadow: 0 2px 0 #81212c, inset 0 1px rgba(255,255,255,.55);
+}
+.lobby-close:hover {
+  background: linear-gradient(180deg, #ff9187, #e83b43 72%, #b82431);
+}
+
+.online-lobby-panel .primary-button,
+.online-lobby-panel .secondary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button {
+  min-height: 38px;
+  border: 2px solid #f4fbff;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #59b8ff 0%, #2688e8 62%, #1766bf 100%);
+  color: #fff;
+  font-family: "Supercell Magic", sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  text-shadow: 0 2px 0 #174c86, 1px 0 0 #174c86, -1px 0 0 #174c86;
+  box-shadow:
+    0 3px 0 #164c83,
+    0 4px 5px rgba(20, 48, 73, .2),
+    inset 0 2px rgba(255,255,255,.42),
+    inset 0 -2px rgba(0,43,100,.22);
+}
+.online-lobby-panel .primary-button:hover,
+.online-lobby-panel .secondary-button:hover,
+.control-panel .secondary-button:hover,
+.control-panel .speed-button:hover {
+  border-color: #fff;
+  background: linear-gradient(180deg, #80cbff, #3899f2 65%, #2074ce);
+}
+.online-lobby-panel .primary-button:active,
+.online-lobby-panel .secondary-button:active,
+.control-panel .secondary-button:active,
+.control-panel .speed-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #164c83, inset 0 2px rgba(0,0,0,.12);
+}
+.online-lobby-panel .primary-button {
+  min-height: 42px;
+  font-size: 11px;
+}
+.control-panel .primary-button {
+  min-height: 40px;
+  border: 2px solid #fff2b5;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #ffe875 0%, #ffbf37 64%, #e99519 100%);
+  color: #62400d;
+  font-family: "Supercell Magic", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  text-shadow: 0 1px rgba(255,255,255,.6);
+  box-shadow: 0 3px 0 #9b5e17, inset 0 2px rgba(255,255,255,.55), inset 0 -2px rgba(139,74,0,.15);
+}
+.control-panel .primary-button:hover {
+  background: linear-gradient(180deg, #fff29b, #ffd15b 64%, #efa52b);
+}
+
+.control-panel {
+  border-color: #718ba4;
+  padding: 0;
+  overflow: auto;
+  background: linear-gradient(180deg, #e8f1f6, #cbdde8);
+}
+.control-panel .panel-section {
+  padding: 16px;
+  border-bottom: 2px solid rgba(68, 101, 131, .2);
+}
+.control-panel .section-heading {
+  margin-bottom: 12px;
+}
+.control-panel .section-heading .eyebrow {
+  color: #315575;
+  font-family: "Supercell Magic", sans-serif;
+  font-size: 11px;
+  text-shadow: none;
+}
+.control-panel .team-label,
+.control-panel .team-stats,
+.control-panel .team-stats span,
+.control-panel .event-feed,
+.control-panel .panel-footer {
+  color: #385671;
+}
+.control-panel .team-stats > div {
+  border: 1px solid rgba(65, 101, 132, .22);
+  border-radius: 6px;
+  background: rgba(255,255,255,.5);
+}
+.control-panel .team-stats strong { color: #173f65; }
+.control-panel .event-feed li { color: #47627a; }
+.control-panel .panel-footer { border-top-color: rgba(65, 101, 132, .22); }
+.control-panel .volume-control { color: #34536f; }
+.control-panel .volume-control output { color: #173f65; }
+.control-panel .debug-controls {
+  color: #315575;
+  border-color: rgba(65, 101, 132, .24);
+}
+.control-panel .debug-controls summary { color: #315575; }
+
+.room-code-panel {
+  border: 2px solid #91aabd;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #f6fbff, #dceaf2);
+  box-shadow: inset 0 2px 4px rgba(40,70,95,.12);
+}
+.room-code-panel .eyebrow {
+  color: #526e86;
+  text-shadow: none;
+}
+.room-code-panel strong {
+  color: #1f5b91;
+  text-shadow: 0 1px #fff;
+}
+.lobby-label { color: #345671; }
+.join-room-row input,
+.profile-name-input {
+  border: 2px solid #8da8bc;
+  border-radius: 6px;
+  background: #f7fbff;
+  color: #193957;
+  box-shadow: inset 0 2px 4px rgba(30,60,85,.13);
+}
+.join-room-row input::placeholder,
+.profile-name-input::placeholder { color: #8298aa; }
+.online-status { color: #47627a; }
+.lobby-divider { color: #6a8296; }
+.profile-error { color: #b73535; }
+
+@media (max-width: 640px) {
+  .online-lobby-panel {
+    border-radius: 9px;
+    padding: 18px;
+  }
+  .online-lobby-panel .section-heading {
+    margin: -18px -18px 15px;
+    padding: 10px 11px;
+  }
+  .control-panel {
+    max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}
+
+/* Readable typography pass: crisp system UI text at normal browser zoom. */
+:root {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+body, button, input, output, summary, label, small {
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+.brand-copy strong,
+.cr-player-copy strong,
+.cr-trophy-chip strong,
+.cr-arena-title h1,
+.cr-battle-button strong {
+  font-family: "Supercell Magic", "Segoe UI", Arial, sans-serif;
+}
+.brand-copy small { font-size: 12px; letter-spacing: .06em; }
+.profile-button { font-size: 13px; }
+.profile-avatar { font-size: 12px; }
+.match-summary { font-size: 13px; }
+.eyebrow { font-size: 11px; letter-spacing: .09em; }
+.status-tag { font-size: 10px; }
+.primary-button { font-size: 14px; }
+.secondary-button, .speed-button { font-size: 13px; }
+.speed-row { font-size: 12px; }
+.team-label { font-size: 10px; letter-spacing: .08em; }
+.elixir-line > span { font-size: 10px; }
+.team-stats span { font-size: 10px; letter-spacing: .06em; }
+.event-feed li { font-size: 12px; line-height: 1.45; }
+.panel-footer { font-size: 10px; letter-spacing: .07em; }
+.arena-caption { font-size: 11px; letter-spacing: .08em; }
+.caption-center { font-size: 10px; }
+.cr-player-copy small, .cr-trophy-chip small { font-size: 10px; letter-spacing: .09em; }
+.cr-player-copy strong { font-size: 13px; }
+.cr-arena-kicker { font-size: 10px; letter-spacing: .14em; }
+.cr-arena-subtitle { font-size: 11px; letter-spacing: .13em; }
+.cr-deck-heading { font-size: 11px; }
+.cr-deck-heading small { font-size: 10px; letter-spacing: .08em; }
+.cr-card-tile span { font-size: 9px; font-weight: 700; }
+.cr-nav-button small { font-size: 10px; letter-spacing: .06em; }
+.cr-battle-button small { font-size: 10px; letter-spacing: .09em; }
+.online-lobby-panel .eyebrow,
+.control-panel .eyebrow,
+.online-lobby-panel h2,
+.online-lobby-panel .primary-button,
+.online-lobby-panel .secondary-button,
+.control-panel .primary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button {
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+.online-lobby-panel .eyebrow,
+.control-panel .eyebrow { font-size: 11px; letter-spacing: .08em; }
+.online-lobby-panel h2 { font-size: 20px; font-weight: 700; }
+.online-lobby-panel .lobby-description { font-size: 13px; line-height: 1.55; }
+.online-lobby-panel .primary-button,
+.online-lobby-panel .secondary-button,
+.control-panel .primary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button { font-size: 13px; font-weight: 700; }
+
+@media (max-width: 760px) {
+  .cr-player-copy small, .cr-trophy-chip small { font-size: 9px; }
+  .cr-player-copy strong { font-size: 12px; }
+  .cr-arena-kicker { font-size: 9px; }
+  .cr-arena-subtitle { font-size: 10px; }
+  .cr-card-tile span { font-size: 8px; }
+  .cr-nav-button small, .cr-battle-button small { font-size: 9px; }
+}
+@media (max-width: 420px) {
+  .cr-player-copy strong { font-size: 11px; }
+  .cr-trophy-chip small { font-size: 8px; }
+  .cr-deck-heading { font-size: 10px; }
+  .cr-card-tile span { font-size: 7px; }
+  .cr-nav-button small, .cr-battle-button small { font-size: 8px; }
+  .event-feed li { font-size: 11px; }
+}
+
+
+
+/* Clean Clash Royale-style button finish: restrained depth, crisp edges, no glow. */
+.cr-nav-button,
+.cr-battle-button {
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 9px;
+  box-shadow: 0 3px 0 #153c61, 0 4px 7px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.22);
+  text-shadow: none;
+  filter: none;
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+.cr-nav-button {
+  background: linear-gradient(180deg, #347fb5 0%, #286b9e 100%);
+  color: #f5f9ff;
+}
+.cr-nav-button span { color: #ffe18a; }
+.cr-nav-button small { color: #f5f9ff; font-size: 10px; letter-spacing: .04em; }
+.cr-battle-button {
+  border-color: #ffe69a;
+  background: linear-gradient(180deg, #ffdf68 0%, #ffc342 100%);
+  color: #684018;
+  box-shadow: 0 3px 0 #96591e, 0 4px 7px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.48);
+  text-shadow: none;
+  animation: none;
+}
+.cr-battle-button strong {
+  color: #684018;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: .01em;
+}
+.cr-battle-button small { color: #80501e; font-size: 10px; font-weight: 800; letter-spacing: .07em; }
+.cr-battle-button::after { display: none; }
+.cr-nav-button:hover,
+.cr-battle-button:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #153c61, 0 6px 9px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.22);
+}
+.cr-battle-button:hover {
+  box-shadow: 0 4px 0 #96591e, 0 6px 9px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.48);
+}
+.cr-nav-button:active,
+.cr-battle-button:active {
+  transform: translateY(2px);
+  filter: none;
+  box-shadow: 0 1px 0 #153c61, inset 0 1px rgba(0,0,0,.12);
+}
+.cr-battle-button:active { box-shadow: 0 1px 0 #96591e, inset 0 1px rgba(0,0,0,.1); }
+
+.menu-play-button,
+.menu-action-button {
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 9px;
+  box-shadow: 0 3px 0 rgba(0,0,0,.24), 0 5px 10px rgba(0,0,0,.14);
+  transform: none;
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.menu-play-button {
+  background: linear-gradient(180deg, #ffdf70, #f5b83e);
+  border-color: #ffe69a;
+  color: #674018;
+  text-shadow: none;
+}
+.menu-play-button:hover,
+.menu-action-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 4px 0 rgba(0,0,0,.24), 0 7px 12px rgba(0,0,0,.17);
+}
+.menu-action-button {
+  background: linear-gradient(180deg, #286b9e, #1c527e);
+  color: #f4f8ff;
+}
+.menu-action-button .menu-action-icon {
+  border-radius: 7px;
+  background: rgba(255,222,126,.14);
+  color: #ffe18a;
+}
+.menu-play-button:active,
+.menu-action-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0,0,0,.24), inset 0 1px rgba(0,0,0,.1);
+}
+
+.online-lobby-panel .primary-button,
+.online-lobby-panel .secondary-button,
+.control-panel .primary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button {
+  border-width: 1px;
+  border-radius: 7px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  text-shadow: none;
+  box-shadow: 0 2px 0 #164c83, 0 3px 5px rgba(20,48,73,.16), inset 0 1px rgba(255,255,255,.28);
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+.online-lobby-panel .primary-button,
+.control-panel .primary-button {
+  background: linear-gradient(180deg, #ffdf70, #f5b83e);
+  border-color: #ffe69a;
+  color: #674018;
+}
+.online-lobby-panel .secondary-button,
+.control-panel .secondary-button,
+.control-panel .speed-button {
+  background: linear-gradient(180deg, #347fb5, #286b9e);
+  border-color: #79b7df;
+  color: #f5f9ff;
+}
+.online-lobby-panel .primary-button:hover,
+.control-panel .primary-button:hover,
+.online-lobby-panel .secondary-button:hover,
+.control-panel .secondary-button:hover,
+.control-panel .speed-button:hover {
+  filter: brightness(1.06);
+}
+.online-lobby-panel .primary-button:active,
+.online-lobby-panel .secondary-button:active,
+.control-panel .primary-button:active,
+.control-panel .secondary-button:active,
+.control-panel .speed-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #164c83, inset 0 1px rgba(0,0,0,.1);
+}

@@ -1,0 +1,210 @@
+/* First-launch offline preparation */
+.offline-setup {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 16, 30, .88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .22s ease, visibility .22s ease;
+}
+.offline-setup.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.offline-setup.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.offline-setup-panel {
+  width: min(100%, 390px);
+  padding: 30px 28px 26px;
+  border: 2px solid #8ba9c1;
+  border-radius: 13px;
+  background: linear-gradient(180deg, #edf5fa, #cbdde9);
+  color: #244563;
+  text-align: center;
+  box-shadow: 0 5px 0 #243e58, 0 18px 48px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.9);
+}
+.offline-setup-mark {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 16px;
+  border: 2px solid #f6d77e;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #397fb1, #20527e);
+  color: #ffe18a;
+  font-size: 29px;
+  box-shadow: 0 3px 0 #183f63, inset 0 1px rgba(255,255,255,.3);
+}
+.offline-setup-eyebrow {
+  color: #607f98;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+.offline-setup-panel h2 {
+  margin: 8px 0;
+  color: #1e4262;
+  font-size: 21px;
+  font-weight: 900;
+}
+.offline-setup-panel > p {
+  margin: 0 auto 20px;
+  max-width: 300px;
+  color: #526e85;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.offline-progress-track {
+  height: 13px;
+  overflow: hidden;
+  border: 1px solid #8ba6bb;
+  border-radius: 99px;
+  background: #a9bdcc;
+  box-shadow: inset 0 2px 4px rgba(26,55,78,.2);
+}
+.offline-progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #72c7ff, #2384d3);
+  box-shadow: inset 0 1px rgba(255,255,255,.45);
+  transition: width .16s ease;
+}
+.offline-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+  color: #627c91;
+  font-size: 11px;
+}
+.offline-progress-meta strong { color: #245982; }
+.offline-setup-panel > .offline-setup-error {
+  margin: 16px 0 0;
+  color: #a53c3c;
+  font-size: 12px;
+}
+.offline-continue {
+  min-height: 40px;
+  margin-top: 17px;
+  padding: 0 20px;
+  border: 1px solid #83b8dc;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #398bc5, #23679e);
+  color: white;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.offline-continue:hover { filter: brightness(1.08); }
+@media (prefers-reduced-motion: reduce) {
+  .offline-setup, .offline-progress-track span { transition: none; }
+}
+
+
+/* Native app installation and offline network state. */
+.cr-install-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #ffe69a;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffdf70, #f5b83e);
+  color: #674018;
+  font: 800 10px/1 "Segoe UI", Arial, sans-serif;
+  letter-spacing: .06em;
+  box-shadow: 0 2px 0 #96591e, 0 3px 6px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.48);
+  cursor: pointer;
+}
+.cr-install-button > span { font-size: 17px; }
+.cr-install-button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.cr-install-button:active { transform: translateY(1px); box-shadow: 0 1px 0 #96591e; }
+.cr-install-button[hidden], .cr-network-status[hidden] { display: none; }
+.cr-network-status {
+  position: absolute;
+  top: 72px;
+  right: max(18px, env(safe-area-inset-right));
+  z-index: 5;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,211,132,.5);
+  border-radius: 7px;
+  background: rgba(79,43,24,.9);
+  color: #ffe3a0;
+  font: 800 9px/1.2 "Segoe UI", Arial, sans-serif;
+  letter-spacing: .04em;
+  box-shadow: 0 3px 9px rgba(0,0,0,.22);
+}
+@media (max-width: 420px) {
+  .cr-install-button { min-height: 38px; padding: 0 8px; font-size: 9px; }
+  .cr-network-status { top: 62px; right: 10px; font-size: 8px; }
+}
+
+
+/* iOS Add to Home Screen guidance. */
+.install-help[hidden] { display: none; }
+.install-help {
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(4, 13, 25, .78);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+.install-help-panel {
+  position: relative;
+  width: min(100%, 390px);
+  padding: 28px;
+  border: 1px solid rgba(177,211,236,.35);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #173b5d, #0d2945);
+  color: #eff7ff;
+  box-shadow: 0 18px 55px rgba(0,0,0,.42);
+}
+.install-help-panel > .lobby-close { position: absolute; top: 12px; right: 12px; }
+.install-help-panel > .eyebrow { color: #a9c9e2; font-size: 10px; letter-spacing: .12em; }
+.install-help-panel h2 { margin: 10px 0 12px; font-size: 21px; }
+.install-help-panel p, .install-help-panel li { color: #d1e0ed; font-size: 13px; line-height: 1.55; }
+.install-help-panel ol { padding-left: 21px; }
+.install-help-panel li { margin: 9px 0; padding-left: 3px; }
+.install-help-panel strong { color: #ffe18a; }
+.install-help-panel .install-help-note { margin: 18px 0 0; color: #a9c4d9; font-size: 11px; }
+
+
+/* Multiplayer connectivity is reported separately from device internet access. */
+.cr-network-status[data-state="connected"] {
+  border-color: rgba(116,225,166,.55);
+  background: rgba(20,75,54,.92);
+  color: #baf5d2;
+}
+.cr-network-status[data-state="connecting"],
+.cr-network-status[data-state="reconnecting"] {
+  border-color: rgba(255,211,132,.58);
+  background: rgba(79,57,24,.94);
+  color: #ffe3a0;
+}
+.cr-network-status[data-state="disconnected"],
+.cr-network-status[data-state="offline"] {
+  border-color: rgba(255,151,151,.58);
+  background: rgba(79,32,35,.94);
+  color: #ffd0d0;
+}
