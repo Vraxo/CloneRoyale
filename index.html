@@ -119,6 +119,16 @@
         <section class="arena-column" aria-label="Battlefield">
           <div class="arena-frame">
             <div id="game" class="game-surface"></div>
+            <div id="reconnect-overlay" class="reconnect-overlay" hidden role="status" aria-live="polite">
+              <section class="reconnect-panel">
+                <span class="reconnect-symbol" aria-hidden="true">↻</span>
+                <span class="reconnect-eyebrow">MULTIPLAYER CONNECTION</span>
+                <h2 id="reconnect-title">Reconnecting…</h2>
+                <p id="reconnect-description">Your match is being kept while we restore the connection.</p>
+                <div id="reconnect-spinner" class="reconnect-spinner" aria-hidden="true"></div>
+                <button id="reconnect-leave" class="secondary-button" type="button" hidden>Return to menu</button>
+              </section>
+            </div>
             <div id="emote-ui" class="emote-ui" hidden>
               <button id="emote-toggle" class="emote-toggle" type="button" aria-expanded="false" aria-controls="emote-picker">☺ Emotes</button>
               <div id="emote-picker" class="emote-picker" role="group" aria-label="Battle emotes" hidden>
