@@ -39,20 +39,12 @@ try {
   const publicReplay = await fetch(baseUrl + "/api/replays/" + replayId);
   assert.equal(publicReplay.status, 200);
   assert.equal((await publicReplay.json()).visibility, "public");
-  const rejected = await fetch(baseUrl + "/api/replays/" + replayId + "/unpublish", {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ shareToken: "wrong-token" })
-  });
-  assert.equal(rejected.status, 403, "Hiding a replay must require the participant share token.");
-  const hidden = await fetch(baseUrl + "/api/replays/" + replayId + "/unpublish", {
+  const unpublish = await fetch(baseUrl + "/api/replays/" + replayId + "/unpublish", {
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ shareToken })
   });
-  assert.equal(hidden.status, 200);
-  assert.equal((await hidden.json()).visibility, "unlisted");
-  const hiddenList = await fetch(baseUrl + "/api/replays");
-  assert.deepEqual((await hiddenList.json()).replays, [], "Hidden replays must disappear from the public library.");
-  const directLink = await fetch(baseUrl + "/api/replays/" + replayId);
-  assert.equal(directLink.status, 200, "Hiding removes a replay from discovery but preserves its direct link.");
-  assert.equal((await directLink.json()).visibility, "unlisted");
+  assert.equal(unpublish.status, 405, "Replay visibility opt-out should not be available.");
+  const stillPublic = await fetch(baseUrl + "/api/replays");
+  assert.equal((await stillPublic.json()).replays.length, 1, "Completed PvP replays should remain public.");
   const republished = await fetch(baseUrl + "/api/replays/" + replayId + "/publish", {
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ shareToken })
   });
@@ -63,7 +55,7 @@ try {
   assert.equal(entries.length, 1);
   assert.equal(entries[0].id, replayId);
   assert.deepEqual(entries[0].players, { blue: "ArchiveBlue", red: "ArchiveRed" });
-  console.log("Replay archive smoke test passed: public-by-default listing, participant-only hiding and publishing, and direct replay links.");
+  console.log("Replay archive smoke test passed: public-by-default listing, no unpublish endpoint, participant-only publishing, and direct replay links.");
 } finally {
   server.kill("SIGTERM");
   await Promise.race([new Promise(resolve => server.once("exit", resolve)), delay(1000)]);
