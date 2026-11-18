@@ -97,6 +97,7 @@ export class BattleController {
     if (this.isOnline || !isBattleReplay(replay)) return false;
     this.replayLiveState = this.game;
     this.replayPlayer = new ReplayPlayer(replay);
+    document.body.dataset.replaying = "true";
     this.game = this.replayPlayer.state;
     this.selectedCard = null;
     this.paused = false;
@@ -124,6 +125,7 @@ export class BattleController {
     this.game = this.replayLiveState;
     this.replayPlayer = null;
     this.replayLiveState = null;
+    document.body.dataset.replaying = "false";
     this.paused = true;
     this.accumulator = 0;
     this.renderer.setDeploymentArea(this.game, "blue", null);
@@ -415,7 +417,9 @@ export class BattleController {
       this.paused,
       this.placementMessage,
       this.history?.canStepBack() ?? false,
-      this.playerSide
+      this.playerSide,
+      this.replayTick,
+      this.replayDurationTicks
     );
   }
 
@@ -439,6 +443,7 @@ export class BattleController {
 
     if (this.game.gameOver) {
       this.lastReplay = this.replayRecorder.finish(this.game);
+      document.body.dataset.replayAvailable = "true";
       try {
         const stored = JSON.parse(localStorage.getItem("cloneroyale.replays") ?? "[]") as unknown;
         const replays = Array.isArray(stored) ? stored.filter(isBattleReplay) : [];
