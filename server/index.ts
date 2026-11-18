@@ -10,7 +10,7 @@ import { createMatchmaking } from "./matchmaking.js";
 import { createRoomLifecycle } from "./roomLifecycle.js";
 import { createClientMessageHandler } from "./clientMessages.js";
 import { createMatchSimulation } from "./matchSimulation.js";
-import { createAccountStore } from "./accounts.js";
+import { createAccountStore } from "./account/accounts.js";
 import type { MessageHandler, ServerClient, ServerRoom } from "./types.js";
 
 const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));

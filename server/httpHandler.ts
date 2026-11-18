@@ -2,7 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { createReplayArchive } from "./replayArchive.js";
-import type { createAccountStore } from "./accounts.js";
+import type { createAccountStore } from "./account/accounts.js";
 
 type ReplayArchive = ReturnType<typeof createReplayArchive>;
 type AccountStore = ReturnType<typeof createAccountStore>;
