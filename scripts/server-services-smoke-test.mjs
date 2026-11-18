@@ -12,7 +12,7 @@ function makeClient(id) {
     queued: false,
     room: null,
     side: null,
-    resumeToken: "resume-token-" + id,
+    resumeToken: "resume-token-" + id.padEnd(32, "x"),
     rematchReady: false
   };
 }
