@@ -9,7 +9,8 @@ export type UnitType =
   | "mini-pekka"
   | "baby-dragon"
   | "skeleton"
-  | "cannon";
+  | "cannon"
+  | "knight";
 
 export interface Unit {
   id: number;
