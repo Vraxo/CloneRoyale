@@ -319,6 +319,7 @@ async function connectOnline(): Promise<boolean> {
             setLobbyStatus("Room " + message.code + " created. Share the code and wait for your opponent.");
           }
         } else if (message.type === "resumed") {
+          setReconnectOverlay(false);
           localStorage.setItem("cloneroyale.resume-token", message.resumeToken);
           document.body.dataset.onlineSide = message.side;
           onlineClient.setProfile(guestProfile.id, guestProfile.name);
@@ -497,6 +498,7 @@ joinRoomButton?.addEventListener("click", async () => {
   setLobbyStatus("Joining room…");
 });
 function leaveOnlineMatch(): void {
+  setReconnectOverlay(false);
   if (emoteUi instanceof HTMLElement) emoteUi.hidden = false;
   if (emotePicker instanceof HTMLElement) emotePicker.hidden = true;
   emoteToggle?.setAttribute("aria-expanded", "false");
