@@ -7,7 +7,8 @@ function findEnemyUnit(
   state: GameState,
   unit: Unit,
   detectionRange: number,
-  buildingsOnly = false
+  buildingsOnly = false,
+  includeTargetRadius = false
 ): Unit | null {
   let nearest: Unit | null = null;
   let nearestDistance = detectionRange;
@@ -19,9 +20,10 @@ function findEnemyUnit(
     if (!unit.canTargetAir && candidate.isAir) continue;
 
     const distance = Math.hypot(candidate.x - unit.x, candidate.y - unit.y);
-    if (distance < nearestDistance) {
+    const effectiveDistance = distance - (includeTargetRadius ? candidate.radius : 0);
+    if (effectiveDistance < nearestDistance) {
       nearest = candidate;
-      nearestDistance = distance;
+      nearestDistance = effectiveDistance;
     }
   }
 
@@ -423,7 +425,7 @@ export function updateUnits(state: GameState, dt: number): void {
     }
 
     if (unit.kind === "building") {
-      const target = findEnemyUnit(state, unit, unit.range);
+      const target = findEnemyUnit(state, unit, unit.range, false, true);
       if (target && unit.attackCooldown <= 0) attackUnit(state, unit, target);
       continue;
     }
@@ -514,7 +516,7 @@ export function updateTowers(state: GameState, dt: number): void {
       if (unit.side === tower.side || unit.hp <= 0) continue;
       if ((unit.appearanceDelayRemaining ?? 0) > 0) continue;
 
-      const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y);
+      const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y) - unit.radius;
       if (distance < nearestDistance) {
         nearestDistance = distance;
         target = unit;
