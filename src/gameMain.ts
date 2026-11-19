@@ -9,7 +9,7 @@ import { initializeReplayLibrary } from "./replays/replayLibrary";
 import { createOnlineSession } from "./app/onlineSession";
 import { initializeDeckScreen } from "./decks/deckScreen";
 import { initializeGuestProfile } from "./app/guestProfile";
-import { initializeAccountPanel } from "./app/accountPanel";
+import { initializeAccountPanel } from "./accounts/accountPanel";
 import { initializeBattleEmotes } from "./app/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
 import { initializeLobbyScreen } from "./app/lobbyScreen";
