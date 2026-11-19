@@ -1,7 +1,7 @@
 import { createPlayerMessageHandlers } from "./playerMessages.js";
 import { createRoomMessageHandlers } from "./roomMessages.js";
 import { createMatchMessageHandlers } from "./matchMessages.js";
-import type { ClientMessage, MessageHandler, MessageHandlerOptions, ServerClient } from "../types.js";
+import type { ClientMessage, MessageHandler, MessageHandlerOptions, ServerClient } from "../core/types.js";
 
 export function createClientMessageHandler(options: MessageHandlerOptions): MessageHandler {
   const handlers = new Map<string, MessageHandler>([

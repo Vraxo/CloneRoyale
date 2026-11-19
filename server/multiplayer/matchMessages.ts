@@ -1,6 +1,6 @@
 import { canPlaceCard, snapToArenaTile, playCard } from "../simulation.js";
 import type { CardId } from "../../src/game/types/index.js";
-import type { ClientMessage, MessageHandlerOptions, ServerClient } from "../types.js";
+import type { ClientMessage, MessageHandlerOptions, ServerClient } from "../core/types.js";
 
 export function createMatchMessageHandlers(options: MessageHandlerOptions): Record<string, (client: ServerClient, message: ClientMessage) => void> {
   const { send, broadcast, matchmaking, requestRematch } = options;

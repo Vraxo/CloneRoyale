@@ -22,7 +22,7 @@ import type {
   MessageHandler,
   ServerClient,
   ServerRoom
-} from "./types.js";
+} from "./core/types.js";
 
 const SERVER_ROOT = resolve(
   fileURLToPath(new URL("../dist/", import.meta.url))

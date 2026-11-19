@@ -1,6 +1,6 @@
 import type { BattleReplay } from "../../src/game/replay.js";
 import type { GameState, Side } from "../../src/game/types/index.js";
-import type { RandomBytes, ServerRoom } from "../types.js";
+import type { RandomBytes, ServerRoom } from "../core/types.js";
 
 interface MatchSimulationOptions {
   rooms: Map<string, ServerRoom>;
