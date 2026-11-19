@@ -1,7 +1,7 @@
 import { ArenaRenderer } from "./render/arenaRenderer";
 import { BattleController } from "./app/battleController";
-import { bindBattleInput } from "./app/battleInput";
-import { startBattleLoop } from "./app/battleLoop";
+import { bindBattleInput } from "./battle/battleInput";
+import { startBattleLoop } from "./battle/battleLoop";
 import { OnlineClient } from "./net/onlineClient";
 import { createMenuAudio } from "./audio/menuAudio";
 import { initializeAudioSettings } from "./audio/audioSettings";
