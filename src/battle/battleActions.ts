@@ -6,7 +6,7 @@ import { canPlaceCard, snapToArenaTile } from "../game/placement";
 import type { ReplayRecordingSession } from "../game/replayRecording";
 import type { CardId, GameState, Side } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
-import type { OnlineClient } from "../net/onlineClient";
+import type { OnlineClient } from "../multiplayer/onlineClient";
 
 interface BattleActionsOptions {
   renderer: ArenaRenderer;

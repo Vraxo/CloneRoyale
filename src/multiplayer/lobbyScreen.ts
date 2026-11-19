@@ -1,5 +1,5 @@
 import type { BattleController } from "../app/battleController";
-import type { OnlineClient } from "../net/onlineClient";
+import type { OnlineClient } from "./onlineClient";
 import { clearOnlineResumeToken } from "./onlineResumeToken";
 
 type LobbySession = {
