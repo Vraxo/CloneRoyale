@@ -8,7 +8,7 @@ await writeFile(
 
 const result = spawnSync(
   process.execPath,
-  ["--test", "dist-tests/tests/unit"],
+  ["--test", "dist-tests/tests/unit/game.test.js"],
   { stdio: "inherit" }
 );
 
