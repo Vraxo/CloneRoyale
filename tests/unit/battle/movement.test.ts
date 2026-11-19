@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { updateUnits } from "../../src/game/combat.js";
-import { createGame } from "../../src/game/simulation.js";
-import { ARENA_TILE_SIZE, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "../../src/game/state.js";
-import type { GameState, Unit } from "../../src/game/types/index.js";
+import { updateUnits } from "../../../src/game/combat.js";
+import { createGame } from "../../../src/game/simulation.js";
+import { ARENA_TILE_SIZE, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "../../../src/game/state.js";
+import type { GameState, Unit } from "../../../src/game/types/index.js";
 
 function makeUnit(
   id: number,

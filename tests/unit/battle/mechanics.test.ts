@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { playCard } from "../../src/game/deployment.js";
-import { damageTarget } from "../../src/game/effects.js";
-import { canPlaceCard } from "../../src/game/placement.js";
-import { createGame, stepGame } from "../../src/game/simulation.js";
-import type { GameState, Unit } from "../../src/game/types/index.js";
+import { playCard } from "../../../src/game/deployment.js";
+import { damageTarget } from "../../../src/game/effects.js";
+import { canPlaceCard } from "../../../src/game/placement.js";
+import { createGame, stepGame } from "../../../src/game/simulation.js";
+import type { GameState, Unit } from "../../../src/game/types/index.js";
 
 function makeUnit(id: number, side: "blue" | "red", x: number, y: number): Unit {
   return {
