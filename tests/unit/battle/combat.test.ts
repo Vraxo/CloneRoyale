@@ -229,7 +229,8 @@ test("buildings include target radius when checking attack range", () => {
     kind: "building",
     range: 55,
     attack: { type: "projectile", style: "cannon", speed: 300 },
-    attackCooldown: 0
+    attackCooldown: 0,
+    deploymentRemaining: 0
   });
   const target = makeUnit(101, "red", 120 + 55 + 12 - 1, 700);
 
