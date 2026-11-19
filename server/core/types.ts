@@ -1,5 +1,5 @@
-import type { BattleReplay, ReplayRecorder } from "../src/game/replay";
-import type { CardId, GameState, Side } from "../src/game/types";
+import type { BattleReplay, ReplayRecorder } from "../../src/game/replay";
+import type { CardId, GameState, Side } from "../../src/game/types";
 
 export interface ServerSocket {
   destroyed?: boolean;
