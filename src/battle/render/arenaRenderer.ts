@@ -271,7 +271,7 @@ export class ArenaRenderer {
   private createPreviewUnit(
     cardId: CardId,
     category: "troop" | "building",
-    definition: import("../game/types").UnitDefinition,
+    definition: import("../../game/types").UnitDefinition,
     index: number,
     x: number,
     y: number,
