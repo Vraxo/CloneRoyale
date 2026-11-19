@@ -1,4 +1,4 @@
-import type { BattleController } from "./battleController";
+import type { BattleController } from "../app/battleController";
 import { bindHoldControl } from "./holdControl";
 
 function element<T extends HTMLElement>(id: string): T {

@@ -1,5 +1,5 @@
 import type { Application } from "pixi.js";
-import type { BattleController } from "./battleController";
+import type { BattleController } from "../app/battleController";
 
 export function startBattleLoop(
   app: Application,
