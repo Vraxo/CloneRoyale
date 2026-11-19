@@ -5,7 +5,7 @@ import { startBattleLoop } from "./app/battleLoop";
 import { OnlineClient } from "./net/onlineClient";
 import { createMenuAudio } from "./audio/menuAudio";
 import { initializeAudioSettings } from "./audio/audioSettings";
-import { initializeReplayLibrary } from "./app/replayLibrary";
+import { initializeReplayLibrary } from "./replays/replayLibrary";
 import { createOnlineSession } from "./app/onlineSession";
 import { initializeDeckScreen } from "./app/deckScreen";
 import { initializeGuestProfile } from "./app/guestProfile";
