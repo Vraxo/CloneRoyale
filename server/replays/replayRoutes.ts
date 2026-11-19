@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { createReplayArchive } from "../replayArchive.js";
-import { readJsonBody, sendJson, sendText } from "./httpUtils.js";
+import { readJsonBody, sendJson, sendText } from "../core/httpUtils.js";
 
 type ReplayArchive = ReturnType<typeof createReplayArchive>;
 
