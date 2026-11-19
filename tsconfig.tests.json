@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": false,
+    "rootDir": ".",
+    "outDir": "./dist-tests",
+    "types": ["node"]
+  },
+  "include": [
+    "src/game/**/*.ts",
+    "src/cards/**/*.ts",
+    "tests/unit/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-server",
+    "dist-tests"
+  ]
+}
