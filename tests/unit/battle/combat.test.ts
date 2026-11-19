@@ -220,3 +220,49 @@ test("destroying a princess tower activates its side's king tower", () => {
   assert.ok(game.audioEvents.includes("crown-earned"));
   assert.ok(game.audioEvents.includes("king-activation"));
 });
+
+
+test("buildings include target radius when checking attack range", () => {
+  const game = createGame();
+  const building = makeUnit(100, "blue", 120, 700, {
+    type: "cannon",
+    kind: "building",
+    range: 55,
+    attack: { type: "projectile", style: "cannon", speed: 300 },
+    attackCooldown: 0,
+    deploymentRemaining: 0
+  });
+  const target = makeUnit(101, "red", 120 + 55 + 12 - 1, 700);
+
+  addUnit(game, building);
+  addUnit(game, target);
+  updateUnits(game, 1 / 30);
+
+  assert.equal(game.projectiles.length, 1);
+  assert.equal(game.projectiles[0].targetId, target.id);
+});
+
+test("towers include target radius when checking attack range", () => {
+  const game = createGame();
+  const tower = game.towers.find((candidate) =>
+    candidate.side === "red" && candidate.kind === "princess" && candidate.lane === "left"
+  );
+  assert.ok(tower);
+  tower.attackCooldown = 0;
+
+  for (const candidate of game.towers) {
+    if (candidate !== tower) candidate.attackCooldown = 100;
+  }
+
+  const target = makeUnit(
+    100,
+    "blue",
+    tower.x + tower.range + 12 - 1,
+    tower.y
+  );
+  addUnit(game, target);
+  updateTowers(game, 1 / 30);
+
+  assert.equal(game.projectiles.length, 1);
+  assert.equal(game.projectiles[0].targetId, target.id);
+});
