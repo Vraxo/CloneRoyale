@@ -11,13 +11,13 @@ import {
   stepGame
 } from "./simulation.js";
 import { createAccountStore } from "./account/accounts.js";
-import { createClientMessageHandler } from "./clientMessages.js";
+import { createClientMessageHandler } from "./multiplayer/clientMessages.js";
 import { createHttpHandler } from "./httpHandler.js";
 import { createMatchSimulation } from "./multiplayer/matchSimulation.js";
 import { createMatchmaking } from "./multiplayer/matchmaking.js";
 import { createReplayArchive } from "./replays/replayArchive.js";
 import { createRoomLifecycle } from "./multiplayer/roomLifecycle.js";
-import { createWebSocketTransport } from "./webSocketTransport.js";
+import { createWebSocketTransport } from "./multiplayer/webSocketTransport.js";
 import type {
   MessageHandler,
   ServerClient,

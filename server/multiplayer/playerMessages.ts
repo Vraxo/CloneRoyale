@@ -1,4 +1,4 @@
-import type { ClientMessage, MessageHandlerOptions, ServerClient } from "./types.js";
+import type { ClientMessage, MessageHandlerOptions, ServerClient } from "../types.js";
 
 export function createPlayerMessageHandlers(options: MessageHandlerOptions): Record<string, (client: ServerClient, message: ClientMessage) => void> {
   const { broadcast, playerSummaries, resumePlayer } = options;
