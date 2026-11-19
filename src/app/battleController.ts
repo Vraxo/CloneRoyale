@@ -15,6 +15,7 @@ import { createBattleHud, type BattleHud } from "./battleHud";
 import { BattleActions } from "./battleActions";
 import { BattleSimulationClock } from "./battleSimulation";
 import { BattleOnline } from "./battleOnline";
+import { completeBattle } from "./battleCompletion";
 
 export class BattleController {
   private game: GameState;
@@ -356,18 +357,21 @@ export class BattleController {
     this.history?.record(this.game);
 
     if (this.game.gameOver) {
-      this.lastReplay = this.replayRecording.finish(this.game);
-      document.body.dataset.replayAvailable = "true";
-      saveBattleReplay(this.lastReplay);
-      this.selectedCard = null;
-      this.renderer.setPlacementPreview(null);
-      this.renderer.setDeploymentArea(this.game, "blue", null);
-      this.renderer.clearUnitPreview();
-      this.music.stop();
-      this.soundEffects.play(this.game.winner === "draw" ? "match-draw" : this.game.winner === "blue" ? "match-victory" : "match-defeat");
-      this.previousGameOver = true;
-      this.simulation.reset();
-      this.updateHud();
+      completeBattle({
+        game: this.game,
+        replayRecording: this.replayRecording,
+        renderer: this.renderer,
+        music: this.music,
+        soundEffects: this.soundEffects,
+        setSelectedCard: (cardId) => { this.selectedCard = cardId; },
+        setReplayAvailable: (available) => {
+          document.body.dataset.replayAvailable = String(available);
+        },
+        setLastReplay: (replay) => { this.lastReplay = replay; },
+        setPreviousGameOver: (value) => { this.previousGameOver = value; },
+        resetSimulation: () => this.simulation.reset(),
+        updateHud: () => this.updateHud()
+      });
     }
   }
 }
