@@ -1,6 +1,6 @@
 import type { BattleController } from "../app/battleController";
 import type { OnlineClient } from "../net/onlineClient";
-import { clearOnlineResumeToken } from "../app/onlineResumeToken";
+import { clearOnlineResumeToken } from "./onlineResumeToken";
 
 type LobbySession = {
   connect: () => Promise<boolean>;
