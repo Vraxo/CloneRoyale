@@ -1,4 +1,4 @@
-import type { RandomBytes, ServerClient, ServerRoom } from "./types.js";
+import type { RandomBytes, ServerClient, ServerRoom } from "../types.js";
 
 interface MatchmakingOptions {
   queue: ServerClient[];
