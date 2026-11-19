@@ -1,0 +1,222 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { updateTowers, updateUnits } from "../../src/game/combat.js";
+import { damageTarget } from "../../src/game/effects.js";
+import { addProjectile, updateProjectiles } from "../../src/game/projectiles.js";
+import { createGame } from "../../src/game/simulation.js";
+import type { GameState, Unit } from "../../src/game/types.js";
+
+function makeUnit(
+  id: number,
+  side: "blue" | "red",
+  x: number,
+  y: number,
+  overrides: Partial<Unit> = {}
+): Unit {
+  return {
+    id,
+    side,
+    cardId: "giant",
+    type: "giant",
+    kind: "troop",
+    lane: "left",
+    x,
+    y,
+    hp: 500,
+    maxHp: 500,
+    radius: 12,
+    damage: 100,
+    speed: 0,
+    range: 55,
+    attackInterval: 1,
+    attackCooldown: 0,
+    attack: { type: "melee" },
+    splashRadius: 0,
+    isAir: false,
+    canTargetAir: true,
+    targetsBuildingsOnly: false,
+    lifetime: 0,
+    age: 0,
+    deploymentRemaining: 10,
+    facing: 0,
+    animationOffset: 0,
+    attackAnim: 0,
+    ...overrides
+  };
+}
+
+function addUnit(state: GameState, unit: Unit): void {
+  state.units.push(unit);
+}
+
+test("melee units damage an enemy in range and start their attack cooldown", () => {
+  const game = createGame();
+  const attacker = makeUnit(100, "blue", 120, 700);
+  const target = makeUnit(101, "red", 145, 700);
+
+  attacker.deploymentRemaining = 0;
+  target.hp = 250;
+  addUnit(game, attacker);
+  addUnit(game, target);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(target.hp, 150);
+  assert.equal(attacker.attackCooldown, attacker.attackInterval);
+  assert.ok(attacker.attackAnim > 0);
+});
+
+test("units choose the nearest valid enemy rather than the first in the array", () => {
+  const game = createGame();
+  const attacker = makeUnit(100, "blue", 120, 700);
+  const farther = makeUnit(101, "red", 160, 700);
+  const nearer = makeUnit(102, "red", 130, 700);
+
+  attacker.deploymentRemaining = 0;
+  addUnit(game, attacker);
+  addUnit(game, farther);
+  addUnit(game, nearer);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(nearer.hp, 400);
+  assert.equal(farther.hp, 500);
+});
+
+test("ground units cannot target air units unless their definition allows it", () => {
+  const game = createGame();
+  const attacker = makeUnit(100, "blue", 120, 700, { canTargetAir: false });
+  const airTarget = makeUnit(101, "red", 140, 700, { isAir: true });
+
+  attacker.deploymentRemaining = 0;
+  addUnit(game, attacker);
+  addUnit(game, airTarget);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(airTarget.hp, 500);
+  assert.equal(attacker.attackCooldown, 0);
+});
+
+test("ranged units launch a projectile instead of applying immediate damage", () => {
+  const game = createGame();
+  const attacker = makeUnit(100, "blue", 120, 700, {
+    attack: { type: "projectile", style: "arrow", speed: 300 },
+    range: 100
+  });
+  const target = makeUnit(101, "red", 170, 700);
+
+  attacker.deploymentRemaining = 0;
+  addUnit(game, attacker);
+  addUnit(game, target);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(target.hp, 500);
+  assert.equal(game.projectiles.length, 1);
+  assert.equal(game.projectiles[0].targetId, target.id);
+  assert.equal(game.projectiles[0].damage, attacker.damage);
+});
+
+test("princess towers fire at the nearest enemy troop in range", () => {
+  const game = createGame();
+  const target = makeUnit(100, "blue", 135, 205);
+  addUnit(game, target);
+
+  const tower = game.towers.find((candidate) =>
+    candidate.side === "red" && candidate.kind === "princess" && candidate.lane === "left"
+  );
+  assert.ok(tower);
+  tower.attackCooldown = 0;
+
+  updateTowers(game, 1 / 30);
+
+  assert.equal(game.projectiles.length, 1);
+  assert.equal(game.projectiles[0].targetId, target.id);
+  assert.equal(tower.attackCooldown, tower.attackInterval);
+  assert.ok(game.audioEvents.includes("princess-tower-attack"));
+});
+
+test("king towers remain inactive until activated, then acquire targets", () => {
+  const game = createGame();
+  const target = makeUnit(100, "blue", 270, 180);
+  addUnit(game, target);
+
+  const king = game.towers.find((candidate) =>
+    candidate.side === "red" && candidate.kind === "king"
+  );
+  assert.ok(king);
+  king.attackCooldown = 0;
+
+  for (const tower of game.towers) {
+    if (tower.kind === "princess") tower.attackCooldown = 100;
+  }
+
+  updateTowers(game, 1 / 30);
+  assert.equal(game.projectiles.length, 0);
+
+  damageTarget(game, king.id, 1);
+  assert.equal(king.activated, true);
+
+  updateTowers(game, 1 / 30);
+
+  assert.equal(game.projectiles.length, 1);
+  assert.equal(game.projectiles[0].targetId, target.id);
+  assert.ok(game.audioEvents.includes("king-tower-attack"));
+});
+
+test("projectile impacts apply damage when they reach their target", () => {
+  const game = createGame();
+  const target = makeUnit(100, "red", 160, 700);
+  addUnit(game, target);
+
+  addProjectile(game, "blue", 100, 700, target.id, target.x, target.y, 125, 0, "arrow", 0.2);
+  updateProjectiles(game, 0.2);
+
+  assert.equal(target.hp, 375);
+  assert.equal(game.projectiles.length, 0);
+  assert.ok(game.audioEvents.includes("projectile-impact"));
+});
+
+test("fireball splash damages enemy troops fully, towers partially, and spares allies", () => {
+  const game = createGame();
+  const enemy = makeUnit(100, "red", 140, 180);
+  const ally = makeUnit(101, "blue", 150, 180);
+  addUnit(game, enemy);
+  addUnit(game, ally);
+
+  const enemyPrincess = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  assert.ok(enemyPrincess);
+  const originalTowerHp = enemyPrincess.hp;
+
+  addProjectile(game, "blue", 135, 100, null, 135, 180, 100, 55, "fireball", 0.12);
+  updateProjectiles(game, 0.12);
+
+  assert.equal(enemy.hp, 400);
+  assert.equal(ally.hp, 500);
+  assert.equal(enemyPrincess.hp, originalTowerHp - 28);
+  assert.equal(game.projectiles.length, 0);
+  assert.ok(game.audioEvents.includes("fireball-explosion"));
+});
+
+test("destroying a princess tower activates its side's king tower", () => {
+  const game = createGame();
+  const princess = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  const king = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "king"
+  );
+  assert.ok(princess);
+  assert.ok(king);
+  princess.hp = 1;
+
+  damageTarget(game, princess.id, 1);
+
+  assert.equal(princess.hp, 0);
+  assert.equal(king.activated, true);
+  assert.ok(game.audioEvents.includes("crown-earned"));
+  assert.ok(game.audioEvents.includes("king-activation"));
+});
