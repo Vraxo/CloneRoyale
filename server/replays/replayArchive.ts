@@ -1,7 +1,7 @@
 import { readFile, mkdir, readdir, writeFile, rename } from "node:fs/promises";
 import { resolve } from "node:path";
 import { randomBytes, createHash, timingSafeEqual } from "node:crypto";
-import { isBattleReplay } from "./simulation.js";
+import { isBattleReplay } from "../simulation.js";
 import type { BattleReplay } from "../src/game/replay.js";
 
 const MAX_PUBLIC_REPLAYS = 100;
