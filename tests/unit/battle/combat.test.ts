@@ -266,3 +266,25 @@ test("towers include target radius when checking attack range", () => {
   assert.equal(game.projectiles.length, 1);
   assert.equal(game.projectiles[0].targetId, target.id);
 });
+
+
+test("simultaneous lethal melee attacks resolve regardless of unit order", () => {
+  const game = createGame();
+  const blue = makeUnit(100, "blue", 120, 700, {
+    hp: 100,
+    maxHp: 100,
+    deploymentRemaining: 0
+  });
+  const red = makeUnit(101, "red", 145, 700, {
+    hp: 100,
+    maxHp: 100,
+    deploymentRemaining: 0
+  });
+
+  addUnit(game, blue);
+  addUnit(game, red);
+  updateUnits(game, 1 / 30);
+
+  assert.equal(blue.hp, 0);
+  assert.equal(red.hp, 0);
+});
