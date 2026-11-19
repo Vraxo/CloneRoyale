@@ -1,4 +1,4 @@
-import type { MessageHandlerOptions, ServerClient, ClientMessage } from "./types.js";
+import type { MessageHandlerOptions, ServerClient, ClientMessage } from "../types.js";
 
 export function createRoomMessageHandlers(options: MessageHandlerOptions): Record<string, (client: ServerClient, message: ClientMessage) => void> {
   const { send, rooms, matchmaking, createRoom, leaveRoom, attachPlayer, sendRoom } = options;
