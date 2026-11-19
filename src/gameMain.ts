@@ -1,4 +1,4 @@
-import { ArenaRenderer } from "./render/arenaRenderer";
+import { ArenaRenderer } from "./battle/render/arenaRenderer";
 import { BattleController } from "./app/battleController";
 import { bindBattleInput } from "./battle/battleInput";
 import { startBattleLoop } from "./battle/battleLoop";

@@ -9,7 +9,7 @@ import { ReplayPlaybackSession } from "../game/replayPlayback";
 import { saveBattleReplay, saveReplayShareToken } from "../game/replayStorage";
 import { STARTER_DECK } from "../game/cards";
 import type { CardId, GameState, Side } from "../game/types";
-import type { ArenaRenderer } from "../render/arenaRenderer";
+import type { ArenaRenderer } from "../battle/render/arenaRenderer";
 import type { OnlineClient } from "../multiplayer/onlineClient";
 import { createBattleHud, type BattleHud } from "../battle/battleHud";
 import { BattleActions } from "../battle/battleActions";

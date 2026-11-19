@@ -1,5 +1,5 @@
 import type { CardId, GameState, Side } from "../game/types";
-import type { ArenaRenderer } from "../render/arenaRenderer";
+import type { ArenaRenderer } from "./render/arenaRenderer";
 
 interface HudElements {
   pauseButton: HTMLButtonElement;

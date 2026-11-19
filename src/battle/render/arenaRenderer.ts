@@ -1,7 +1,7 @@
 import { Application, Container, Graphics } from "pixi.js";
-import type { CardId, GameState, Side, Unit } from "../game/types";
-import { cardById } from "../game/cards";
-import { getGroundDeploymentZones } from "../game/placement";
+import type { CardId, GameState, Side, Unit } from "../../game/types";
+import { cardById } from "../../game/cards";
+import { getGroundDeploymentZones } from "../../game/placement";
 import { EffectView } from "./entities/effectView";
 import { ProjectileView } from "./entities/projectileView";
 import { TowerView } from "./entities/towerView";
@@ -271,7 +271,7 @@ export class ArenaRenderer {
   private createPreviewUnit(
     cardId: CardId,
     category: "troop" | "building",
-    definition: import("../game/types").UnitDefinition,
+    definition: import("../../game/types").UnitDefinition,
     index: number,
     x: number,
     y: number,

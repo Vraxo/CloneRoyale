@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Projectile } from "../../game/types";
+import type { Projectile } from "../../../game/types";
 import { drawArrow } from "./arrowArt";
 
 export class ProjectileView {

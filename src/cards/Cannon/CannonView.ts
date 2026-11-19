@@ -1,6 +1,6 @@
 import { Container, Graphics } from "pixi.js";
 import type { Unit } from "../../game/types";
-import { UnitView } from "../../render/entities/unitView";
+import { UnitView } from "../../battle/render/entities/unitView";
 
 const ATTACK_ANIMATION_DURATION = 0.32;
 

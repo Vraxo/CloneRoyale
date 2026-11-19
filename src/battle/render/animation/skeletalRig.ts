@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Unit } from "../../game/types";
+import type { Unit } from "../../../game/types";
 
 export type HumanoidStyle = "skeleton" | "giant" | "archer" | "mini-pekka" | "knight";
 

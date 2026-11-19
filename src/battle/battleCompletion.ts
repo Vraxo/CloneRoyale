@@ -4,7 +4,7 @@ import type { ReplayRecordingSession } from "../game/replayRecording";
 import type { BattleReplay } from "../game/replay";
 import type { GameState } from "../game/types";
 import { saveBattleReplay } from "../game/replayStorage";
-import type { ArenaRenderer } from "../render/arenaRenderer";
+import type { ArenaRenderer } from "./render/arenaRenderer";
 
 interface BattleCompletionOptions {
   game: GameState;
