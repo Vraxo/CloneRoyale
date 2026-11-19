@@ -12,7 +12,7 @@ import { initializeGuestProfile } from "./profile/guestProfile";
 import { initializeAccountPanel } from "./accounts/accountPanel";
 import { initializeBattleEmotes } from "./app/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
-import { initializeLobbyScreen } from "./app/lobbyScreen";
+import { initializeLobbyScreen } from "./multiplayer/lobbyScreen";
 import { initializeGameMenu } from "./app/gameMenu";
 import { initializeMatchLifecycle } from "./app/matchLifecycle";
 import { initializeMatchResults } from "./app/matchResults";
