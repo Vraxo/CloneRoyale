@@ -1,7 +1,7 @@
 import { createBattleMusic, type BattleMusic } from "../audio/battleMusic";
 import { createSoundEffects, type SoundEffects } from "../audio/soundEffects";
 import { SIMULATION_STEP } from "../game/simulation";
-import { SimulationRuntime } from "../runtime/simulationRuntime";
+import { SimulationRuntime } from "../battle/simulationRuntime";
 import { createGameHistory } from "../game/history";
 import { isBattleReplay, type BattleReplay } from "../game/replay";
 import { ReplayRecordingSession } from "../game/replayRecording";
