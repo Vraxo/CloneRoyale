@@ -42,7 +42,10 @@ test("snaps positions to tile centers and clamps them inside the arena", () => {
 
 test("allows ground cards only in the deploying side's available area", () => {
   const game = createGame();
-  const giantRadius = cardById("giant").unit.radius;
+  const giantCard = cardById("giant");
+  assert.equal(giantCard.category, "troop");
+  if (giantCard.category !== "troop") assert.fail("Giant must be a troop card");
+  const giantRadius = giantCard.unit.radius;
 
   assert.equal(canPlaceCard(game, "blue", "giant", 135, 800), true);
   assert.equal(canPlaceCard(game, "blue", "giant", 135, 160), false);
