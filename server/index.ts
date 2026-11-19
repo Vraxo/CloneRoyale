@@ -13,10 +13,10 @@ import {
 import { createAccountStore } from "./account/accounts.js";
 import { createClientMessageHandler } from "./clientMessages.js";
 import { createHttpHandler } from "./httpHandler.js";
-import { createMatchSimulation } from "./matchSimulation.js";
-import { createMatchmaking } from "./matchmaking.js";
+import { createMatchSimulation } from "./multiplayer/matchSimulation.js";
+import { createMatchmaking } from "./multiplayer/matchmaking.js";
 import { createReplayArchive } from "./replays/replayArchive.js";
-import { createRoomLifecycle } from "./roomLifecycle.js";
+import { createRoomLifecycle } from "./multiplayer/roomLifecycle.js";
 import { createWebSocketTransport } from "./webSocketTransport.js";
 import type {
   MessageHandler,

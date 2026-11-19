@@ -1,6 +1,6 @@
-import { ReplayRecorder } from "../src/game/replay.js";
-import type { CardId, Side } from "../src/game/types/index.js";
-import type { RandomBytes, ServerClient, ServerRoom } from "./types.js";
+import { ReplayRecorder } from "../../src/game/replay.js";
+import type { CardId, Side } from "../../src/game/types/index.js";
+import type { RandomBytes, ServerClient, ServerRoom } from "../types.js";
 
 interface RoomLifecycleOptions {
   rooms: Map<string, ServerRoom>;
