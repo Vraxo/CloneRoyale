@@ -10,7 +10,7 @@ import { createOnlineSession } from "./multiplayer/onlineSession";
 import { initializeDeckScreen } from "./decks/deckScreen";
 import { initializeGuestProfile } from "./profile/guestProfile";
 import { initializeAccountPanel } from "./accounts/accountPanel";
-import { initializeBattleEmotes } from "./app/battleEmotes";
+import { initializeBattleEmotes } from "./battle/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
 import { initializeLobbyScreen } from "./multiplayer/lobbyScreen";
 import { initializeGameMenu } from "./app/gameMenu";
