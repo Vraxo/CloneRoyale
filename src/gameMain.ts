@@ -6,7 +6,7 @@ import { OnlineClient } from "./net/onlineClient";
 import { createMenuAudio } from "./audio/menuAudio";
 import { initializeAudioSettings } from "./audio/audioSettings";
 import { initializeReplayLibrary } from "./replays/replayLibrary";
-import { createOnlineSession } from "./app/onlineSession";
+import { createOnlineSession } from "./multiplayer/onlineSession";
 import { initializeDeckScreen } from "./decks/deckScreen";
 import { initializeGuestProfile } from "./profile/guestProfile";
 import { initializeAccountPanel } from "./accounts/accountPanel";

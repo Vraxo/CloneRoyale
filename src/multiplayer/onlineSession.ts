@@ -1,4 +1,4 @@
-import type { BattleController } from "./battleController";
+import type { BattleController } from "../app/battleController";
 import type { OnlineClient, OnlineMessage } from "../net/onlineClient";
 import type { Side } from "../game/types";
 import { clearOnlineResumeToken, readOnlineResumeToken, saveOnlineResumeToken } from "./onlineResumeToken";
