@@ -1,4 +1,4 @@
-import { SimulationRuntime } from "./runtime/simulationRuntime";
+import { SimulationRuntime } from "./battle/simulationRuntime";
 
 interface SimulationSummary {
   seed: number;
