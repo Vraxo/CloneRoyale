@@ -1,7 +1,7 @@
 import { readFile, stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { sendText } from "./httpUtils.js";
+import { sendText } from "../core/httpUtils.js";
 
 interface StaticFileOptions {
   root: string;

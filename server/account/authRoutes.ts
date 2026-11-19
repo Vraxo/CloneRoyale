@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { createAccountStore } from "../account/accounts.js";
-import { readJsonBody, sendJson } from "./httpUtils.js";
+import type { createAccountStore } from "./accounts.js";
+import { readJsonBody, sendJson } from "../core/httpUtils.js";
 
 type AccountStore = ReturnType<typeof createAccountStore>;
 

@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { sendJson } from "./httpUtils.js";
+import { sendJson } from "../core/httpUtils.js";
 
 interface MatchmakingRouteOptions {
   getMatchmakingStatus: () => Record<string, number>;
