@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { updateTowers, updateUnits } from "../../src/game/combat.js";
-import { damageTarget } from "../../src/game/effects.js";
-import { addProjectile, updateProjectiles } from "../../src/game/projectiles.js";
-import { createGame } from "../../src/game/simulation.js";
-import type { GameState, Unit } from "../../src/game/types/index.js";
+import { updateTowers, updateUnits } from "../../../src/game/combat.js";
+import { damageTarget } from "../../../src/game/effects.js";
+import { addProjectile, updateProjectiles } from "../../../src/game/projectiles.js";
+import { createGame } from "../../../src/game/simulation.js";
+import type { GameState, Unit } from "../../../src/game/types/index.js";
 
 function makeUnit(
   id: number,

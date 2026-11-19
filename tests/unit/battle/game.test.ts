@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { STARTER_DECK, cardById } from "../../src/game/cards.js";
-import { playCard } from "../../src/game/deployment.js";
-import { canPlaceCard, snapToArenaTile } from "../../src/game/placement.js";
-import { createGame, stepGame } from "../../src/game/simulation.js";
-import { FIELD_HEIGHT, FIELD_WIDTH } from "../../src/game/state.js";
+import { STARTER_DECK, cardById } from "../../../src/game/cards.js";
+import { playCard } from "../../../src/game/deployment.js";
+import { canPlaceCard, snapToArenaTile } from "../../../src/game/placement.js";
+import { createGame, stepGame } from "../../../src/game/simulation.js";
+import { FIELD_HEIGHT, FIELD_WIDTH } from "../../../src/game/state.js";
 
 test("creates a complete initial arena with two matching sides", () => {
   const game = createGame();
