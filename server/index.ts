@@ -12,7 +12,7 @@ import {
 } from "./simulation.js";
 import { createAccountStore } from "./account/accounts.js";
 import { createClientMessageHandler } from "./multiplayer/clientMessages.js";
-import { createHttpHandler } from "./httpHandler.js";
+import { createHttpHandler } from "./app/httpHandler.js";
 import { createMatchSimulation } from "./multiplayer/matchSimulation.js";
 import { createMatchmaking } from "./multiplayer/matchmaking.js";
 import { createReplayArchive } from "./replays/replayArchive.js";

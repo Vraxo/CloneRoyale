@@ -1,11 +1,11 @@
-import { createAuthRoutes } from "./account/authRoutes.js";
-import { createMatchmakingRoutes } from "./multiplayer/matchmakingRoutes.js";
-import { createReplayRoutes } from "./replays/replayRoutes.js";
-import { createStaticFileHandler } from "./app/staticFiles.js";
-import type { createReplayArchive } from "./replays/replayArchive.js";
-import type { createAccountStore } from "./account/accounts.js";
+import { createAuthRoutes } from "../account/authRoutes.js";
+import { createMatchmakingRoutes } from "../multiplayer/matchmakingRoutes.js";
+import { createReplayRoutes } from "../replays/replayRoutes.js";
+import { createStaticFileHandler } from "./staticFiles.js";
+import type { createReplayArchive } from "../replays/replayArchive.js";
+import type { createAccountStore } from "../account/accounts.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { sendText } from "./core/httpUtils.js";
+import { sendText } from "../core/httpUtils.js";
 
 type ReplayArchive = ReturnType<typeof createReplayArchive>;
 type AccountStore = ReturnType<typeof createAccountStore>;
