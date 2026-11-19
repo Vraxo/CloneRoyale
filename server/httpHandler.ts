@@ -2,7 +2,7 @@ import { createAuthRoutes } from "./account/authRoutes.js";
 import { createMatchmakingRoutes } from "./multiplayer/matchmakingRoutes.js";
 import { createReplayRoutes } from "./replays/replayRoutes.js";
 import { createStaticFileHandler } from "./app/staticFiles.js";
-import type { createReplayArchive } from "./replayArchive.js";
+import type { createReplayArchive } from "./replays/replayArchive.js";
 import type { createAccountStore } from "./account/accounts.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { sendText } from "./core/httpUtils.js";
