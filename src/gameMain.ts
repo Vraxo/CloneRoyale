@@ -8,7 +8,7 @@ import { initializeAudioSettings } from "./audio/audioSettings";
 import { initializeReplayLibrary } from "./replays/replayLibrary";
 import { createOnlineSession } from "./app/onlineSession";
 import { initializeDeckScreen } from "./decks/deckScreen";
-import { initializeGuestProfile } from "./app/guestProfile";
+import { initializeGuestProfile } from "./profile/guestProfile";
 import { initializeAccountPanel } from "./accounts/accountPanel";
 import { initializeBattleEmotes } from "./app/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
