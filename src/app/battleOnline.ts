@@ -4,7 +4,7 @@ import type { CardId, GameState, Side } from "../game/types";
 import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
 import type { BattleHud } from "./battleHud";
-import { clearOnlineResumeToken } from "./onlineResumeToken";
+import { clearOnlineResumeToken } from "../multiplayer/onlineResumeToken";
 
 interface BattleOnlineOptions {
   renderer: ArenaRenderer;
