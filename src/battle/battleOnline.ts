@@ -1,7 +1,7 @@
 import type { BattleMusic } from "../audio/battleMusic";
 import type { SoundEffects } from "../audio/soundEffects";
 import type { CardId, GameState, Side } from "../game/types";
-import type { ArenaRenderer } from "../render/arenaRenderer";
+import type { ArenaRenderer } from "./render/arenaRenderer";
 import type { OnlineClient } from "../multiplayer/onlineClient";
 import type { BattleHud } from "./battleHud";
 import { clearOnlineResumeToken } from "../multiplayer/onlineResumeToken";

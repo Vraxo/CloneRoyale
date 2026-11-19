@@ -1,5 +1,5 @@
 import { ColorMatrixFilter, Container, Graphics } from "pixi.js";
-import type { Unit } from "../../game/types";
+import type { Unit } from "../../../game/types";
 
 export abstract class UnitView {
   public readonly id: number;

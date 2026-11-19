@@ -1,4 +1,4 @@
-import type { Unit } from "../../../game/types";
+import type { Unit } from "../../../../game/types";
 import { SkeletalRig, type HumanoidStyle } from "../../animation/skeletalRig";
 import { UnitView } from "../unitView";
 

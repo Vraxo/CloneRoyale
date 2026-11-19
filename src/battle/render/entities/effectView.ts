@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Effect } from "../../game/types";
+import type { Effect } from "../../../game/types";
 import { drawArrow } from "./arrowArt";
 
 export class EffectView {

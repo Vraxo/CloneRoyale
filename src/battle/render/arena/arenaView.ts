@@ -1,5 +1,5 @@
 import { Graphics } from "pixi.js";
-import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, KING_TOWER_Y, RIVER_BOTTOM, RIVER_TOP } from "../../game/state";
+import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, KING_TOWER_Y, RIVER_BOTTOM, RIVER_TOP } from "../../../game/state";
 
 export const WORLD_WIDTH = FIELD_WIDTH;
 export const WORLD_HEIGHT = FIELD_HEIGHT;

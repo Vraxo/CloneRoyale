@@ -1,6 +1,6 @@
 import { Container, Graphics } from "pixi.js";
-import type { Tower } from "../../game/types";
-import { ARENA_TILE_SIZE } from "../../game/state";
+import type { Tower } from "../../../game/types";
+import { ARENA_TILE_SIZE } from "../../../game/state";
 
 export class TowerView {
   public readonly id: number;

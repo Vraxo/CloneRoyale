@@ -1,5 +1,5 @@
-import type { Unit } from "../../game/types";
-import { ArcherView } from "../../cards/Archer/ArcherView";
+import type { Unit } from "../../../game/types";
+import { ArcherView } from "../../../cards/Archer/ArcherView";
 import { BabyDragonView } from "../../cards/BabyDragon/BabyDragonView";
 import { CannonView } from "../../cards/Cannon/CannonView";
 import { GiantView } from "../../cards/Giant/GiantView";

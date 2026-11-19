@@ -1,7 +1,7 @@
 import { Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
-import type { CardId, GameState, Side } from "../../game/types";
-import { cardById } from "../../game/cards";
-import { MATCH_RULES } from "../../game/matchRules";
+import type { CardId, GameState, Side } from "../../../game/types";
+import { cardById } from "../../../game/cards";
+import { MATCH_RULES } from "../../../game/matchRules";
 import { calculateHudLayout } from "./hudLayout";
 
 const HUD_HEIGHT = 176;
