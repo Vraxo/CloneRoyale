@@ -13,9 +13,9 @@ import type { ArenaRenderer } from "../render/arenaRenderer";
 import type { OnlineClient } from "../net/onlineClient";
 import { createBattleHud, type BattleHud } from "../battle/battleHud";
 import { BattleActions } from "../battle/battleActions";
-import { BattleSimulationClock } from "./battleSimulation";
-import { BattleOnline } from "./battleOnline";
-import { completeBattle } from "./battleCompletion";
+import { BattleSimulationClock } from "../battle/battleSimulation";
+import { BattleOnline } from "../battle/battleOnline";
+import { completeBattle } from "../battle/battleCompletion";
 
 export class BattleController {
   private game: GameState;
