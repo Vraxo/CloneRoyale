@@ -1,4 +1,4 @@
-import type { BattleController } from "./battleController";
+import type { BattleController } from "../app/battleController";
 import type { OnlineClient } from "../net/onlineClient";
 
 type MatchResultsOptions = {

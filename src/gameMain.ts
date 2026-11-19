@@ -14,8 +14,8 @@ import { initializeBattleEmotes } from "./app/battleEmotes";
 import { createGameNavigation } from "./app/gameNavigation";
 import { initializeLobbyScreen } from "./multiplayer/lobbyScreen";
 import { initializeGameMenu } from "./app/gameMenu";
-import { initializeMatchLifecycle } from "./app/matchLifecycle";
-import { initializeMatchResults } from "./app/matchResults";
+import { initializeMatchLifecycle } from "./multiplayer/matchLifecycle";
+import { initializeMatchResults } from "./multiplayer/matchResults";
 import { initializeDeveloperMode } from "./app/developerMode";
 
 const parameters = new URLSearchParams(window.location.search);
