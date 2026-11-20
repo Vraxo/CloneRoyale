@@ -226,3 +226,31 @@ test("bot stops prioritizing more archers once two are already deployed", () => 
     targetX: 435
   });
 });
+
+
+test("bot avoids surrounding a tank when friendly splash damage is already nearby", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["skeleton-army", "baby-dragon"];
+  game.sides.blue.elixir = 10;
+  game.units.push(
+    makeTroop(1000, "red", 200, 700),
+    makeTroop(1001, "blue", 210, 700, {
+      cardId: "baby-dragon",
+      type: "baby-dragon",
+      combat: {
+        damage: 100,
+        range: 80,
+        attackInterval: 1,
+        attackCooldown: 0,
+        attack: { type: "melee" },
+        splashRadius: 50
+      }
+    })
+  );
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "baby-dragon",
+    lane: "right",
+    targetX: 435
+  });
+});
