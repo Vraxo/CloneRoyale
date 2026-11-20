@@ -24,13 +24,8 @@ function makeUnit(
     y,
     health: { hp: 500, maxHp: 500 },
     collision: { radius: 12 },
-    damage: 100,
+    combat: { damage: 100, range: 55, attackInterval: 1, attackCooldown: 0, attack: { type: "melee" }, splashRadius: 0 },
     movement: { speed: 0, isAir: false },
-    range: 55,
-    attackInterval: 1,
-    attackCooldown: 0,
-    attack: { type: "melee" },
-    splashRadius: 0,
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
@@ -71,7 +66,7 @@ test("melee units damage an enemy in range and start their attack cooldown", () 
   updateUnits(game, 1 / 30);
 
   assert.equal(target.health.hp, 150);
-  assert.equal(attacker.attackCooldown, attacker.attackInterval);
+  assert.equal(attacker.combat.attackCooldown, attacker.combat.attackInterval);
   assert.ok(attacker.presentation.attackAnim > 0);
 });
 
@@ -104,14 +99,13 @@ test("ground units cannot target air units unless their definition allows it", (
   updateUnits(game, 1 / 30);
 
   assert.equal(airTarget.health.hp, 500);
-  assert.equal(attacker.attackCooldown, 0);
+  assert.equal(attacker.combat.attackCooldown, 0);
 });
 
 test("ranged units launch a projectile instead of applying immediate damage", () => {
   const game = createGame();
   const attacker = makeUnit(100, "blue", 120, 700, {
-    attack: { type: "projectile", style: "arrow", speed: 300 },
-    range: 100
+    combat: { damage: 100, range: 100, attackInterval: 1, attackCooldown: 0, attack: { type: "projectile", style: "arrow", speed: 300 }, splashRadius: 0 }
   });
   const target = makeUnit(101, "red", 170, 700);
 
@@ -124,7 +118,7 @@ test("ranged units launch a projectile instead of applying immediate damage", ()
   assert.equal(target.health.hp, 500);
   assert.equal(game.projectiles.length, 1);
   assert.equal(game.projectiles[0].targetId, target.id);
-  assert.equal(game.projectiles[0].damage, attacker.damage);
+  assert.equal(game.projectiles[0].damage, attacker.combat.damage);
 });
 
 test("princess towers fire at the nearest enemy troop in range", () => {
@@ -236,9 +230,7 @@ test("buildings include target radius when checking attack range", () => {
   const building = makeUnit(100, "blue", 120, 700, {
     type: "cannon",
     kind: "building",
-    range: 55,
-    attack: { type: "projectile", style: "cannon", speed: 300 },
-    attackCooldown: 0,
+    combat: { damage: 100, range: 55, attackInterval: 1, attackCooldown: 0, attack: { type: "projectile", style: "cannon", speed: 300 }, splashRadius: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
   const target = makeUnit(101, "red", 120 + 55 + 12 - 1, 700);
