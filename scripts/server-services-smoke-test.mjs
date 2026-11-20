@@ -233,6 +233,7 @@ function testClientMessageDispatch() {
   client.room = room;
   room.players.set(client.id, client);
   const calls = [];
+  const chatHistory = [];
   const handler = createClientMessageHandler({
     send: (_client, message) => messages.push(message),
     broadcast: (_room, message) => roomUpdates.push(message),
@@ -249,7 +250,7 @@ function testClientMessageDispatch() {
     resumePlayer: (current, token) => calls.push(["resume", current.id, token]),
     sendRoom: currentRoom => roomUpdates.push({ type: "room", code: currentRoom.code }),
     broadcastGlobal: message => calls.push(["global-broadcast", message]),
-    getGlobalChatHistory: () => []
+    getGlobalChatHistory: () => chatHistory
   });
 
   handler(client, { type: "not-a-real-message" });
@@ -276,7 +277,8 @@ function testClientMessageDispatch() {
   assert.deepEqual(calls, [
     ["find-match", client.id],
     ["rematch-ready", client.id],
-    ["resume", client.id, "resume-token"]
+    ["resume", client.id, "resume-token"],
+    ["global-broadcast", calls.at(-1)[1]]
   ], "Each registered message should dispatch to its own handler.");
 }
 
