@@ -8,9 +8,12 @@ function positionOf(target: Unit | Tower): { x: number; y: number } {
   return "transform" in target ? target.transform : target;
 }
 
+type TargetingUnit = Pick<Unit, "side" | "transform" | "targeting">;
+type LaneUnit = Pick<Unit, "side" | "lane" | "transform">;
+
 function findEnemyUnit(
   state: GameState,
-  unit: Unit,
+  unit: TargetingUnit,
   detectionRange: number,
   buildingsOnly = false,
   includeTargetRadius = false
@@ -35,7 +38,7 @@ function findEnemyUnit(
   return nearest;
 }
 
-function enemyTowerFor(state: GameState, unit: Unit): Tower | null {
+function enemyTowerFor(state: GameState, unit: LaneUnit): Tower | null {
   const enemySide = otherSide(unit.side);
   const princess = state.towers.find((tower) =>
     tower.side === enemySide && tower.kind === "princess" && tower.lane === unit.lane && tower.hp > 0
