@@ -15,5 +15,4 @@ export const KNIGHT: MovableUnitDefinition = {
     splashRadius: 0
   },
   targeting: { canTargetAir: false, targetsBuildingsOnly: false },
-  audio: {},
 };
