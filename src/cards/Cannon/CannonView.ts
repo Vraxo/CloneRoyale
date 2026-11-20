@@ -91,8 +91,7 @@ export class CannonView extends UnitView {
     );
     const recoil = Math.pow(attackProgress, 1.7);
     this.barrel.position.set(0, recoil * 8.5);
-    this.barrel.rotation = Math.sin(time * 0.7 + unit.presentation.animationOffset) * 0.012
-      + recoil * 0.035;
+    this.barrel.rotation = 0;
 
     // A brief, directional muzzle flash at the start of each shot.
     const elapsedSinceShot = ATTACK_ANIMATION_DURATION - unit.presentation.attackAnim;
