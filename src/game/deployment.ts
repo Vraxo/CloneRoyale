@@ -57,9 +57,7 @@ function spawnCard(
       movement: {
         speed: definition.movement.speed,
         isAir: definition.movement.isAir,
-        formationSlot: definition.identity.type === "archer" && card.count === 2
-          ? (index === 0 ? -1 : 1)
-          : undefined
+        formationSlot: definition.movement.formationSlots?.[index]
       },
       collision: { radius: definition.collision.radius, mass: definition.collision.mass ?? 1 },
       combat: {
