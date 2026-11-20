@@ -196,3 +196,16 @@ test("bot uses skeleton army to surround a tank when no splash defender is nearb
     lane: "left"
   });
 });
+
+
+test("red bot recognizes threats on its own half and uses its side's lane timing", () => {
+  const game = createGame();
+  game.sides.red.hand = ["giant"];
+  game.sides.red.elixir = 10;
+  game.units.push(makeTroop(800, "blue", 135, 200));
+
+  assert.deepEqual(chooseBotAction(game, "red"), {
+    cardId: "giant",
+    lane: "right"
+  });
+});
