@@ -34,7 +34,7 @@ export interface UnitHealth {
 
 export interface UnitCollision {
   radius: number;
-  collisionMass?: number;
+  mass?: number;
 }
 
 export interface UnitMovement {
@@ -78,10 +78,10 @@ export interface UnitPresentation {
 export interface Unit
   extends UnitIdentity,
     UnitTransform,
-    UnitCollision,
     UnitCombat,
     UnitTargeting,
     UnitLifetime {
+  collision: UnitCollision;
   movement: UnitMovement;
   health: UnitHealth;
   deployment: UnitDeployment;
