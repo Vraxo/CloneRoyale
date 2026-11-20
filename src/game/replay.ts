@@ -75,6 +75,7 @@ export class ReplayPlayer {
 
   public step(): GameState {
     if (this.isFinished) return this.currentState;
+    this.currentState.audioEvents = [];
     while (this.actionIndex < this.replay.actions.length
       && this.replay.actions[this.actionIndex].tick <= this.currentTick) {
       const action = this.replay.actions[this.actionIndex++];
@@ -84,7 +85,9 @@ export class ReplayPlayer {
         y: action.y
       });
     }
+    const deploymentAudioEvents = this.currentState.audioEvents.slice();
     stepGame(this.currentState, SIMULATION_STEP, this.replay.mode === "online" ? null : "red", this.replay.mode === "online");
+    this.currentState.audioEvents.unshift(...deploymentAudioEvents);
     this.currentTick += 1;
     return this.currentState;
   }
@@ -95,6 +98,7 @@ export class ReplayPlayer {
     this.currentTick = 0;
     this.actionIndex = 0;
     while (this.currentTick < target && !this.currentState.gameOver) this.step();
+    this.currentState.audioEvents = [];
     return this.currentState;
   }
 
