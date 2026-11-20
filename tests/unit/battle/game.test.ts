@@ -302,3 +302,14 @@ test("ends the game when the blue king tower is destroyed", () => {
   assert.equal(game.winner, "red");
   assert.ok(game.audioEvents.includes("match-defeat"));
 });
+
+
+test("deploys a troop at explicitly supplied placement coordinates", () => {
+  const game = createGame();
+
+  assert.equal(playCard(game, "blue", "giant", "left", undefined, undefined, { x: 210, y: 640 }), true);
+
+  assert.equal(game.units.length, 1);
+  assert.equal(game.units[0].transform.x, 210);
+  assert.equal(game.units[0].transform.y, 640);
+});
