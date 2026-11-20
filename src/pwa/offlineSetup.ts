@@ -20,18 +20,12 @@ function parsePrecacheMessage(value: unknown): PrecacheMessage | null {
   }
 
   if (value.type === "PRECACHE_COMPLETE") return { type: value.type };
-
   if (value.type === "PRECACHE_ERROR") {
-    return {
-      type: value.type,
-      message: typeof value.message === "string" ? value.message : undefined
-    };
+    return { type: value.type, message: typeof value.message === "string" ? value.message : undefined };
   }
-
   if (value.type === "PRECACHE_STATUS" && typeof value.ready === "boolean") {
     return { type: value.type, ready: value.ready };
   }
-
   return null;
 }
 
@@ -43,23 +37,28 @@ export function initializeOfflineSetup(): void {
   const progressPercent = document.querySelector<HTMLElement>("#offline-progress-percent");
   const progressCount = document.querySelector<HTMLElement>("#offline-progress-count");
   const error = document.querySelector<HTMLElement>("#offline-setup-error");
-  const continueButton = document.querySelector<HTMLButtonElement>("#offline-continue");
+  const saveButton = document.querySelector<HTMLButtonElement>("#offline-save");
+  const closeButton = document.querySelector<HTMLButtonElement>("#offline-continue");
+
+  if (!saveButton) return;
+  const offlineButton = saveButton;
 
   function show(): void {
     setup?.classList.remove("is-hidden");
     setup?.classList.add("is-visible");
+    closeButton?.focus();
   }
 
   function hide(): void {
     setup?.classList.remove("is-visible");
     setup?.classList.add("is-hidden");
+    offlineButton.focus();
   }
 
   function updateProgress(completed: number, total: number): void {
     const safeTotal = Math.max(1, total);
     const safeCompleted = Math.min(safeTotal, Math.max(0, completed));
     const percent = Math.round((safeCompleted / safeTotal) * 100);
-
     progress?.setAttribute("aria-valuenow", String(percent));
     if (progressFill) progressFill.style.width = percent + "%";
     if (progressPercent) progressPercent.textContent = percent + "%";
@@ -67,39 +66,48 @@ export function initializeOfflineSetup(): void {
   }
 
   function markReady(): void {
-    if (status) status.textContent = "Everything is saved on this device. You're ready to play.";
+    if (status) status.textContent = "Saved on this device. You can now launch the game without an internet connection for solo play.";
     updateProgress(1, 1);
-    window.setTimeout(hide, 650);
+    offlineButton.textContent = "✓ OFFLINE READY";
+    offlineButton.disabled = true;
+    window.setTimeout(hide, 1200);
   }
 
   function showError(message: string): void {
     show();
-    if (status) status.textContent = "The game can still be played online.";
+    if (status) status.textContent = "The game remains fully playable online. Offline saving can be tried again later.";
     if (error) {
       error.textContent = message;
       error.hidden = false;
     }
-    if (continueButton) continueButton.hidden = false;
+    offlineButton.disabled = false;
   }
 
-  continueButton?.addEventListener("click", hide);
+  closeButton?.addEventListener("click", hide);
+  setup?.addEventListener("click", event => {
+    if (event.target === setup) hide();
+  });
+  setup?.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      hide();
+    }
+  });
 
-  if (!("serviceWorker" in navigator)) {
-    hide();
-    return;
-  }
+  if (!("serviceWorker" in navigator)) return;
+  offlineButton.hidden = false;
+
+  let registration: ServiceWorkerRegistration | null = null;
+  let preparationStarted = false;
 
   navigator.serviceWorker.addEventListener("message", event => {
     const message = parsePrecacheMessage(event.data);
     if (!message) return;
-
     switch (message.type) {
       case "PRECACHE_PROGRESS":
         show();
         updateProgress(message.completed, message.total);
-        if (status) {
-          status.textContent = "Saving the game files. Unchanged files are reused when the game updates.";
-        }
+        if (status) status.textContent = "Saving game files for offline solo play. You can close this window and keep playing online.";
         break;
       case "PRECACHE_COMPLETE":
         markReady();
@@ -108,19 +116,44 @@ export function initializeOfflineSetup(): void {
         showError(message.message ?? "Some files could not be saved. Check your connection and try again.");
         break;
       case "PRECACHE_STATUS":
-        if (message.ready) markReady();
+        if (message.ready) {
+          offlineButton.textContent = "✓ OFFLINE READY";
+          offlineButton.disabled = true;
+        }
         break;
     }
   });
 
   navigator.serviceWorker.register("/service-worker.js")
-    .then(async registration => {
-      const worker = registration.active ?? registration.waiting ?? registration.installing;
-      worker?.postMessage({ type: "GET_PRECACHE_STATUS" });
+    .then(async value => {
+      registration = value;
       await navigator.serviceWorker.ready;
-      navigator.serviceWorker.controller?.postMessage({ type: "GET_PRECACHE_STATUS" });
+      const worker = registration.active ?? navigator.serviceWorker.controller;
+      worker?.postMessage({ type: "GET_PRECACHE_STATUS" });
     })
     .catch(() => {
-      showError("Automatic offline setup is unavailable in this browser. You can still play while connected.");
+      // Registration is optional; the game itself continues to work online.
+      offlineButton.hidden = true;
     });
+
+  offlineButton.addEventListener("click", async () => {
+    if (offlineButton.disabled) return;
+    show();
+    if (error) error.hidden = true;
+    if (preparationStarted) return;
+    preparationStarted = true;
+    offlineButton.disabled = true;
+    if (status) status.textContent = "Connecting to offline storage…";
+
+    try {
+      registration = (await navigator.serviceWorker.getRegistration("/")) ?? registration;
+      await navigator.serviceWorker.ready;
+      const worker = registration?.active ?? navigator.serviceWorker.controller;
+      if (!worker) throw new Error("Offline storage is not available in this browser.");
+      worker.postMessage({ type: "PREPARE_OFFLINE" });
+    } catch (cause) {
+      preparationStarted = false;
+      showError(cause instanceof Error ? cause.message : "Offline preparation is unavailable.");
+    }
+  });
 }

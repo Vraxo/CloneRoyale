@@ -107,15 +107,24 @@ await dispatch("install", {
 });
 
 const installedCache = await caches.open(currentCacheName);
-const installedKeys = await installedCache.keys();
-assert.equal(installedKeys.length, precacheUrls.length, "Install must cache every precache URL.");
-assert.ok(!networkRequests.includes(reusableAsset), "Unchanged hashed assets must be reused from the previous cache.");
-assert.ok(networkRequests.includes("/"), "The app shell must be fetched during first installation.");
+assert.equal((await installedCache.keys()).length, 0, "Service worker installation must not download game files.");
+assert.equal(networkRequests.length, 0, "First launch must not trigger an offline download.");
 
 await dispatch("activate", {
   waitUntil(promise) { this.pending = promise; }
 });
-assert.ok(!(await caches.keys()).includes(previousCacheName), "Activation must remove the previous cache.");
+assert.ok((await caches.keys()).includes(previousCacheName), "The previous offline cache must remain until optional preparation completes.");
+
+await dispatch("message", {
+  data: { type: "PREPARE_OFFLINE" },
+  waitUntil(promise) { this.pending = promise; }
+});
+
+const preparedKeys = await installedCache.keys();
+assert.equal(preparedKeys.length, precacheUrls.length, "Explicit offline preparation must cache every precache URL.");
+assert.ok(!networkRequests.includes(reusableAsset), "Unchanged hashed assets must be reused from the previous cache.");
+assert.ok(networkRequests.includes("/"), "The app shell must be fetched when offline preparation is requested.");
+assert.ok(!(await caches.keys()).includes(previousCacheName), "Successful preparation must remove the previous cache.");
 
 offline = true;
 let offlineResponse;
@@ -127,4 +136,4 @@ await dispatch("fetch", {
 assert.ok(offlineResponse, "Offline navigation must return a response.");
 assert.match(await offlineResponse.text(), /^network:\//, "Offline navigation must serve the cached app shell.");
 
-console.log("Offline smoke test passed: precache, incremental asset reuse, cache cleanup, and offline app-shell fallback.");
+console.log("Offline smoke test passed: optional precache, incremental asset reuse, cache cleanup, and offline app-shell fallback.");

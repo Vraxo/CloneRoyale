@@ -37,66 +37,59 @@ async function notifyClients(message) {
   for (const client of windows) client.postMessage(message);
 }
 
-self.addEventListener("install", event => {
-  event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const previousNames = (await caches.keys()).filter(name => name.startsWith("clone-royale-") && name !== CACHE_NAME);
-    const previousCaches = await Promise.all(previousNames.map(name => caches.open(name)));
-    let completed = 0;
-    await notifyClients({ type: "PRECACHE_PROGRESS", completed, total: PRECACHE_URLS.length });
+async function prepareOffline() {
+  const cache = await caches.open(CACHE_NAME);
+  const previousNames = (await caches.keys()).filter(name => name.startsWith("clone-royale-") && name !== CACHE_NAME);
+  const previousCaches = await Promise.all(previousNames.map(name => caches.open(name)));
+  let completed = 0;
+  await notifyClients({ type: "PRECACHE_PROGRESS", completed, total: PRECACHE_URLS.length });
 
-    try {
-      for (const url of PRECACHE_URLS) {
-        // Vite's /assets files carry content hashes, so an identical URL is immutable.
-        // Reuse those responses and only download newly generated assets.
-        let response;
-        if (url.startsWith("/assets/")) {
-          for (const previousCache of previousCaches) {
-            response = await previousCache.match(url);
-            if (response) break;
-          }
+  try {
+    for (const url of PRECACHE_URLS) {
+      let response;
+      if (url.startsWith("/assets/")) {
+        for (const previousCache of previousCaches) {
+          response = await previousCache.match(url);
+          if (response) break;
         }
-
-        if (!response) response = await fetch(url, { cache: "reload" });
-        if (!response.ok) throw new Error("Could not download " + url + " (" + response.status + ").");
-        await cache.put(url, response);
-        completed += 1;
-        await notifyClients({ type: "PRECACHE_PROGRESS", completed, total: PRECACHE_URLS.length });
       }
-      await notifyClients({ type: "PRECACHE_COMPLETE" });
-      await self.skipWaiting();
-    } catch (error) {
-      await caches.delete(CACHE_NAME);
-      await notifyClients({
-        type: "PRECACHE_ERROR",
-        message: error instanceof Error ? error.message : "A game file could not be downloaded."
-      });
-      throw error;
+      if (!response) response = await fetch(url, { cache: "reload" });
+      if (!response.ok) throw new Error("Could not download " + url + " (" + response.status + ").");
+      await cache.put(url, response);
+      completed += 1;
+      await notifyClients({ type: "PRECACHE_PROGRESS", completed, total: PRECACHE_URLS.length });
     }
-  })());
+    await Promise.all(previousNames.map(name => caches.delete(name)));
+    await notifyClients({ type: "PRECACHE_COMPLETE" });
+  } catch (error) {
+    await caches.delete(CACHE_NAME);
+    await notifyClients({
+      type: "PRECACHE_ERROR",
+      message: error instanceof Error ? error.message : "A game file could not be downloaded."
+    });
+  }
+}
+
+self.addEventListener("install", event => {
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil((async () => {
-    const names = await caches.keys();
-    await Promise.all(names.filter(name => name.startsWith("clone-royale-") && name !== CACHE_NAME)
-      .map(name => caches.delete(name)));
-    await self.clients.claim();
-    await notifyClients({ type: "PRECACHE_COMPLETE" });
-  })());
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener("message", event => {
+  if (event.data?.type === "PREPARE_OFFLINE") {
+    event.waitUntil(prepareOffline());
+    return;
+  }
   if (event.data?.type !== "GET_PRECACHE_STATUS") return;
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     const keys = await cache.keys();
-    const ready = keys.length >= PRECACHE_URLS.length;
     event.source?.postMessage({
       type: "PRECACHE_STATUS",
-      ready,
-      completed: keys.length,
-      total: PRECACHE_URLS.length
+      ready: PRECACHE_URLS.every(url => keys.some(request => new URL(request.url).pathname === url))
     });
   })());
 });
@@ -104,15 +97,12 @@ self.addEventListener("message", event => {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
-
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
-
     try {
       return await fetch(request);
     } catch (error) {
@@ -127,4 +117,4 @@ self.addEventListener("fetch", event => {
 `;
 
 await writeFile(join(outputDirectory, "service-worker.js"), worker);
-console.log("Generated offline cache for " + files.length + " client files (" + cacheName + ").");
+console.log("Generated optional offline cache for " + files.length + " client files (" + cacheName + ").");
