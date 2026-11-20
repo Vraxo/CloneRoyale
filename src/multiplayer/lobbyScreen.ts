@@ -14,6 +14,31 @@ type LobbyScreenOptions = {
   setLobbyStatus: (message: string) => void;
 };
 
+type MatchmakingStatus = {
+  connectedClients: number;
+  queuedPlayers: number;
+  activePublicMatches: number;
+};
+
+const STATUS_REFRESH_MS = 5000;
+
+function matchmakingStatusUrl(): string {
+  const configuredUrl = import.meta.env.VITE_MULTIPLAYER_SERVER_URL;
+  if (configuredUrl) return configuredUrl.replace(/\/$/, "") + "/matchmaking-status";
+
+  const protocol = window.location.protocol;
+  const port = import.meta.env.DEV ? ":3001" : window.location.port ? ":" + window.location.port : "";
+  return protocol + "//" + window.location.hostname + port + "/matchmaking-status";
+}
+
+function isMatchmakingStatus(value: unknown): value is MatchmakingStatus {
+  if (typeof value !== "object" || value === null) return false;
+  const status = value as Record<string, unknown>;
+  return ["connectedClients", "queuedPlayers", "activePublicMatches"].every(key =>
+    Number.isInteger(status[key]) && (status[key] as number) >= 0
+  );
+}
+
 export function initializeLobbyScreen(options: LobbyScreenOptions) {
   const { client, session, battle, setLobbyStatus } = options;
   const lobby = document.getElementById("online-lobby");
@@ -21,10 +46,64 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
   const findMatchButton = document.getElementById("find-match");
   const cancelMatchButton = document.getElementById("cancel-match");
   const privateRoomSection = document.getElementById("private-room-section");
+  const connectedCount = document.getElementById("presence-connected");
+  const queuedCount = document.getElementById("presence-queued");
+  const activeMatchCount = document.getElementById("presence-matches");
+  const presenceNote = document.getElementById("presence-note");
+  const presenceUpdated = document.getElementById("presence-updated");
+  let refreshTimer: ReturnType<typeof setInterval> | null = null;
+  let refreshInProgress = false;
+
+  function stopStatusRefresh(): void {
+    if (refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+
+  async function refreshMatchmakingStatus(): Promise<void> {
+    if (refreshInProgress || !(lobby instanceof HTMLDivElement) || lobby.hidden) return;
+    refreshInProgress = true;
+    try {
+      const response = await fetch(matchmakingStatusUrl(), { cache: "no-store" });
+      if (!response.ok) throw new Error("Status request failed");
+      const status: unknown = await response.json();
+      if (!isMatchmakingStatus(status)) throw new Error("Invalid status response");
+      if (connectedCount) connectedCount.textContent = String(status.connectedClients);
+      if (queuedCount) queuedCount.textContent = String(status.queuedPlayers);
+      if (activeMatchCount) activeMatchCount.textContent = String(status.activePublicMatches);
+      if (presenceNote) {
+        presenceNote.textContent = status.connectedClients === 0
+          ? "No players are connected yet. Be the first to open the queue."
+          : status.connectedClients === 1
+            ? "You're the only player online right now. Keep the lobby open and someone can join."
+            : status.queuedPlayers > 0
+              ? "Players are online and looking for an opponent. Try finding a match."
+              : "Players are online, but nobody is searching right now. Start the queue to invite a match.";
+      }
+      if (presenceUpdated) presenceUpdated.textContent = "LIVE · REFRESHES EVERY 5S";
+    } catch {
+      if (presenceNote) presenceNote.textContent = "Live player count is temporarily unavailable. You can still try matchmaking.";
+      if (presenceUpdated) presenceUpdated.textContent = "STATUS UNAVAILABLE";
+    } finally {
+      refreshInProgress = false;
+    }
+  }
+
+  function startStatusRefresh(): void {
+    stopStatusRefresh();
+    void refreshMatchmakingStatus();
+    refreshTimer = setInterval(() => {
+      if (!(lobby instanceof HTMLDivElement) || lobby.hidden) {
+        stopStatusRefresh();
+        return;
+      }
+      void refreshMatchmakingStatus();
+    }, STATUS_REFRESH_MS);
+  }
 
   function openLobby(): void {
     if (lobby instanceof HTMLDivElement) lobby.hidden = false;
     setLobbyStatus("Connect to the game server to create or join a room.");
+    startStatusRefresh();
   }
 
   document.getElementById("online-play")?.addEventListener("click", openLobby);
@@ -46,6 +125,7 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
   });
 
   document.getElementById("close-lobby")?.addEventListener("click", () => {
+    stopStatusRefresh();
     if (!battle.isOnline) {
       session.unsubscribe();
       client.leave();
@@ -79,6 +159,7 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
   });
 
   function hideLobby(): void {
+    stopStatusRefresh();
     if (lobby instanceof HTMLDivElement) lobby.hidden = true;
   }
 
