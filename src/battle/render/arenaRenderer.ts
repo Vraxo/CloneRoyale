@@ -289,7 +289,7 @@ export class ArenaRenderer {
       movement: {
         speed: definition.movement.speed,
         isAir: definition.movement.isAir,
-        formationSlot: definition.identity.type === "archer" && index < 2
+        formationSlot: definition.formation?.pattern === "paired" && index < 2
           ? (index === 0 ? -1 : 1)
           : undefined
       },
