@@ -31,8 +31,7 @@ function makeUnit(
     attackCooldown: 0,
     attack: { type: "melee" },
     splashRadius: 0,
-    canTargetAir: true,
-    targetsBuildingsOnly: false,
+    targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     lifetime: 0,
     age: 0,
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
@@ -82,7 +81,7 @@ test("units choose the nearest valid enemy rather than the first in the array", 
 
 test("ground units cannot target air units unless their definition allows it", () => {
   const game = createGame();
-  const attacker = makeUnit(100, "blue", 120, 700, { canTargetAir: false });
+  const attacker = makeUnit(100, "blue", 120, 700, { targeting: { canTargetAir: false, targetsBuildingsOnly: false } });
   const airTarget = makeUnit(101, "red", 140, 700, { movement: { speed: 0, isAir: true } });
 
   attacker.deployment.remaining = 0;
