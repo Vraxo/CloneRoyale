@@ -78,6 +78,7 @@ test("moves a troop away from a stationary building when the troop is first", ()
   assert.equal(building.kind, "building");
   building.transform.x = 100;
   building.transform.y = 500;
+  building.deployment.appearanceDelay = 0;
   building.deployment.remaining = 0;
   const troop = makeTroop(100, 110);
   game.units.unshift(troop);
@@ -98,6 +99,7 @@ test("moves a troop away from a stationary building when the building is first",
   assert.equal(building.kind, "building");
   building.transform.x = 110;
   building.transform.y = 500;
+  building.deployment.appearanceDelay = 0;
   building.deployment.remaining = 0;
   const troop = makeTroop(100, 100);
   game.units.unshift(troop);
