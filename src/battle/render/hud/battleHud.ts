@@ -15,7 +15,7 @@ const CARD_ART: Record<CardId, string> = {
   cannon: "/cards/cannon.png",
   fireball: "/cards/fireball.png",
   arrows: "/cards/arrows.png",
-  knight: "/cards/knight.svg"
+  knight: "/cards/knight.png"
 };
 
 function formatClock(seconds: number): string {

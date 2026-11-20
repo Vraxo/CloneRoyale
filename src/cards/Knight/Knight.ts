@@ -15,4 +15,11 @@ export const KNIGHT: MovableUnitDefinition = {
     splashRadius: 0
   },
   targeting: { canTargetAir: false, targetsBuildingsOnly: false },
+  audio: {
+    attack: "knight-attack",
+    hit: "knight-hit",
+    deploy: "knight-deploy",
+    death: "knight-death",
+    movement: { event: "knight-step", interval: 0.56 }
+  },
 };

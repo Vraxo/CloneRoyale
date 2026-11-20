@@ -1,4 +1,9 @@
 export type AudioEvent =
+  | "knight-deploy"
+  | "knight-attack"
+  | "knight-hit"
+  | "knight-death"
+  | "knight-step"
   | "mini-pekka-deploy"
   | "mini-pekka-attack"
   | "mini-pekka-hit"
