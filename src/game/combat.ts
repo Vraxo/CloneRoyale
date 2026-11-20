@@ -18,7 +18,7 @@ function findEnemyUnit(
     if (candidate.side === unit.side || candidate.health.hp <= 0) continue;
     if ((candidate.deployment.appearanceDelay) > 0) continue;
     if (buildingsOnly && candidate.kind !== "building") continue;
-    if (!unit.canTargetAir && candidate.movement.isAir) continue;
+    if (!unit.targeting.canTargetAir && candidate.movement.isAir) continue;
 
     const distance = Math.hypot(candidate.x - unit.x, candidate.y - unit.y);
     const effectiveDistance = distance - (includeTargetRadius ? candidate.collision.radius : 0);
@@ -146,7 +146,7 @@ export function updateUnits(state: GameState, dt: number): void {
     }
 
     const detectionRange = Math.max(105, unit.range + 65);
-    const enemy = findEnemyUnit(state, unit, detectionRange, unit.targetsBuildingsOnly);
+    const enemy = findEnemyUnit(state, unit, detectionRange, unit.targeting.targetsBuildingsOnly);
 
     if (enemy) {
       const distance = Math.hypot(enemy.x - unit.x, enemy.y - unit.y);
