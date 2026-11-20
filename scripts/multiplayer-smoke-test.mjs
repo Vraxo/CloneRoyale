@@ -92,6 +92,20 @@ try {
 
   const second = await connect();
   second.send(JSON.stringify({ type: "set-profile", guestId: "22222222-2222-4222-8222-222222222222", name: "RedPlayer" }));
+  const globalChatOnFirst = nextMessage(first, message => message.type === "global-chat-message");
+  const globalChatOnSecond = nextMessage(second, message => message.type === "global-chat-message");
+  first.send(JSON.stringify({ type: "global-chat", text: "Hello from the lobby" }));
+  const [chatFirst, chatSecond] = await Promise.all([globalChatOnFirst, globalChatOnSecond]);
+  assert.deepEqual(chatFirst, chatSecond, "Global chat must reach players regardless of room membership.");
+  assert.equal(chatFirst.message.name, "BluePlayer");
+  assert.equal(chatFirst.message.text, "Hello from the lobby");
+  const chatHistory = nextMessage(second, message => message.type === "global-chat-history");
+  second.send(JSON.stringify({ type: "global-chat-history" }));
+  assert.equal((await chatHistory).messages.at(-1).text, "Hello from the lobby");
+  const rateLimitedChat = nextMessage(first, message => message.type === "global-chat-message", 250);
+  first.send(JSON.stringify({ type: "global-chat", text: "Too soon" }));
+  await assert.rejects(rateLimitedChat, /Timed out/);
+  await delay(1200);
   const firstStartPromise = nextMessage(first, message => message.type === "match-start");
   const secondStartPromise = nextMessage(second, message => message.type === "match-start");
   second.send(JSON.stringify({ type: "join-room", code: assigned.code }));
