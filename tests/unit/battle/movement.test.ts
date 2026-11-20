@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { updateUnits } from "../../../src/game/combat.js";
-import { keepGroundUnitsOnBridges } from "../../../src/game/movement.js";
+import { keepGroundUnitsOnBridges, moveUnitTowardTarget } from "../../../src/game/movement.js";
 import { createGame } from "../../../src/game/simulation.js";
 import { ARENA_TILE_SIZE, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "../../../src/game/state.js";
 import type { BuildingUnit, GameState, TroopUnit, Unit } from "../../../src/game/types/index.js";
@@ -198,4 +198,32 @@ test("bridge constraints leave air, defeated, deploying, and stationary units un
   assert.equal(defeated.transform.x, 300);
   assert.equal(deploying.transform.x, 300);
   assert.equal(building.transform.x, 300);
+});
+
+test("air units move directly toward targets across the river", () => {
+  const game = createGame();
+  const unit = makeUnit(300, "blue", 300, 700, {
+    movement: { speed: 100, isAir: true },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+
+  moveUnitTowardTarget(game, unit, 300, 200, 1, 999);
+
+  assert.equal(unit.transform.x, 300);
+  assert.equal(unit.transform.y, 600);
+  assert.equal(unit.movement.isMoving, true);
+});
+
+test("formation slots offset troop movement perpendicular to its target", () => {
+  const game = createGame();
+  const unit = makeUnit(301, "blue", 200, 700, {
+    movement: { speed: 100, isAir: false, formationSlot: 1 },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+
+  moveUnitTowardTarget(game, unit, 200, 650, 1, 999);
+
+  assert.equal(unit.transform.x, 185);
+  assert.equal(unit.transform.y, 650);
+  assert.equal(unit.movement.isMoving, true);
 });
