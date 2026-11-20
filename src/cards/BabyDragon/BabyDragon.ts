@@ -17,5 +17,11 @@ export const BABY_DRAGON: UnitDefinition = {
     splashRadius: 42
   },
   targeting: { canTargetAir: true, targetsBuildingsOnly: false },
+  audio: {
+    attack: "baby-dragon-attack",
+    deploy: "baby-dragon-deploy",
+    death: "baby-dragon-death",
+    movement: { event: "baby-dragon-wing", interval: 0.58 }
+  },
   lifetime: { duration: 0 }
 };
