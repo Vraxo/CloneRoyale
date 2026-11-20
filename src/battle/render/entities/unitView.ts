@@ -48,7 +48,7 @@ export abstract class UnitView {
     const flashRemaining = Math.max(0, this.damageFlashUntil - time);
     this.damageFlash.alpha = flashRemaining / 0.12 * 0.9;
 
-    this.container.position.set(unit.x, unit.y);
+    this.container.position.set(unit.transform.x, unit.transform.y);
 
     const appearanceDelay = unit.deployment.appearanceDelay ?? 0;
     const hasAppeared = appearanceDelay <= 0;
