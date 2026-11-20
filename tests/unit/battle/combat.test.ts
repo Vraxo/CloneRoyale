@@ -392,3 +392,16 @@ test("ranged troops can target towers when no enemy troops are available", () =>
   assert.equal(game.projectiles[0].targetY, tower.y);
   assert.ok(game.audioEvents.includes("giant-attack"));
 });
+
+
+test("buildings do not attack when no enemy troops are in range", () => {
+  const game = createGame();
+  const building = makeBuilding(100, "blue", 120, 700);
+  addUnit(game, building);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(game.projectiles.length, 0);
+  assert.equal(building.combat.attackCooldown, 0);
+  assert.equal(building.health.hp, 500);
+});
