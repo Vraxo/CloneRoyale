@@ -237,3 +237,17 @@ test("unlocks only the right deployment pocket after the enemy right tower falls
   assert.equal(canPlaceCard(game, "blue", "giant", 105, 220), false);
   assert.equal(canPlaceCard(game, "blue", "giant", 435, 220), true);
 });
+
+test("deploys the full skeleton army in rows with staggered appearance", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["skeleton-army"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "skeleton-army", "left"), true);
+  assert.equal(game.units.length, 15);
+  assert.equal(game.units[0].transform.x, 105 - 2 * 5.95);
+  assert.equal(game.units[4].transform.x, 105 + 2 * 5.95);
+  assert.equal(game.units[5].transform.y, 759);
+  assert.equal(game.units[0].deployment.duration, 1);
+  assert.ok(Math.abs(game.units[14].deployment.duration - 1.45) < 0.000001);
+});
