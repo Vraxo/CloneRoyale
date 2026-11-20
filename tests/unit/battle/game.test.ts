@@ -254,6 +254,8 @@ test("deploys the full skeleton army in rows with staggered appearance", () => {
 
 test("rejects non-finite card placement coordinates", () => {
   const game = createGame();
+  game.sides.blue.hand.push("fireball");
+  game.sides.blue.elixir = 10;
 
   assert.equal(canPlaceCard(game, "blue", "giant", Number.NaN, 800), false);
   assert.equal(canPlaceCard(game, "blue", "giant", 135, Number.POSITIVE_INFINITY), false);
