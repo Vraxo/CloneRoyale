@@ -380,7 +380,6 @@ export class ThreeBattleScene {
       for (const side of [-1, 1]) {
         const wing = new THREE.Group();
         wing.position.set(side * 9, 34, 1);
-        const membrane = new THREE.Mesh(new THREE.BufferGeometry(), this.materials.dragon);
         const shape = new THREE.Shape();
         shape.moveTo(0, 0);
         shape.quadraticCurveTo(side * 20, 12, side * 35, 8);
@@ -577,7 +576,19 @@ export class ThreeBattleScene {
         rig.weapon.rotation.y = Math.sin(state.time * 1.5 + unit.presentation.animationOffset) * 0.04;
       }
     }
-    this.removeMissing(new Map([...this.unitModels].map(([id, rig]) => [id, rig.root])), active);
+    for (const [id, rig] of this.unitModels) {
+      if (active.has(id)) continue;
+      this.scene.remove(rig.root);
+      rig.root.traverse(child => {
+        if (!(child instanceof THREE.Mesh)) return;
+        child.geometry.dispose();
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        for (const material of materials) {
+          if (!Object.values(this.materials).includes(material as never)) material.dispose();
+        }
+      });
+      this.unitModels.delete(id);
+    }
   }
 
   private syncProjectiles(state: ReadonlyGameState): void {
