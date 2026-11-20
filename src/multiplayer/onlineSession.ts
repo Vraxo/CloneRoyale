@@ -91,8 +91,12 @@ export function createOnlineSession(options: OnlineSessionOptions) {
     } else if (message.type === "opponent-reconnected") {
       battle.setOnlineNotice("Opponent reconnected. The battle is resuming.");
     } else if (message.type === "queue-status") {
-      const position = message.position ? " · Position " + message.position + " of " + message.waiting : "";
-      setLobbyStatus("Searching for an opponent… " + message.waiting + " player" + (message.waiting === 1 ? "" : "s") + " in queue" + position + ".");
+      if (message.waiting <= 1) {
+        setLobbyStatus("You're the only player searching right now. Keep this open—the next player will be matched with you.");
+      } else {
+        const position = message.position ? " You're #" + message.position + " in line." : "";
+        setLobbyStatus(message.waiting + " players are searching for a match." + position);
+      }
     } else if (message.type === "queue-cancelled") {
       setLobbyStatus("Matchmaking cancelled.");
     } else if (message.type === "room") {
