@@ -343,3 +343,43 @@ test("routes a ground troop from its bank to a target inside the river", () => {
   assert.equal(unit.transform.y, 480);
   assert.equal(unit.movement.isMoving, true);
 });
+
+test("chooses deterministic opposite sides for equidistant obstacle routes", () => {
+  const run = (id: number) => {
+    const game = createGame();
+    const unit = makeUnit(id, "blue", LANE_X.left, 800, {
+      movement: { speed: 100, isAir: false },
+      deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+    });
+    const blocker = makeBuilding(500, "blue", LANE_X.left, 700, {
+      collision: { radius: 20 }
+    });
+
+    addUnit(game, unit);
+    addUnit(game, blocker);
+    moveUnitTowardTarget(game, unit, LANE_X.left, 600, 0.1, 999);
+
+    return unit.transform.x;
+  };
+
+  assert.ok(run(400) > LANE_X.left, "even IDs should consistently take the left waypoint");
+  assert.ok(run(401) < LANE_X.left, "odd IDs should consistently take the right waypoint");
+});
+
+test("does not divert a troop around an obstacle that is its target", () => {
+  const game = createGame();
+  const unit = makeUnit(402, "blue", LANE_X.left, 800, {
+    movement: { speed: 100, isAir: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  const target = makeBuilding(403, "red", LANE_X.left, 700, {
+    collision: { radius: 20 }
+  });
+
+  addUnit(game, unit);
+  addUnit(game, target);
+  moveUnitTowardTarget(game, unit, target.transform.x, target.transform.y, 0.1, target.id);
+
+  assert.equal(unit.transform.x, LANE_X.left);
+  assert.equal(unit.transform.y, 790);
+});
