@@ -158,3 +158,41 @@ test("bot chooses Baby Dragon against a group of four threats", () => {
     lane: "left"
   });
 });
+
+test("bot starts a giant push when it has no friendly giant", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["giant"];
+  game.sides.blue.elixir = 10;
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "giant",
+    lane: "left"
+  });
+});
+
+test("bot adds archers when fewer than two are already deployed", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["archers"];
+  game.sides.blue.elixir = 10;
+  game.units.push(makeTroop(600, "blue", 135, 800, {
+    cardId: "archers",
+    type: "archer"
+  }));
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "archers",
+    lane: "left"
+  });
+});
+
+test("bot uses skeleton army to surround a tank when no splash defender is nearby", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["skeleton-army"];
+  game.sides.blue.elixir = 10;
+  game.units.push(makeTroop(700, "red", 400, 700));
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "skeleton-army",
+    lane: "left"
+  });
+});
