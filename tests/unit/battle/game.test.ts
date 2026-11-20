@@ -99,6 +99,15 @@ test("deploys archers using their configured paired formation", () => {
   assert.deepEqual(game.units.map((unit) => unit.movement.formationSlot), [-1, 1]);
 });
 
+test("plays fireball with its configured launch sound", () => {
+  const game = createGame();
+  game.sides.blue.hand.push("fireball");
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "fireball", "left"), true);
+  assert.ok(game.audioEvents.includes("fireball-launch"));
+});
+
 test("regenerates elixir and advances the match clock without bot actions", () => {
   const game = createGame();
 

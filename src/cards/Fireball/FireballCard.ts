@@ -12,5 +12,6 @@ export const FIREBALL_CARD: SpellCardDefinition = {
       style: "fireball",
       duration: 0.55
     }
-  }
+  },
+  audio: { launch: "fireball-launch" }
 };
