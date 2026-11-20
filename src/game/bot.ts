@@ -95,7 +95,7 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
   }
 
   const friendlySplashNearby = ownTroops.some((unit) =>
-    unit.type === "baby-dragon" && Math.hypot(unit.transform.x - (enemyTank?.transform.x ?? 0), unit.transform.y - (enemyTank?.transform.y ?? 0)) < 180
+    unit.combat.splashRadius > 0 && Math.hypot(unit.transform.x - (enemyTank?.transform.x ?? 0), unit.transform.y - (enemyTank?.transform.y ?? 0)) < 180
   );
   if (enemyTank && !friendlySplashNearby && affordable.has("skeleton-army")) {
     return { cardId: "skeleton-army", lane: enemyTank.lane };
