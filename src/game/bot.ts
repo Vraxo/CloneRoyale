@@ -67,6 +67,11 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
     return { cardId: "arrows", lane: laneForX(arrowsCluster.x), targetX: arrowsCluster.x, targetY: arrowsCluster.y };
   }
 
+  const zapCluster = bestEnemyCluster(threats, 92);
+  if (affordable.has("zap") && zapCluster && zapCluster.count >= 2) {
+    return { cardId: "zap", lane: laneForX(zapCluster.x), targetX: zapCluster.x, targetY: zapCluster.y };
+  }
+
   const fireballCluster = bestEnemyCluster(threats, 92);
   if (affordable.has("fireball") && fireballCluster && fireballCluster.count >= 3) {
     return { cardId: "fireball", lane: laneForX(fireballCluster.x), targetX: fireballCluster.x, targetY: fireballCluster.y };
@@ -120,7 +125,8 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
     "archers",
     "giant",
     "fireball",
-    "arrows"
+    "arrows",
+    "zap"
   ];
   const cardId = priority.find((candidate) => affordable.has(candidate));
   if (!cardId) return null;
