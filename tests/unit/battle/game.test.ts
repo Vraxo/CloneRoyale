@@ -349,3 +349,41 @@ test("emits a regulation countdown event exactly when its threshold is crossed",
 
   assert.equal(game.audioEvents.includes("countdown-10"), false);
 });
+
+test("ends overtime immediately when blue takes the first tower", () => {
+  const game = createGame();
+  game.phase = "overtime";
+  game.overtimeStartCrowns = { blue: 0, red: 0 };
+
+  const redPrincess = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  assert.ok(redPrincess);
+  redPrincess.hp = 0;
+
+  stepGame(game, 1 / 30, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.phase, "finished");
+  assert.equal(game.winner, "blue");
+  assert.ok(game.events.some((event) => event.includes("Blue wins in overtime!")));
+});
+
+test("ends overtime immediately when red takes the first tower", () => {
+  const game = createGame();
+  game.phase = "overtime";
+  game.overtimeStartCrowns = { blue: 0, red: 0 };
+
+  const bluePrincess = game.towers.find((tower) =>
+    tower.side === "blue" && tower.kind === "princess" && tower.lane === "right"
+  );
+  assert.ok(bluePrincess);
+  bluePrincess.hp = 0;
+
+  stepGame(game, 1 / 30, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.phase, "finished");
+  assert.equal(game.winner, "red");
+  assert.ok(game.events.some((event) => event.includes("Red wins in overtime!")));
+});
