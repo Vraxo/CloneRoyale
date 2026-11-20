@@ -318,7 +318,7 @@ export class ArenaRenderer {
           ? (index === 0 ? -1 : 1)
           : undefined
       }
-    };;
+    };
   }
 
   public handCardAt(
