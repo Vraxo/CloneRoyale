@@ -107,3 +107,16 @@ test("ignores missing targets and towers that are already destroyed", () => {
 
   assert.deepEqual(game, before);
 });
+
+
+test("damaging an already activated king tower does not repeat activation audio", () => {
+  const game = createGame();
+  const king = game.towers.find((tower) => tower.side === "red" && tower.kind === "king");
+  assert.ok(king);
+  king.activated = true;
+
+  damageTarget(game, king.id, 100);
+
+  assert.equal(king.hp, king.maxHp - 100);
+  assert.equal(game.audioEvents.includes("king-activation"), false);
+});
