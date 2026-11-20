@@ -20,7 +20,8 @@
     "test:server-services": "node scripts/server-services-smoke-test.mjs",
     "test:accounts": "node scripts/accounts-smoke-test.mjs",
     "test:auth-api": "node scripts/auth-api-smoke-test.mjs",
-    "test:unit": "tsc -p tsconfig.tests.json && node scripts/run-unit-tests.mjs"
+    "test:unit": "tsc -p tsconfig.tests.json && node scripts/run-unit-tests.mjs",
+    "test:unit:coverage": "tsc -p tsconfig.tests.json && node scripts/run-unit-tests.mjs --coverage"
   },
   "dependencies": {
     "pixi.js": "^8.23.0"
