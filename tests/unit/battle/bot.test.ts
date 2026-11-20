@@ -181,7 +181,7 @@ test("bot adds archers when fewer than two are already deployed", () => {
 
   assert.deepEqual(chooseBotAction(game, "blue"), {
     cardId: "archers",
-    lane: "left"
+    lane: "right"
   });
 });
 
