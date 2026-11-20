@@ -184,3 +184,30 @@ test("red troops target the blue side's living lane tower", () => {
   assert.ok(bluePrincess);
   assert.equal(findEnemyTower(state, unit), bluePrincess);
 });
+
+test("lane targeting falls back to the king when its princess tower is absent", () => {
+  const state = createGame();
+  const unit = makeTroop(201, "blue", 135, 800);
+  const princessIndex = state.towers.findIndex((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  const king = state.towers.find((tower) => tower.side === "red" && tower.kind === "king");
+
+  assert.ok(princessIndex >= 0);
+  assert.ok(king);
+  state.towers.splice(princessIndex, 1);
+
+  assert.equal(findEnemyTower(state, unit), king);
+});
+
+test("lane targeting returns null when neither its princess tower nor the king remains", () => {
+  const state = createGame();
+  const unit = makeTroop(202, "blue", 135, 800);
+  state.towers = state.towers.filter((tower) =>
+    !(tower.side === "red" && (
+      tower.kind === "king" || (tower.kind === "princess" && tower.lane === "left")
+    ))
+  );
+
+  assert.equal(findEnemyTower(state, unit), null);
+});
