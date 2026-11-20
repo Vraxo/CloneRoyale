@@ -283,10 +283,10 @@ export function stepGame(
 
   state.units = state.units.filter((unit) =>
     unit.health.hp > 0
-    && unit.x > -40
-    && unit.x < 760
-    && unit.y > -40
-    && unit.y < 1000
+    && unit.transform.x > -40
+    && unit.transform.x < 760
+    && unit.transform.y > -40
+    && unit.transform.y < 1000
   );
 
   checkGameEnd(state);
