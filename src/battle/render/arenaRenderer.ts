@@ -294,8 +294,7 @@ export class ArenaRenderer {
           ? (index === 0 ? -1 : 1)
           : undefined
       },
-      radius: definition.radius,
-      collisionMass: definition.collisionMass ?? 1,
+      collision: { radius: definition.radius, mass: definition.collisionMass ?? 1 },
       damage: definition.damage,
       range: definition.range,
       attackInterval: definition.attackInterval,
@@ -351,7 +350,7 @@ export class ArenaRenderer {
       this.entities,
       createUnitView,
       (view, unit) => view.update(unit, state.time),
-      (unit) => unit.y + unit.radius
+      (unit) => unit.y + unit.collision.radius
     );
 
     synchronizeViews(
