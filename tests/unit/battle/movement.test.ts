@@ -26,7 +26,6 @@ function makeUnit(
     movement: { speed: 0, isAir: false },
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
-    audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
   };
@@ -59,7 +58,6 @@ function makeBuilding(
     },
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
-    audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
   };
