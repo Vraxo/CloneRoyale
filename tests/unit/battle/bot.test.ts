@@ -93,3 +93,36 @@ test("bot does not target enemies that are still deploying with a spell", () => 
   assert.equal(decision?.cardId, "arrows");
   assert.equal(decision?.targetY, undefined);
 });
+
+test("bot uses fireball against a clustered group of threats", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["fireball"];
+  game.sides.blue.elixir = 10;
+  game.units.push(
+    ...Array.from({ length: 3 }, (_, index) =>
+      makeTroop(200 + index, "red", 100 + index * 10, 700, {
+        cardId: "skeleton-army",
+        type: "skeleton"
+      })
+    )
+  );
+
+  const decision = chooseBotAction(game, "blue");
+
+  assert.equal(decision?.cardId, "fireball");
+  assert.equal(decision?.lane, "left");
+  assert.equal(decision?.targetX, 110);
+  assert.equal(decision?.targetY, 700);
+});
+
+test("bot uses a knight to defend against a tank when Mini P.E.K.K.A. is unavailable", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["knight"];
+  game.sides.blue.elixir = 10;
+  game.units.push(makeTroop(300, "red", 400, 700, { lane: "right" }));
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "knight",
+    lane: "right"
+  });
+});
