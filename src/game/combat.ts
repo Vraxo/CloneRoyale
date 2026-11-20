@@ -63,11 +63,11 @@ function attackUnit(
 ): void {
   unit.combat.attackCooldown = unit.combat.attackInterval;
   unit.presentation.attackAnim = 0.32;
-  if (unit.audio.attack) state.audioEvents.push(unit.audio.attack);
+  if (unit.audio?.attack) state.audioEvents.push(unit.audio?.attack);
 
   if (unit.combat.attack.type === "melee") {
     pendingMeleeAttacks.push({ unit, target });
-    if (unit.audio.hit) state.audioEvents.push(unit.audio.hit);
+    if (unit.audio?.hit) state.audioEvents.push(unit.audio?.hit);
     return;
   }
 
@@ -100,7 +100,7 @@ export function updateUnits(state: GameState, dt: number): void {
       unit.deployment.appearanceDelay = remaining;
       if (remaining > 0) continue;
 
-      if (unit.audio.deploy) state.audioEvents.push(unit.audio.deploy);
+      if (unit.audio?.deploy) state.audioEvents.push(unit.audio?.deploy);
 
       state.effects.push({
         id: state.nextId++,
@@ -172,7 +172,7 @@ export function updateUnits(state: GameState, dt: number): void {
   for (const unit of state.units) {
     if (unit.health.hp <= 0 || unit.kind === "building") continue;
 
-    const movementSound = unit.audio.movement;
+    const movementSound = unit.audio?.movement;
     if (!movementSound) continue;
 
     if (unit.movement.isMoving) {
