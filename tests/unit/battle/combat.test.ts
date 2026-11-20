@@ -512,3 +512,71 @@ test("troops move toward detected enemy units that are outside attack range", ()
   assert.ok(attacker.transform.x > 120);
   assert.equal(enemy.health.hp, 500);
 });
+
+test("troops wait for their attack cooldown before attacking an enemy tower", () => {
+  const game = createGame();
+  const tower = game.towers.find((candidate) =>
+    candidate.side === "red" && candidate.kind === "princess" && candidate.lane === "left"
+  );
+  assert.ok(tower);
+
+  const attacker = makeUnit(500, "blue", tower.x, tower.y, {
+    combat: {
+      damage: 100,
+      range: 100,
+      attackInterval: 1,
+      attackCooldown: 0.5,
+      attack: { type: "projectile", style: "arrow", speed: 300 },
+      splashRadius: 0
+    },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  addUnit(game, attacker);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(game.projectiles.length, 0);
+  assert.ok(attacker.combat.attackCooldown > 0);
+});
+
+test("defeated troops and buildings are skipped before combat and movement updates", () => {
+  const game = createGame();
+  const defeatedTroop = makeUnit(501, "blue", 120, 700, {
+    health: { hp: 0, maxHp: 500 },
+    combat: {
+      damage: 100,
+      range: 55,
+      attackInterval: 1,
+      attackCooldown: 0.5,
+      attack: { type: "melee" },
+      splashRadius: 0
+    },
+    lifetime: { duration: 10, elapsed: 2 },
+    audio: { movement: { event: "giant-step", interval: 0.2 } },
+    movement: { speed: 80, isAir: false, isMoving: true, footstepCooldown: 0 }
+  });
+  const defeatedBuilding = makeBuilding(502, "blue", 140, 700, {
+    health: { hp: 0, maxHp: 500 },
+    combat: {
+      damage: 100,
+      range: 55,
+      attackInterval: 1,
+      attackCooldown: 0.5,
+      attack: { type: "melee" },
+      splashRadius: 0
+    },
+    lifetime: { duration: 10, elapsed: 2 }
+  });
+  addUnit(game, defeatedTroop);
+  addUnit(game, defeatedBuilding);
+
+  updateUnits(game, 0.1);
+
+  assert.equal(defeatedTroop.combat.attackCooldown, 0.5);
+  assert.equal(defeatedTroop.lifetime?.elapsed, 2);
+  assert.equal(defeatedTroop.movement.footstepCooldown, 0);
+  assert.equal(defeatedBuilding.combat.attackCooldown, 0.5);
+  assert.equal(defeatedBuilding.lifetime?.elapsed, 2);
+  assert.equal(game.projectiles.length, 0);
+  assert.equal(game.audioEvents.includes("giant-step"), false);
+});
