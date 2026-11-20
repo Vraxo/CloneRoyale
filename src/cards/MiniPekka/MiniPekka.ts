@@ -22,5 +22,4 @@ export const MINI_PEKKA: MovableUnitDefinition = {
     death: "mini-pekka-death",
     movement: { event: "mini-pekka-step", interval: 0.42 }
   },
-  lifetime: { duration: 0 }
 };

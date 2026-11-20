@@ -26,7 +26,6 @@ function makeUnit(
     combat: { damage: 100, range: 55, attackInterval: 1, attackCooldown: 0, attack: { type: "melee" }, splashRadius: 0 },
     movement: { speed: 0, isAir: false },
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
-    lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
     audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 },
@@ -60,7 +59,6 @@ function makeBuilding(
       splashRadius: 0
     },
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
-    lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
     audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 },
@@ -83,7 +81,7 @@ test("units expire after their configured lifetime", () => {
   updateUnits(game, 0.1);
 
   assert.equal(unit.health.hp, 0);
-  assert.equal(unit.lifetime.elapsed, 0.1);
+  assert.equal(unit.lifetime?.elapsed, 0.1);
 });
 
 test("melee units damage an enemy in range and start their attack cooldown", () => {

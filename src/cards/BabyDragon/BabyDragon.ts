@@ -23,5 +23,4 @@ export const BABY_DRAGON: MovableUnitDefinition = {
     death: "baby-dragon-death",
     movement: { event: "baby-dragon-wing", interval: 0.58 }
   },
-  lifetime: { duration: 0 }
 };
