@@ -16,7 +16,7 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npm run build
-      - run: npm run test:unit
+      - run: npm run test:unit:coverage
       - run: npm run test:multiplayer
       - run: npm run test:server-services
       - run: npm run test:accounts
