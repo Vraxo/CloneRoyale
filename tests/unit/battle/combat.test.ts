@@ -32,8 +32,7 @@ function makeUnit(
     attack: { type: "melee" },
     splashRadius: 0,
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
-    lifetime: 0,
-    age: 0,
+    lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
     facing: 0,
     presentation: { animationOffset: 0, attackAnim: 0 },
@@ -44,6 +43,20 @@ function makeUnit(
 function addUnit(state: GameState, unit: Unit): void {
   state.units.push(unit);
 }
+
+test("units expire after their configured lifetime", () => {
+  const game = createGame();
+  const unit = makeUnit(100, "blue", 120, 700, {
+    lifetime: { duration: 0.1, elapsed: 0 },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  addUnit(game, unit);
+
+  updateUnits(game, 0.1);
+
+  assert.equal(unit.health.hp, 0);
+  assert.equal(unit.lifetime.elapsed, 0.1);
+});
 
 test("melee units damage an enemy in range and start their attack cooldown", () => {
   const game = createGame();

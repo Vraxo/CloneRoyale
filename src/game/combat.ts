@@ -130,11 +130,11 @@ export function updateUnits(state: GameState, dt: number): void {
     }
 
     unit.movement.isMoving = false;
-    unit.age += dt;
+    unit.lifetime.elapsed += dt;
     unit.attackCooldown = Math.max(0, unit.attackCooldown - dt);
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
 
-    if (unit.lifetime > 0 && unit.age >= unit.lifetime) {
+    if (unit.lifetime.duration > 0 && unit.lifetime.elapsed >= unit.lifetime.duration) {
       unit.health.hp = 0;
       continue;
     }

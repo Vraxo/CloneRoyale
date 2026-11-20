@@ -60,8 +60,8 @@ export interface UnitTargeting {
 }
 
 export interface UnitLifetime {
-  lifetime: number;
-  age: number;
+  duration: number;
+  elapsed: number;
 }
 
 export interface UnitDeployment {
@@ -78,8 +78,8 @@ export interface UnitPresentation {
 export interface Unit
   extends UnitIdentity,
     UnitTransform,
-    UnitCombat,
-    UnitLifetime {
+    UnitCombat {
+  lifetime: UnitLifetime;
   targeting: UnitTargeting;
   collision: UnitCollision;
   movement: UnitMovement;
