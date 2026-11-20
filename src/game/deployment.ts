@@ -65,8 +65,10 @@ function spawnCard(
       attackCooldown: 0.25 + nextRandom(state) * 0.35,
       attack: definition.attack,
       splashRadius: definition.splashRadius,
-      canTargetAir: definition.canTargetAir,
-      targetsBuildingsOnly: definition.targetsBuildingsOnly,
+      targeting: {
+        canTargetAir: definition.canTargetAir,
+        targetsBuildingsOnly: definition.targetsBuildingsOnly
+      },
       lifetime: definition.lifetime,
       age: 0,
       deployment: {
