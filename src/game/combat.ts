@@ -3,6 +3,7 @@ import { addProjectile } from "./projectiles";
 import { damageTarget } from "./effects";
 import { otherSide } from "./state";
 import { moveUnitTowardTarget, resolveUnitCollisions } from "./movement";
+import { updateUnitLifetime } from "./lifetime";
 
 function positionOf(target: Unit | Tower): { x: number; y: number } {
   return "transform" in target ? target.transform : target;
@@ -152,13 +153,7 @@ export function updateUnits(state: GameState, dt: number): void {
     unit.combat.attackCooldown = Math.max(0, unit.combat.attackCooldown - dt);
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
 
-    if (unit.lifetime) {
-      unit.lifetime.elapsed += dt;
-      if (unit.lifetime.duration > 0 && unit.lifetime.elapsed >= unit.lifetime.duration) {
-        unit.health.hp = 0;
-        continue;
-      }
-    }
+    if (updateUnitLifetime(unit, dt)) continue;
 
     if (unit.kind === "building") {
       const target = findEnemyUnit(state, unit, unit.combat.range, false, true);
