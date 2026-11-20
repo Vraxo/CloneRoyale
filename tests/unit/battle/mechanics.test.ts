@@ -61,6 +61,15 @@ test("troops without a configured lifetime omit the lifetime component", () => {
   assert.equal("lifetime" in game.units[0], false);
 });
 
+test("units without sound profiles omit the audio component", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["knight"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "knight", "left"), true);
+  assert.equal("audio" in game.units[0], false);
+});
+
 test("allows deployment when elixir exactly matches the card cost", () => {
   const game = createGame();
   game.sides.blue.elixir = 5;
