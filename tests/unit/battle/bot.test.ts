@@ -126,3 +126,35 @@ test("bot uses a knight to defend against a tank when Mini P.E.K.K.A. is unavail
     lane: "right"
   });
 });
+
+test("bot places a cannon against three or more incoming threats", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["cannon"];
+  game.sides.blue.elixir = 10;
+  game.units.push(
+    ...Array.from({ length: 3 }, (_, index) =>
+      makeTroop(400 + index, "red", 100 + index * 10, 700)
+    )
+  );
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "cannon",
+    lane: "left"
+  });
+});
+
+test("bot chooses Baby Dragon against a group of four threats", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["baby-dragon"];
+  game.sides.blue.elixir = 10;
+  game.units.push(
+    ...Array.from({ length: 4 }, (_, index) =>
+      makeTroop(500 + index, "red", 100 + index * 10, 700)
+    )
+  );
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "baby-dragon",
+    lane: "left"
+  });
+});
