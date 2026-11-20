@@ -4,6 +4,7 @@ import { damageTarget } from "./effects";
 import { otherSide } from "./state";
 import { moveUnitTowardTarget, resolveUnitCollisions } from "./movement";
 import { updateUnitLifetime } from "./lifetime";
+import { updateUnitDeployment } from "./unitDeployment";
 
 function positionOf(target: Unit | Tower): { x: number; y: number } {
   return "transform" in target ? target.transform : target;
@@ -122,33 +123,7 @@ export function updateUnits(state: GameState, dt: number): void {
   for (const unit of state.units) {
     if (unit.health.hp <= 0) continue;
 
-    const appearanceDelay = unit.deployment.appearanceDelay;
-    if (appearanceDelay > 0) {
-      const remaining = Math.max(0, appearanceDelay - dt);
-      unit.deployment.appearanceDelay = remaining;
-      if (remaining > 0) continue;
-
-      if (unit.audio?.deploy) state.audioEvents.push(unit.audio?.deploy);
-
-      state.effects.push({
-        id: state.nextId++,
-        x: unit.transform.x,
-        y: unit.transform.y,
-        age: 0,
-        lifetime: 0.62,
-        radius: Math.max(22, unit.collision.radius * 2.2),
-        style: "deployment",
-        side: unit.side
-      });
-
-      continue;
-    }
-
-    const deploymentRemaining = unit.deployment.remaining;
-    if (deploymentRemaining > 0) {
-      unit.deployment.remaining = Math.max(0, deploymentRemaining - dt);
-      continue;
-    }
+    if (updateUnitDeployment(state, unit, dt)) continue;
 
     unit.combat.attackCooldown = Math.max(0, unit.combat.attackCooldown - dt);
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
