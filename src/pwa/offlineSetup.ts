@@ -79,7 +79,7 @@ export function initializeOfflineSetup(): void {
       error.textContent = message;
       error.hidden = false;
     }
-    openButton.disabled = false;
+    saveButton.disabled = false;
   }
 
   closeButton?.addEventListener("click", hide);
@@ -116,8 +116,8 @@ export function initializeOfflineSetup(): void {
         break;
       case "PRECACHE_STATUS":
         if (message.ready) {
-          openButton.textContent = "✓ OFFLINE READY";
-          openButton.disabled = true;
+          saveButton.textContent = "✓ OFFLINE READY";
+          saveButton.disabled = true;
         }
         break;
     }
@@ -132,20 +132,20 @@ export function initializeOfflineSetup(): void {
     })
     .catch(() => {
       // Registration is optional; the game itself continues to work online.
-      openButton.hidden = true;
+      saveButton.hidden = true;
     });
 
   saveButton.addEventListener("click", async () => {
-    if (openButton.disabled) return;
+    if (saveButton.disabled) return;
     show();
     if (error) error.hidden = true;
     if (preparationStarted) return;
     preparationStarted = true;
-    openButton.disabled = true;
+    saveButton.disabled = true;
     if (status) status.textContent = "Connecting to offline storage…";
 
     try {
-      registration ??= await navigator.serviceWorker.getRegistration("/");
+      registration = (await navigator.serviceWorker.getRegistration("/")) ?? registration;
       await navigator.serviceWorker.ready;
       const worker = registration?.active ?? navigator.serviceWorker.controller;
       if (!worker) throw new Error("Offline storage is not available in this browser.");
