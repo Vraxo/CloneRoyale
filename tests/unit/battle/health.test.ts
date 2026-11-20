@@ -78,3 +78,32 @@ test("destroying a princess tower awards a crown and activates its king tower", 
   assert.ok(game.audioEvents.includes("crown-earned"));
   assert.ok(game.audioEvents.includes("king-activation"));
 });
+
+
+test("lethal damage to a unit without death audio emits no sound", () => {
+  const game = createGame();
+  const unit = makeTroop(101, 50);
+  delete unit.audio;
+  game.units.push(unit);
+
+  damageTarget(game, unit.id, 50);
+
+  assert.equal(unit.health.hp, 0);
+  assert.deepEqual(game.audioEvents, []);
+  assert.equal(game.effects.length, 1);
+});
+
+test("ignores missing targets and towers that are already destroyed", () => {
+  const game = createGame();
+  const destroyedTower = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  assert.ok(destroyedTower);
+  destroyedTower.hp = 0;
+  const before = structuredClone(game);
+
+  damageTarget(game, -1, 100);
+  damageTarget(game, destroyedTower.id, 100);
+
+  assert.deepEqual(game, before);
+});
