@@ -37,7 +37,7 @@ function makeUnit(
     targetsBuildingsOnly: false,
     lifetime: 0,
     age: 0,
-    deploymentRemaining: 10,
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
     facing: 0,
     presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
@@ -53,7 +53,7 @@ test("melee units damage an enemy in range and start their attack cooldown", () 
   const attacker = makeUnit(100, "blue", 120, 700);
   const target = makeUnit(101, "red", 145, 700);
 
-  attacker.deploymentRemaining = 0;
+  attacker.deployment.remaining = 0;
   target.hp = 250;
   addUnit(game, attacker);
   addUnit(game, target);
@@ -71,7 +71,7 @@ test("units choose the nearest valid enemy rather than the first in the array", 
   const farther = makeUnit(101, "red", 160, 700);
   const nearer = makeUnit(102, "red", 130, 700);
 
-  attacker.deploymentRemaining = 0;
+  attacker.deployment.remaining = 0;
   addUnit(game, attacker);
   addUnit(game, farther);
   addUnit(game, nearer);
@@ -87,7 +87,7 @@ test("ground units cannot target air units unless their definition allows it", (
   const attacker = makeUnit(100, "blue", 120, 700, { canTargetAir: false });
   const airTarget = makeUnit(101, "red", 140, 700, { isAir: true });
 
-  attacker.deploymentRemaining = 0;
+  attacker.deployment.remaining = 0;
   addUnit(game, attacker);
   addUnit(game, airTarget);
 
@@ -105,7 +105,7 @@ test("ranged units launch a projectile instead of applying immediate damage", ()
   });
   const target = makeUnit(101, "red", 170, 700);
 
-  attacker.deploymentRemaining = 0;
+  attacker.deployment.remaining = 0;
   addUnit(game, attacker);
   addUnit(game, target);
 
@@ -229,7 +229,7 @@ test("buildings include target radius when checking attack range", () => {
     range: 55,
     attack: { type: "projectile", style: "cannon", speed: 300 },
     attackCooldown: 0,
-    deploymentRemaining: 0
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
   const target = makeUnit(101, "red", 120 + 55 + 12 - 1, 700);
 
@@ -272,12 +272,12 @@ test("simultaneous lethal melee attacks resolve regardless of unit order", () =>
   const blue = makeUnit(100, "blue", 120, 700, {
     hp: 100,
     maxHp: 100,
-    deploymentRemaining: 0
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
   const red = makeUnit(101, "red", 145, 700, {
     hp: 100,
     maxHp: 100,
-    deploymentRemaining: 0
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
 
   addUnit(game, blue);
