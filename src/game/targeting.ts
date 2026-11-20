@@ -1,11 +1,14 @@
 import type { GameState, Tower, Unit } from "./types";
 import { otherSide } from "./state";
 
+type UnitTargetingState = Pick<GameState, "units">;
+type TowerTargetingState = Pick<GameState, "towers">;
+
 type TargetingUnit = Pick<Unit, "side" | "transform" | "targeting">;
 type LaneUnit = Pick<Unit, "side" | "lane" | "transform">;
 
 export function findEnemyUnit(
-  state: GameState,
+  state: UnitTargetingState,
   unit: TargetingUnit,
   detectionRange: number,
   buildingsOnly = false,
@@ -31,7 +34,7 @@ export function findEnemyUnit(
   return nearest;
 }
 
-export function findEnemyTower(state: GameState, unit: LaneUnit): Tower | null {
+export function findEnemyTower(state: TowerTargetingState, unit: LaneUnit): Tower | null {
   const enemySide = otherSide(unit.side);
   const princess = state.towers.find((tower) =>
     tower.side === enemySide && tower.kind === "princess" && tower.lane === unit.lane && tower.hp > 0

@@ -112,7 +112,7 @@ function clamp(value: number, minimum: number, maximum: number): number {
   return Math.max(minimum, Math.min(maximum, value));
 }
 
-export function resolveUnitCollisions(state: GameState): void {
+export function resolveUnitCollisions(state: Pick<GameState, "units" | "towers">): void {
   separateUnits(state.units);
   separateUnitsFromTowers(state.units, state.towers);
 }
