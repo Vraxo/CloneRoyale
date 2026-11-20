@@ -1,7 +1,18 @@
 import type { GameState, Tower, Unit } from "./types";
+import type { UnitCollision, UnitIdentity, UnitMovement, UnitTransform } from "./types/Unit";
 import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "./state";
 
 const BRIDGE_HALF_WIDTH = 1.5 * ARENA_TILE_SIZE;
+
+type PathingUnit =
+  & Pick<UnitTransform, "x" | "y">
+  & Pick<UnitMovement, "isAir">
+  & Pick<UnitCollision, "radius">
+  & Pick<UnitIdentity, "lane">;
+
+type MovingUnit =
+  & Pick<UnitTransform, "x" | "y" | "facing">
+  & Pick<UnitMovement, "speed" | "isMoving">;
 
 function riverBank(y: number): -1 | 0 | 1 {
   if (y < RIVER_TOP) return -1;
@@ -9,7 +20,7 @@ function riverBank(y: number): -1 | 0 | 1 {
   return 0;
 }
 
-function movementTarget(unit: Unit, targetX: number, targetY: number): { x: number; y: number } {
+function movementTarget(unit: PathingUnit, targetX: number, targetY: number): { x: number; y: number } {
   if (unit.isAir) return { x: targetX, y: targetY };
 
   const currentBank = riverBank(unit.y);
@@ -45,7 +56,7 @@ function movementTarget(unit: Unit, targetX: number, targetY: number): { x: numb
   };
 }
 
-function moveToward(unit: Unit, x: number, y: number, dt: number): void {
+function moveToward(unit: MovingUnit, x: number, y: number, dt: number): void {
   const dx = x - unit.x;
   const dy = y - unit.y;
   const distance = Math.hypot(dx, dy);
