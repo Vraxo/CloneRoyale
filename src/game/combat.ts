@@ -216,7 +216,7 @@ export function updateTowers(state: GameState, dt: number): void {
       const princessDestroyed = state.towers.some((candidate) =>
         candidate.side === tower.side
         && candidate.kind === "princess"
-        && candidate.health.hp <= 0
+        && candidate.hp <= 0
       );
       const kingDamaged = tower.hp < tower.maxHp;
 
