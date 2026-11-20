@@ -1,4 +1,4 @@
-import type { GameState, Side, Tower, Unit } from "./types";
+import type { GameState, Tower, Unit } from "./types";
 import { addProjectile } from "./projectiles";
 import { damageTarget } from "./effects";
 import { moveUnitTowardTarget, resolveUnitCollisions } from "./movement";
