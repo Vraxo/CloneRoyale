@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { updateUnits } from "../../../src/game/combat.js";
+import { keepGroundUnitsOnBridges } from "../../../src/game/movement.js";
 import { createGame } from "../../../src/game/simulation.js";
 import { ARENA_TILE_SIZE, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "../../../src/game/state.js";
 import type { BuildingUnit, GameState, TroopUnit, Unit } from "../../../src/game/types/index.js";
@@ -164,4 +165,37 @@ test("pushes ground units out of tower collision space", () => {
 
   const distance = Math.hypot(unit.transform.x - tower.x, unit.transform.y - tower.y);
   assert.ok(distance >= unit.collision.radius + tower.radius + 2 - 0.01);
+});
+
+
+test("bridge constraints leave air, defeated, deploying, and stationary units untouched", () => {
+  const game = createGame();
+  const riverY = (RIVER_TOP + RIVER_BOTTOM) / 2;
+  const bridgeX = LANE_X.left;
+  const activeGround = makeUnit(100, "blue", 300, riverY, {
+    movement: { speed: 80, isAir: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  const air = makeUnit(101, "blue", 300, riverY, {
+    movement: { speed: 80, isAir: true },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  const defeated = makeUnit(102, "blue", 300, riverY, {
+    health: { hp: 0, maxHp: 500 },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  const deploying = makeUnit(103, "blue", 300, riverY, {
+    movement: { speed: 80, isAir: false },
+    deployment: { appearanceDelay: 0.1, duration: 0, remaining: 0 }
+  });
+  const building = makeBuilding(104, "blue", 300, riverY);
+  game.units.push(activeGround, air, defeated, deploying, building);
+
+  keepGroundUnitsOnBridges(game.units);
+
+  assert.equal(activeGround.transform.x, bridgeX + 1.5 * ARENA_TILE_SIZE - activeGround.collision.radius);
+  assert.equal(air.transform.x, 300);
+  assert.equal(defeated.transform.x, 300);
+  assert.equal(deploying.transform.x, 300);
+  assert.equal(building.transform.x, 300);
 });
