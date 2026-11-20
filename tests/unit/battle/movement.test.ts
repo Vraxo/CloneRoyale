@@ -259,3 +259,18 @@ test("does not move a troop with zero movement speed", () => {
   assert.equal(unit.transform.facing, 0);
   assert.equal(unit.movement.isMoving, false);
 });
+
+
+test("routes a ground troop from the river interior to the correct bridge exit", () => {
+  const game = createGame();
+  const unit = makeUnit(304, "blue", 300, (RIVER_TOP + RIVER_BOTTOM) / 2, {
+    movement: { speed: 1000, isAir: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
+    lane: "left"
+  });
+
+  moveUnitTowardTarget(game, unit, 300, 200, 1, 999);
+
+  assert.equal(unit.transform.x, LANE_X.left);
+  assert.equal(unit.transform.y, RIVER_TOP - 1);
+});
