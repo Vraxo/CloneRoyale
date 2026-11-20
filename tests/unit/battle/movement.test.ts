@@ -22,7 +22,7 @@ function makeUnit(
     x,
     y,
     health: { hp: 500, maxHp: 500 },
-    radius: 12,
+    collision: { radius: 12 },
     damage: 100,
     movement: { speed: 0, isAir: false },
     range: 55,
@@ -55,7 +55,7 @@ test("separates overlapping ground units without leaving them intersecting", () 
   updateUnits(game, 1 / 30);
 
   const distance = Math.hypot(second.x - first.x, second.y - first.y);
-  assert.ok(distance >= first.radius + second.radius + 2 - 0.01);
+  assert.ok(distance >= first.collision.radius + second.collision.radius + 2 - 0.01);
 });
 
 test("does not separate air units from ground units", () => {
@@ -93,12 +93,12 @@ test("keeps ground units inside their lane's bridge corridor while crossing the 
 
     if (unit.y <= RIVER_BOTTOM && unit.y >= RIVER_TOP) {
       enteredRiver = true;
-      assert.ok(Math.abs(unit.x - bridgeX) <= halfBridgeWidth - unit.radius + 0.01);
+      assert.ok(Math.abs(unit.x - bridgeX) <= halfBridgeWidth - unit.collision.radius + 0.01);
     }
 
     if (previousY > RIVER_TOP && unit.y <= RIVER_TOP) {
       crossedRiver = true;
-      assert.ok(Math.abs(unit.x - bridgeX) <= halfBridgeWidth - unit.radius + 0.01);
+      assert.ok(Math.abs(unit.x - bridgeX) <= halfBridgeWidth - unit.collision.radius + 0.01);
       break;
     }
   }
@@ -118,7 +118,7 @@ test("routes ground troops around blocking buildings instead of moving straight 
     cardId: "cannon",
     type: "cannon",
     kind: "building",
-    radius: 20,
+    collision: { radius: 20 },
     movement: { speed: 0, isAir: false },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
@@ -128,7 +128,7 @@ test("routes ground troops around blocking buildings instead of moving straight 
   updateUnits(game, 0.1);
 
   assert.ok(troop.x > 105, "the troop should take a lateral waypoint around the building");
-  assert.ok(Math.hypot(troop.x - blocker.x, troop.y - blocker.y) > troop.radius + blocker.radius);
+  assert.ok(Math.hypot(troop.x - blocker.x, troop.y - blocker.y) > troop.collision.radius + blocker.collision.radius);
 });
 
 test("pushes ground units out of tower collision space", () => {
@@ -146,5 +146,5 @@ test("pushes ground units out of tower collision space", () => {
   updateUnits(game, 1 / 30);
 
   const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y);
-  assert.ok(distance >= unit.radius + tower.radius + 2 - 0.01);
+  assert.ok(distance >= unit.collision.radius + tower.radius + 2 - 0.01);
 });
