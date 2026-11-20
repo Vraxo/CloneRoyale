@@ -233,3 +233,20 @@ test("overtime timeout still enters tiebreaker without a crown snapshot", () => 
   assert.equal(game.gameOver, false);
   assert.equal(game.overtimeStartCrowns, null);
 });
+
+
+test("awards the overtime win to red when blue loses a princess tower", () => {
+  const game = createGame();
+  game.phase = "overtime";
+  game.overtimeStartCrowns = { blue: 0, red: 0 };
+  const bluePrincess = tower(game, "blue", "princess", "left");
+  assert.ok(bluePrincess);
+  bluePrincess.hp = 0;
+
+  stepGame(game, 1 / 30, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.winner, "red");
+  assert.ok(game.events.some((event) => event.includes("Red wins in overtime")));
+  assert.ok(game.audioEvents.includes("match-defeat"));
+});
