@@ -18,7 +18,6 @@ export interface UnitIdentity {
   side: Side;
   cardId: CardId;
   type: UnitType;
-  kind: "troop" | "building";
   lane: Lane;
 }
 
@@ -84,15 +83,26 @@ export interface UnitPresentation {
   attackAnim: number;
 }
 
-export interface Unit extends UnitIdentity {
+interface UnitBase extends UnitIdentity {
   transform: UnitTransform;
   combat: UnitCombat;
   lifetime: UnitLifetime;
   targeting: UnitTargeting;
   collision: UnitCollision;
-  movement: UnitMovement;
   health: UnitHealth;
   deployment: UnitDeployment;
   audio: UnitAudio;
   presentation: UnitPresentation;
 }
+
+export interface TroopUnit extends UnitBase {
+  kind: "troop";
+  movement: UnitMovement;
+}
+
+export interface BuildingUnit extends UnitBase {
+  kind: "building";
+  movement?: never;
+}
+
+export type Unit = TroopUnit | BuildingUnit;
