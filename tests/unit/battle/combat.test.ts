@@ -169,6 +169,22 @@ test("ranged units launch a projectile instead of applying immediate damage", ()
   assert.equal(game.projectiles[0].damage, attacker.combat.damage);
 });
 
+test("moving troops emit their configured footstep sound", () => {
+  const game = createGame();
+  const unit = makeUnit(100, "blue", 120, 700, {
+    movement: { speed: 80, isAir: false },
+    audio: { movement: { event: "giant-step", interval: 0.48 } },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  addUnit(game, unit);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(unit.movement.isMoving, true);
+  assert.ok(game.audioEvents.includes("giant-step"));
+  assert.equal(unit.movement.footstepCooldown, 0.48);
+});
+
 test("princess towers fire at the nearest enemy troop in range", () => {
   const game = createGame();
   const target = makeUnit(100, "blue", 135, 205);
