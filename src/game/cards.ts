@@ -9,6 +9,7 @@ import { KNIGHT_CARD } from "../cards/Knight/KnightCard";
 import { MINI_PEKKA_CARD } from "../cards/MiniPekka/MiniPekkaCard";
 import { SKELETON_ARMY_CARD } from "../cards/Skeleton/SkeletonArmyCard";
 import { ZAP_CARD } from "../cards/Zap/ZapCard";
+import { ZAP_CARD } from "../cards/Zap/ZapCard";
 
 export const STARTER_DECK: CardId[] = [
   "giant",
