@@ -309,7 +309,7 @@ export class ArenaRenderer {
       movement: {
         speed: card.unit.movement.speed,
         isAir: card.unit.movement.isAir,
-        formationSlot: definition.movement.formation?.pattern === "paired" && index < 2
+        formationSlot: card.unit.movement.formation?.pattern === "paired" && index < 2
           ? (index === 0 ? -1 : 1)
           : undefined
       }
