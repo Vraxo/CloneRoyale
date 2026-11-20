@@ -11,7 +11,7 @@ export interface UnitHealthDefinition {
 
 export interface UnitCollisionDefinition {
   radius: number;
-  collisionMass?: number;
+  mass?: number;
 }
 
 export interface UnitMovementDefinition {
@@ -33,14 +33,15 @@ export interface UnitTargetingDefinition {
 }
 
 export interface UnitLifetimeDefinition {
-  lifetime: number;
+  duration: number;
 }
 
-export interface UnitDefinition
-  extends UnitIdentityDefinition,
-    UnitHealthDefinition,
-    UnitCollisionDefinition,
-    UnitMovementDefinition,
-    UnitCombatDefinition,
-    UnitTargetingDefinition,
-    UnitLifetimeDefinition {}
+export interface UnitDefinition {
+  identity: UnitIdentityDefinition;
+  health: UnitHealthDefinition;
+  collision: UnitCollisionDefinition;
+  movement: UnitMovementDefinition;
+  combat: UnitCombatDefinition;
+  targeting: UnitTargetingDefinition;
+  lifetime: UnitLifetimeDefinition;
+}

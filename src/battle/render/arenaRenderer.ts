@@ -99,7 +99,7 @@ export class ArenaRenderer {
       return;
     }
 
-    const zones = getGroundDeploymentZones(state, side, card.unit.radius);
+    const zones = getGroundDeploymentZones(state, side, card.unit.collision.radius);
     const boundaries = [...new Set([
       0,
       WORLD_HEIGHT,
@@ -210,7 +210,7 @@ export class ArenaRenderer {
 
     this.spellPreview.clear();
 
-    const spacing = Math.max(18, card.unit.radius * 2 + 8);
+    const spacing = Math.max(18, card.unit.collision.radius * 2 + 8);
     const columns = Math.min(card.count, 5);
     const rows = Math.ceil(card.count / columns);
     const getOffset = (index: number): { x: number; y: number } => ({
@@ -281,32 +281,32 @@ export class ArenaRenderer {
       id: -1000 - index,
       side,
       cardId,
-      type: definition.type,
+      type: definition.identity.type,
       kind: category,
       lane: x < WORLD_WIDTH / 2 ? "left" : "right",
       transform: { x, y, facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2 },
-      health: { hp: definition.hp, maxHp: definition.hp },
+      health: { hp: definition.health.hp, maxHp: definition.health.hp },
       movement: {
-        speed: definition.speed,
-        isAir: definition.isAir,
-        formationSlot: definition.type === "archer" && index < 2
+        speed: definition.movement.speed,
+        isAir: definition.movement.isAir,
+        formationSlot: definition.identity.type === "archer" && index < 2
           ? (index === 0 ? -1 : 1)
           : undefined
       },
-      collision: { radius: definition.radius, mass: definition.collisionMass ?? 1 },
+      collision: { radius: definition.collision.radius, mass: definition.collision.mass ?? 1 },
       combat: {
-        damage: definition.damage,
-        range: definition.range,
-        attackInterval: definition.attackInterval,
+        damage: definition.combat.damage,
+        range: definition.combat.range,
+        attackInterval: definition.combat.attackInterval,
         attackCooldown: 0,
-        attack: definition.attack,
-        splashRadius: definition.splashRadius
+        attack: definition.combat.attack,
+        splashRadius: definition.combat.splashRadius
       },
       targeting: {
-        canTargetAir: definition.canTargetAir,
-        targetsBuildingsOnly: definition.targetsBuildingsOnly
+        canTargetAir: definition.targeting.canTargetAir,
+        targetsBuildingsOnly: definition.targeting.targetsBuildingsOnly
       },
-      lifetime: { duration: definition.lifetime, elapsed: 0 },
+      lifetime: { duration: definition.lifetime.duration, elapsed: 0 },
       deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
       presentation: {
         animationOffset: index * 0.37,

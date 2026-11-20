@@ -35,7 +35,7 @@ function spawnCard(
   for (let index = 0; index < card.count; index += 1) {
     const column = index % 5;
     const row = Math.floor(index / 5);
-    const offsetX = card.count === 1 ? 0 : (column - 2) * Math.min(11, definition.radius * 0.85);
+    const offsetX = card.count === 1 ? 0 : (column - 2) * Math.min(11, definition.collision.radius * 0.85);
     const offsetY = card.count === 1 ? 0 : row * direction * 11;
     const x = centerX + offsetX;
     const y = baseY + offsetY;
@@ -45,7 +45,7 @@ function spawnCard(
       id: state.nextId++,
       side,
       cardId: card.id,
-      type: definition.type,
+      type: definition.identity.type,
       kind: card.category === "building" ? "building" : "troop",
       lane,
       transform: {
@@ -53,28 +53,28 @@ function spawnCard(
         y,
         facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2
       },
-      health: { hp: definition.hp, maxHp: definition.hp },
+      health: { hp: definition.health.hp, maxHp: definition.health.hp },
       movement: {
-        speed: definition.speed,
-        isAir: definition.isAir,
-        formationSlot: definition.type === "archer" && card.count === 2
+        speed: definition.movement.speed,
+        isAir: definition.movement.isAir,
+        formationSlot: definition.identity.type === "archer" && card.count === 2
           ? (index === 0 ? -1 : 1)
           : undefined
       },
-      collision: { radius: definition.radius, mass: definition.collisionMass ?? 1 },
+      collision: { radius: definition.collision.radius, mass: definition.collision.mass ?? 1 },
       combat: {
-        damage: definition.damage,
-        range: definition.range,
-        attackInterval: definition.attackInterval,
+        damage: definition.combat.damage,
+        range: definition.combat.range,
+        attackInterval: definition.combat.attackInterval,
         attackCooldown: 0.25 + nextRandom(state) * 0.35,
-        attack: definition.attack,
-        splashRadius: definition.splashRadius
+        attack: definition.combat.attack,
+        splashRadius: definition.combat.splashRadius
       },
       targeting: {
-        canTargetAir: definition.canTargetAir,
-        targetsBuildingsOnly: definition.targetsBuildingsOnly
+        canTargetAir: definition.targeting.canTargetAir,
+        targetsBuildingsOnly: definition.targeting.targetsBuildingsOnly
       },
-      lifetime: { duration: definition.lifetime, elapsed: 0 },
+      lifetime: { duration: definition.lifetime.duration, elapsed: 0 },
       deployment: {
         appearanceDelay,
         duration: deploymentDuration,

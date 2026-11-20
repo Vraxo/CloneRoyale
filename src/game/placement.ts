@@ -89,7 +89,7 @@ export function canPlaceCard(
       && y >= 12 && y <= FIELD_HEIGHT - 12;
   }
 
-  return getGroundDeploymentZones(state, side, card.unit.radius).some((zone) =>
+  return getGroundDeploymentZones(state, side, card.unit.collision.radius).some((zone) =>
     x >= zone.minX && x <= zone.maxX
     && y >= zone.minY && y <= zone.maxY
   );

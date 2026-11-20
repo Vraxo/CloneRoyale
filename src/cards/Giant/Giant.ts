@@ -1,20 +1,19 @@
 import type { UnitDefinition } from "../../game/types";
 
 export const GIANT: UnitDefinition = {
-  type: "giant",
-  hp: 1850,
-  damage: 125,
-  speed: 31,
-  range: 27,
-  attackInterval: 1.55,
-  attack: {
-    type: "melee"
+  identity: { type: "giant" },
+  health: { hp: 1850 },
+  collision: { radius: 22, mass: 100 },
+  movement: { speed: 31, isAir: false },
+  combat: {
+    damage: 125,
+    range: 27,
+    attackInterval: 1.55,
+    attack: {
+      type: "melee"
+    },
+    splashRadius: 0
   },
-  radius: 22,
-  collisionMass: 100,
-  splashRadius: 0,
-  isAir: false,
-  canTargetAir: false,
-  targetsBuildingsOnly: true,
-  lifetime: 0
+  targeting: { canTargetAir: false, targetsBuildingsOnly: true },
+  lifetime: { duration: 0 }
 };
