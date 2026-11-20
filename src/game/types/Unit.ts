@@ -2,6 +2,7 @@ import type { CardId } from "./CardId";
 import type { Lane } from "./Lane";
 import type { Side } from "./Side";
 import type { UnitAttack } from "./UnitAttack";
+import type { AudioEvent } from "./AudioEvent";
 
 export type UnitType =
   | "giant"
@@ -70,6 +71,14 @@ export interface UnitDeployment {
   remaining: number;
 }
 
+export interface UnitAudio {
+  attack?: AudioEvent;
+  hit?: AudioEvent;
+  deploy?: AudioEvent;
+  death?: AudioEvent;
+  movement?: { event: AudioEvent; interval: number };
+}
+
 export interface UnitPresentation {
   animationOffset: number;
   attackAnim: number;
@@ -84,5 +93,6 @@ export interface Unit extends UnitIdentity {
   movement: UnitMovement;
   health: UnitHealth;
   deployment: UnitDeployment;
+  audio: UnitAudio;
   presentation: UnitPresentation;
 }
