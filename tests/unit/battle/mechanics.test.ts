@@ -250,3 +250,21 @@ test("awards the overtime win to red when blue loses a princess tower", () => {
   assert.ok(game.events.some((event) => event.includes("Red wins in overtime")));
   assert.ok(game.audioEvents.includes("match-defeat"));
 });
+
+
+test("defaults a spell to the king tower when its lane princess tower is destroyed", () => {
+  const game = createGame();
+  const redPrincess = tower(game, "red", "princess", "right");
+  const redKing = tower(game, "red", "king");
+  assert.ok(redPrincess);
+  assert.ok(redKing);
+  redPrincess.hp = 0;
+  game.sides.blue.hand = ["fireball"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "fireball", "right"), true);
+
+  assert.equal(game.projectiles.length, 1);
+  assert.equal(game.projectiles[0].targetX, redKing.x);
+  assert.equal(game.projectiles[0].targetY, redKing.y);
+});
