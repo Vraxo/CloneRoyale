@@ -5,6 +5,8 @@ import { FIELD_HEIGHT, FIELD_WIDTH, RIVER_BOTTOM, RIVER_TOP } from "../../game/s
 
 const HALF_WIDTH = FIELD_WIDTH / 2;
 const HALF_HEIGHT = FIELD_HEIGHT / 2;
+const CAMERA_DISTANCE = 1680;
+const CAMERA_TILT = THREE.MathUtils.degToRad(55);
 type Model = THREE.Group;
 interface UnitRig {
   root: THREE.Group;
@@ -67,7 +69,11 @@ export class ThreeBattleScene {
       pointerEvents: "none"
     });
     this.host.style.position = "relative";
-    this.camera.position.set(0, 1190, 1190);
+    // A fixed, elevated oblique view: strategic top-down readability without a flat bird's-eye angle.
+    this.camera.position.set(0,
+      Math.sin(CAMERA_TILT) * CAMERA_DISTANCE,
+      Math.cos(CAMERA_TILT) * CAMERA_DISTANCE
+    );
     this.camera.lookAt(0, 0, 0);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.shadowMap.enabled = true;
