@@ -48,8 +48,11 @@ function spawnCard(
       type: definition.type,
       kind: card.category === "building" ? "building" : "troop",
       lane,
-      x,
-      y,
+      transform: {
+        x,
+        y,
+        facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2
+      },
       health: { hp: definition.hp, maxHp: definition.hp },
       movement: {
         speed: definition.speed,
@@ -77,7 +80,6 @@ function spawnCard(
         duration: deploymentDuration,
         remaining: deploymentDuration
       },
-      facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
       presentation: {
         animationOffset: nextRandom(state) * Math.PI * 2,
         attackAnim: 0
