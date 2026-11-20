@@ -56,6 +56,30 @@ function enemyTowerFor(state: GameState, unit: LaneUnit): Tower | null {
   return kingDistance < princessDistance ? king : princess;
 }
 
+type TowerTarget = Pick<Unit, "id" | "side" | "health" | "deployment" | "transform" | "collision">;
+
+function findTowerTarget(
+  tower: Pick<Tower, "side" | "range" | "x" | "y">,
+  units: readonly Unit[]
+): TowerTarget | null {
+  let nearest: TowerTarget | null = null;
+  let nearestDistance = tower.range;
+
+  for (const unit of units) {
+    if (unit.side === tower.side || unit.health.hp <= 0) continue;
+    if (unit.deployment.appearanceDelay > 0) continue;
+
+    const distance = Math.hypot(unit.transform.x - tower.x, unit.transform.y - tower.y)
+      - unit.collision.radius;
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearest = unit;
+    }
+  }
+
+  return nearest;
+}
+
 type PendingMeleeAttack = { unit: Unit; target: Unit | Tower };
 
 function attackUnit(
@@ -210,21 +234,11 @@ export function updateTowers(state: GameState, dt: number): void {
     tower.attackCooldown = Math.max(0, tower.attackCooldown - dt);
     if (tower.attackCooldown > 0) continue;
 
-    let target: Unit | null = null;
-    let nearestDistance = tower.range;
-
-    for (const unit of state.units) {
-      if (unit.side === tower.side || unit.health.hp <= 0) continue;
-      if ((unit.deployment.appearanceDelay) > 0) continue;
-
-      const distance = Math.hypot(unit.transform.x - tower.x, unit.transform.y - tower.y) - unit.collision.radius;
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        target = unit;
-      }
-    }
-
+    const target = findTowerTarget(tower, state.units);
     if (!target) continue;
+
+    const nearestDistance = Math.hypot(target.transform.x - tower.x, target.transform.y - tower.y)
+      - target.collision.radius;
 
     tower.attackCooldown = tower.attackInterval;
     state.audioEvents.push(
@@ -236,8 +250,8 @@ export function updateTowers(state: GameState, dt: number): void {
       tower.x,
       tower.y,
       target.id,
-      positionOf(target).x,
-      positionOf(target).y,
+      target.transform.x,
+      target.transform.y,
       tower.damage,
       0,
       "arrow",
