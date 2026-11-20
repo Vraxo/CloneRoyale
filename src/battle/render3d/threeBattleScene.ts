@@ -6,6 +6,16 @@ import { FIELD_HEIGHT, FIELD_WIDTH, RIVER_BOTTOM, RIVER_TOP } from "../../game/s
 const HALF_WIDTH = FIELD_WIDTH / 2;
 const HALF_HEIGHT = FIELD_HEIGHT / 2;
 type Model = THREE.Group;
+interface UnitRig {
+  root: THREE.Group;
+  leftLeg: THREE.Group;
+  rightLeg: THREE.Group;
+  leftArm: THREE.Group;
+  rightArm: THREE.Group;
+  wings: THREE.Group[];
+  weapon: THREE.Group | null;
+  isBuilding: boolean;
+}
 
 export class ThreeBattleScene {
   public readonly canvas = document.createElement("canvas");
@@ -18,7 +28,7 @@ export class ThreeBattleScene {
     powerPreference: "high-performance"
   });
   private readonly towerModels = new Map<number, Model>();
-  private readonly unitModels = new Map<number, Model>();
+  private readonly unitModels = new Map<number, UnitRig>();
   private readonly projectileModels = new Map<number, THREE.Mesh>();
   private readonly effectModels = new Map<number, THREE.Mesh>();
   private readonly preview = new THREE.Group();
@@ -281,62 +291,219 @@ export class ThreeBattleScene {
     return group;
   }
 
-  private createUnit(unit: Unit): Model {
-    const group = new THREE.Group();
+  private createUnit(unit: Unit): UnitRig {
+    const root = new THREE.Group();
     const team = unit.side === "blue" ? this.materials.blue : this.materials.red;
-    const bodyMaterial = unit.type === "baby-dragon" ? this.materials.dragon : team;
-    const capsule = (radius: number, length: number, material: THREE.Material,
-      x: number, y: number, z: number): THREE.Mesh => {
-      const mesh = new THREE.Mesh(new THREE.CapsuleGeometry(radius, length, 4, 8), material);
+    const darkTeam = unit.side === "blue"
+      ? new THREE.MeshStandardMaterial({ color: "#28527b", roughness: 0.8 })
+      : new THREE.MeshStandardMaterial({ color: "#793b38", roughness: 0.8 });
+    const skin = this.materials.skin;
+    const leftLeg = new THREE.Group();
+    const rightLeg = new THREE.Group();
+    const leftArm = new THREE.Group();
+    const rightArm = new THREE.Group();
+    const wings: THREE.Group[] = [];
+    let weapon: THREE.Group | null = null;
+    const isBuilding = unit.kind === "building";
+
+    const capsule = (parent: THREE.Object3D, radius: number, length: number,
+      material: THREE.Material, x: number, y: number, z: number): THREE.Mesh => {
+      const mesh = new THREE.Mesh(new THREE.CapsuleGeometry(radius, length, 4, 10), material);
       mesh.position.set(x, y, z);
       mesh.castShadow = true;
-      group.add(mesh);
+      mesh.receiveShadow = true;
+      parent.add(mesh);
       return mesh;
     };
+    const sphere = (parent: THREE.Object3D, radius: number, material: THREE.Material,
+      x: number, y: number, z: number): THREE.Mesh => {
+      const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 14, 12), material);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      parent.add(mesh);
+      return mesh;
+    };
+    const pivot = (x: number, y: number, z: number): THREE.Group => {
+      const group = new THREE.Group();
+      group.position.set(x, y, z);
+      root.add(group);
+      return group;
+    };
+    const makeSword = (parent: THREE.Object3D, scale = 1): THREE.Group => {
+      const sword = new THREE.Group();
+      const blade = new THREE.Mesh(
+        new THREE.BoxGeometry(4 * scale, 27 * scale, 3 * scale),
+        this.materials.metal
+      );
+      blade.position.y = -15 * scale;
+      blade.castShadow = true;
+      sword.add(blade);
+      const guard = new THREE.Mesh(
+        new THREE.BoxGeometry(13 * scale, 3 * scale, 5 * scale),
+        this.materials.gold
+      );
+      guard.position.y = -2 * scale;
+      sword.add(guard);
+      const grip = new THREE.Mesh(
+        new THREE.CylinderGeometry(2 * scale, 2 * scale, 10 * scale, 8),
+        this.materials.wood
+      );
+      grip.position.y = 5 * scale;
+      sword.add(grip);
+      parent.add(sword);
+      return sword;
+    };
+
     if (unit.type === "cannon") {
-      this.addCylinder(group, 17, 20, 10, this.materials.dark, 0, 12, 0);
-      this.addCylinder(group, 12, 14, 12, team, 0, 22, 0);
-      const barrel = this.addCylinder(group, 5, 7, 31, this.materials.metal, 0, 30, -8, 10);
+      this.addCylinder(root, 20, 23, 12, this.materials.dark, 0, 12, 0);
+      this.addCylinder(root, 14, 17, 15, team, 0, 24, 0);
+      const barrelPivot = new THREE.Group();
+      barrelPivot.position.set(0, 31, -5);
+      root.add(barrelPivot);
+      const barrel = this.addCylinder(barrelPivot, 5, 7, 38, this.materials.metal, 0, 0, -16, 12);
       barrel.rotation.x = Math.PI / 2;
-    } else if (unit.type === "baby-dragon") {
-      capsule(12, 13, bodyMaterial, 0, 27, 0);
-      const head = new THREE.Mesh(new THREE.SphereGeometry(9, 10, 8), bodyMaterial);
-      head.position.set(0, 31, -17);
-      group.add(head);
+      this.addCylinder(barrelPivot, 8, 8, 3, this.materials.dark, 0, 0, -34, 12);
+      return { root, leftLeg, rightLeg, leftArm, rightArm, wings, weapon: barrelPivot, isBuilding: true };
+    }
+
+    if (unit.type === "baby-dragon") {
+      const body = new THREE.Group();
+      root.add(body);
+      capsule(body, 13, 19, this.materials.dragon, 0, 27, 0);
+      sphere(body, 10, this.materials.dragon, 0, 36, -17);
+      sphere(body, 2.2, this.materials.gold, -4, 39, -25);
+      sphere(body, 2.2, this.materials.gold, 4, 39, -25);
+      const snout = new THREE.Mesh(new THREE.ConeGeometry(5, 12, 8), this.materials.dragon);
+      snout.rotation.x = -Math.PI / 2;
+      snout.position.set(0, 32, -28);
+      body.add(snout);
       for (const side of [-1, 1]) {
-        const wing = this.addBox(group, 25, 3, 16, bodyMaterial, side * 17, 31, 3);
-        wing.rotation.z = side * 0.25;
+        const wing = new THREE.Group();
+        wing.position.set(side * 9, 34, 1);
+        const membrane = new THREE.Mesh(new THREE.BufferGeometry(), this.materials.dragon);
+        const shape = new THREE.Shape();
+        shape.moveTo(0, 0);
+        shape.quadraticCurveTo(side * 20, 12, side * 35, 8);
+        shape.quadraticCurveTo(side * 24, -13, side * 10, -15);
+        shape.lineTo(0, 0);
+        const wingShape = new THREE.ShapeGeometry(shape);
+        const wingMesh = new THREE.Mesh(wingShape, this.materials.dragon);
+        wingMesh.material = new THREE.MeshStandardMaterial({ color: "#80ad69", side: THREE.DoubleSide, roughness: 0.8 });
+        wingMesh.castShadow = true;
+        wing.add(wingMesh);
+        const bone = this.addCylinder(wing, 1.5, 1.5, 37, this.materials.dark, side * 15, 0, 0, 6);
+        bone.rotation.z = side * Math.PI / 2;
+        root.add(wing);
+        wings.push(wing);
       }
-    } else if (unit.type === "giant") {
-      capsule(14, 23, this.materials.skin, 0, 27, 0);
-      capsule(17, 9, team, 0, 42, 0);
-      const head = new THREE.Mesh(new THREE.SphereGeometry(9, 10, 8), this.materials.skin);
-      head.position.y = 54;
-      group.add(head);
-    } else if (unit.type === "mini-pekka") {
-      this.addBox(group, 24, 30, 17, this.materials.metal, 0, 28, 0);
-      this.addBox(group, 28, 9, 21, team, 0, 44, 0);
-      const visor = this.addBox(group, 17, 5, 2, this.materials.gold, 0, 36, -10);
-      visor.rotation.x = -0.1;
-    } else if (unit.type === "skeleton") {
-      capsule(5, 15, this.materials.stone, 0, 20, 0);
-      const skull = new THREE.Mesh(new THREE.SphereGeometry(6, 8, 7), this.materials.stone);
-      skull.position.y = 34;
-      group.add(skull);
+      const tail = new THREE.Mesh(new THREE.ConeGeometry(6, 24, 8), this.materials.dragon);
+      tail.rotation.x = Math.PI / 2;
+      tail.position.set(0, 22, 19);
+      root.add(tail);
+      return { root, leftLeg, rightLeg, leftArm, rightArm, wings, weapon: null, isBuilding: false };
+    }
+
+    const giant = unit.type === "giant";
+    const pekka = unit.type === "mini-pekka";
+    const skeleton = unit.type === "skeleton";
+    const knight = unit.type === "knight";
+    const archer = unit.type === "archer";
+    const height = giant ? 66 : pekka ? 57 : skeleton ? 43 : 54;
+    const torsoMaterial = giant ? darkTeam : pekka ? this.materials.metal : skeleton ? this.materials.stone : team;
+    const torso = new THREE.Mesh(
+      new THREE.CapsuleGeometry(giant ? 17 : pekka ? 14 : skeleton ? 7 : 11, giant ? 21 : 17, 5, 12),
+      torsoMaterial
+    );
+    torso.position.y = giant ? 39 : 31;
+    torso.castShadow = true;
+    root.add(torso);
+
+    if (giant) {
+      const belt = this.addBox(root, 34, 7, 22, this.materials.wood, 0, 29, 0);
+      belt.rotation.x = 0.04;
+      sphere(root, 12, skin, 0, 59, -1);
+      this.addBox(root, 18, 7, 15, darkTeam, 0, 51, 0);
+      for (const side of [-1, 1]) {
+        const pauldron = sphere(root, 11, this.materials.wood, side * 19, 48, 0);
+        pauldron.scale.set(1.25, 0.8, 1);
+      }
+    } else if (pekka) {
+      const helmet = new THREE.Mesh(new THREE.ConeGeometry(15, 22, 6), this.materials.metal);
+      helmet.position.set(0, 56, 0);
+      helmet.rotation.y = Math.PI / 6;
+      root.add(helmet);
+      this.addBox(root, 20, 6, 3, this.materials.gold, 0, 53, -12);
+      this.addBox(root, 24, 8, 23, team, 0, 43, 0);
+      const crest = this.addBox(root, 3, 17, 5, this.materials.gold, 0, 68, 0);
+      crest.rotation.z = 0.18;
+    } else if (skeleton) {
+      sphere(root, 8, this.materials.stone, 0, 52, 0);
+      this.addBox(root, 11, 3, 2, this.materials.dark, 0, 53, -7);
+      for (const side of [-1, 1]) {
+        sphere(root, 2, this.materials.dark, side * 3, 53, -7.5);
+      }
     } else {
-      capsule(unit.type === "knight" ? 10 : 8, 17, team, 0, 25, 0);
-      const head = new THREE.Mesh(new THREE.SphereGeometry(7, 8, 7), this.materials.skin);
-      head.position.y = 39;
-      group.add(head);
-      if (unit.type === "archer") {
-        const bow = this.addCylinder(group, 1.5, 1.5, 22, this.materials.gold, 10, 25, -2, 8);
-        bow.rotation.z = Math.PI / 2;
+      sphere(root, knight ? 8.5 : 7.5, skin, 0, height - 2, -1);
+      if (knight) {
+        const helmet = new THREE.Mesh(new THREE.SphereGeometry(10, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.72), this.materials.metal);
+        helmet.position.set(0, height + 1, 0);
+        root.add(helmet);
+        this.addBox(root, 13, 4, 3, this.materials.gold, 0, height - 2, -9);
+        const plume = new THREE.Mesh(new THREE.ConeGeometry(4, 17, 7), this.materials.red);
+        plume.position.set(0, height + 13, 2);
+        root.add(plume);
+      }
+      if (archer) {
+        const hood = new THREE.Mesh(new THREE.ConeGeometry(11, 17, 7), this.materials.red);
+        hood.position.set(0, height + 6, 1);
+        root.add(hood);
+        const quiver = this.addBox(root, 8, 19, 8, this.materials.wood, 10, 35, 5);
+        quiver.rotation.z = -0.25;
       }
     }
-    group.position.set(unit.transform.x - HALF_WIDTH, unit.movement?.isAir ? 38 : 5,
-      unit.transform.y - HALF_HEIGHT);
-    group.rotation.y = -unit.transform.facing;
-    return group;
+
+    leftLeg.position.set(-7, 22, 0);
+    rightLeg.position.set(7, 22, 0);
+    capsule(leftLeg, skeleton ? 2.8 : 5.5, skeleton ? 13 : 15, skeleton ? this.materials.stone : darkTeam, 0, -9, 0);
+    capsule(rightLeg, skeleton ? 2.8 : 5.5, skeleton ? 13 : 15, skeleton ? this.materials.stone : darkTeam, 0, -9, 0);
+    this.addBox(leftLeg, 8, 5, 13, this.materials.dark, 0, -19, -2);
+    this.addBox(rightLeg, 8, 5, 13, this.materials.dark, 0, -19, -2);
+    root.add(leftLeg, rightLeg);
+
+    leftArm.position.set(-14, 42, 0);
+    rightArm.position.set(14, 42, 0);
+    capsule(leftArm, skeleton ? 2.5 : 5, 14, skeleton ? this.materials.stone : torsoMaterial, 0, -9, 0);
+    capsule(rightArm, skeleton ? 2.5 : 5, 14, skeleton ? this.materials.stone : torsoMaterial, 0, -9, 0);
+    sphere(leftArm, skeleton ? 3 : 5, skeleton ? this.materials.stone : skin, 0, -18, -1);
+    sphere(rightArm, skeleton ? 3 : 5, skeleton ? this.materials.stone : skin, 0, -18, -1);
+    root.add(leftArm, rightArm);
+
+    if (knight || pekka || skeleton) {
+      weapon = makeSword(rightArm, pekka ? 1.3 : skeleton ? 0.65 : 0.95);
+      weapon.position.set(0, -18, -3);
+      if (knight) {
+        const shield = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 3, 8), this.materials.gold);
+        shield.rotation.x = Math.PI / 2;
+        shield.position.set(0, -17, -6);
+        leftArm.add(shield);
+        const boss = sphere(leftArm, 3, this.materials.red, 0, -17, -8);
+        boss.scale.z = 0.5;
+      }
+    } else if (archer) {
+      weapon = new THREE.Group();
+      const bow = new THREE.Mesh(new THREE.TorusGeometry(10, 1.8, 6, 16, Math.PI), this.materials.wood);
+      bow.rotation.z = Math.PI / 2;
+      bow.position.set(0, -12, -4);
+      weapon.add(bow);
+      const string = this.addCylinder(weapon, 0.6, 0.6, 20, this.materials.gold, 0, -12, -4, 5);
+      string.rotation.z = Math.PI / 2;
+      rightArm.add(weapon);
+    } else if (giant) {
+      const fist = sphere(rightArm, 7, skin, 0, -18, -2);
+      fist.scale.set(1.15, 1, 1.1);
+    }
+
+    return { root, leftLeg, rightLeg, leftArm, rightArm, wings, weapon, isBuilding };
   }
 
   private syncTowers(state: ReadonlyGameState): void {
@@ -361,20 +528,56 @@ export class ThreeBattleScene {
     const active = new Set<number>();
     for (const unit of state.units) {
       active.add(unit.id);
-      let model = this.unitModels.get(unit.id);
-      if (!model) {
-        model = this.createUnit(unit);
-        this.unitModels.set(unit.id, model);
-        this.scene.add(model);
+      let rig = this.unitModels.get(unit.id);
+      if (!rig) {
+        rig = this.createUnit(unit);
+        this.unitModels.set(unit.id, rig);
+        this.scene.add(rig.root);
       }
-      model.position.set(unit.transform.x - HALF_WIDTH,
-        unit.movement?.isAir ? 38 + Math.sin(state.time * 5 + unit.presentation.animationOffset) * 3 : 5,
-        unit.transform.y - HALF_HEIGHT);
-      model.rotation.y = -unit.transform.facing;
-      const bob = unit.movement?.isMoving ? Math.sin(state.time * 13 + unit.presentation.animationOffset) * 0.045 : 0;
-      model.rotation.z = bob;
+
+      const root = rig.root;
+      const moving = unit.kind === "troop" && unit.movement.isMoving;
+      const airborne = unit.kind === "troop" && unit.movement.isAir;
+      const phase = state.time * (moving ? 11 : 2.2) + unit.presentation.animationOffset;
+      const stride = moving ? Math.sin(phase) * 0.62 : Math.sin(phase) * 0.025;
+      const attackProgress = unit.presentation.attackAnim > 0
+        ? Math.sin((1 - unit.presentation.attackAnim / 0.32) * Math.PI)
+        : 0;
+      const attackSwing = attackProgress * 1.1;
+
+      root.position.set(
+        unit.transform.x - HALF_WIDTH,
+        airborne ? 39 + Math.sin(state.time * 5 + unit.presentation.animationOffset) * 4 : 5,
+        unit.transform.y - HALF_HEIGHT
+      );
+      root.rotation.y = -unit.transform.facing;
+      root.rotation.z = moving ? Math.sin(phase * 0.5) * 0.035 : 0;
+      root.scale.setScalar(unit.type === "giant" ? 1.08 : unit.type === "skeleton" ? 0.9 : 1);
+
+      if (!rig.isBuilding && unit.type !== "baby-dragon") {
+        rig.leftLeg.rotation.x = stride;
+        rig.rightLeg.rotation.x = -stride;
+        rig.leftArm.rotation.x = -stride * 0.72 - attackSwing * 0.25;
+        rig.rightArm.rotation.x = stride * 0.72 - attackSwing;
+        rig.rightArm.rotation.z = -attackSwing * 0.6;
+        if (unit.type === "archer" && rig.weapon) {
+          rig.weapon.rotation.x = attackSwing * 0.3;
+        }
+      }
+
+      if (unit.type === "baby-dragon") {
+        const flap = Math.sin(state.time * 10 + unit.presentation.animationOffset) * 0.48;
+        rig.wings.forEach((wing, index) => {
+          wing.rotation.z = (index === 0 ? -1 : 1) * (0.18 + flap);
+          wing.rotation.x = Math.sin(state.time * 5 + index) * 0.12;
+        });
+      }
+
+      if (unit.type === "cannon" && rig.weapon) {
+        rig.weapon.rotation.y = Math.sin(state.time * 1.5 + unit.presentation.animationOffset) * 0.04;
+      }
     }
-    this.removeMissing(this.unitModels, active);
+    this.removeMissing(new Map([...this.unitModels].map(([id, rig]) => [id, rig.root])), active);
   }
 
   private syncProjectiles(state: ReadonlyGameState): void {
