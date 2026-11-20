@@ -14,7 +14,7 @@ export function damageTarget(state: GameState, targetId: number, damage: number)
       if (unit.type === "skeleton") state.audioEvents.push("skeleton-death");
       if (unit.type === "archer") state.audioEvents.push("archer-death");
     }
-    unit.attackAnim = Math.max(unit.attackAnim, 0.09);
+    unit.presentation.attackAnim = Math.max(unit.presentation.attackAnim, 0.09);
     state.effects.push({
       id: state.nextId++,
       x: unit.x,

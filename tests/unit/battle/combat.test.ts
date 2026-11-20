@@ -39,8 +39,7 @@ function makeUnit(
     age: 0,
     deploymentRemaining: 10,
     facing: 0,
-    animationOffset: 0,
-    attackAnim: 0,
+    presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
   };
 }
@@ -63,7 +62,7 @@ test("melee units damage an enemy in range and start their attack cooldown", () 
 
   assert.equal(target.hp, 150);
   assert.equal(attacker.attackCooldown, attacker.attackInterval);
-  assert.ok(attacker.attackAnim > 0);
+  assert.ok(attacker.presentation.attackAnim > 0);
 });
 
 test("units choose the nearest valid enemy rather than the first in the array", () => {

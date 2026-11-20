@@ -73,8 +73,10 @@ function spawnCard(
       deploymentDuration,
       deploymentRemaining: deploymentDuration,
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
-      animationOffset: nextRandom(state) * Math.PI * 2,
-      attackAnim: 0
+      presentation: {
+        animationOffset: nextRandom(state) * Math.PI * 2,
+        attackAnim: 0
+      }
     });
 
 

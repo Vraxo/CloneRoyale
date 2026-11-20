@@ -40,11 +40,11 @@ export class BabyDragonView extends UnitView {
   public update(unit: DeepReadonly<Unit>, time: number): void {
     this.updateCommon(unit, time);
     this.body.rotation = unit.facing + Math.PI / 2;
-    this.body.y = Math.sin(time * 4 + unit.animationOffset) * 2.6;
+    this.body.y = Math.sin(time * 4 + unit.presentation.animationOffset) * 2.6;
 
-    const flap = Math.sin(time * 12 + unit.animationOffset);
+    const flap = Math.sin(time * 12 + unit.presentation.animationOffset);
     this.leftWing.rotation = -0.25 + flap * 0.58;
     this.rightWing.rotation = 0.25 - flap * 0.58;
-    this.tail.rotation = Math.sin(time * 3 + unit.animationOffset) * 0.12;
+    this.tail.rotation = Math.sin(time * 3 + unit.presentation.animationOffset) * 0.12;
   }
 }

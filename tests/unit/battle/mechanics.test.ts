@@ -33,8 +33,7 @@ function makeUnit(id: number, side: "blue" | "red", x: number, y: number): Unit 
     age: 0,
     deploymentRemaining: 10,
     facing: 0,
-    animationOffset: 0,
-    attackAnim: 0
+    presentation: { animationOffset: 0, attackAnim: 0 }
   };
 }
 

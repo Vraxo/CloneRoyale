@@ -58,7 +58,7 @@ function attackUnit(
   pendingMeleeAttacks: PendingMeleeAttack[]
 ): void {
   unit.attackCooldown = unit.attackInterval;
-  unit.attackAnim = 0.32;
+  unit.presentation.attackAnim = 0.32;
   if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-attack");
   if (unit.type === "giant") state.audioEvents.push("giant-attack");
   if (unit.type === "skeleton") state.audioEvents.push("skeleton-attack");
@@ -132,7 +132,7 @@ export function updateUnits(state: GameState, dt: number): void {
     unit.isMoving = false;
     unit.age += dt;
     unit.attackCooldown = Math.max(0, unit.attackCooldown - dt);
-    unit.attackAnim = Math.max(0, unit.attackAnim - dt);
+    unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
 
     if (unit.lifetime > 0 && unit.age >= unit.lifetime) {
       unit.hp = 0;

@@ -309,8 +309,10 @@ export class ArenaRenderer {
       deploymentDuration: 0,
       deploymentRemaining: 0,
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
-      animationOffset: index * 0.37,
-      attackAnim: 0
+      presentation: {
+        animationOffset: index * 0.37,
+        attackAnim: 0
+      }
     };
   }
 
