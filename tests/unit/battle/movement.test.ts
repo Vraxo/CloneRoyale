@@ -375,6 +375,7 @@ test("does not divert a troop around an obstacle that is its target", () => {
   const target = makeBuilding(403, "red", LANE_X.left, 700, {
     collision: { radius: 20 }
   });
+  game.towers = [];
 
   addUnit(game, unit);
   addUnit(game, target);
