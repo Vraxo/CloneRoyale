@@ -268,3 +268,16 @@ test("defaults a spell to the king tower when its lane princess tower is destroy
   assert.equal(game.projectiles[0].targetX, redKing.x);
   assert.equal(game.projectiles[0].targetY, redKing.y);
 });
+
+
+test("launches arrows without emitting an optional spell launch sound", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["arrows"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "arrows", "left", 135, 180), true);
+
+  assert.equal(game.projectiles.length, 1);
+  assert.equal(game.projectiles[0].style, "arrows");
+  assert.deepEqual(game.audioEvents, []);
+});
