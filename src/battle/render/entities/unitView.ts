@@ -21,7 +21,7 @@ export abstract class UnitView {
     this.damageFlash.alpha = 0;
     this.body.filters = [this.damageFlash];
     this.shadow.ellipse(0, unit.radius * 0.58, unit.radius * 1.3, unit.radius * 0.62)
-      .fill(unit.isAir ? 0x283b2d : 0x344338);
+      .fill(unit.movement.isAir ? 0x283b2d : 0x344338);
     if (unit.id >= 0) {
       const markerColor = unit.side === "blue" ? 0x48a5ff : 0xf06464;
       this.ownershipMarker
