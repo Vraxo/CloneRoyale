@@ -69,9 +69,11 @@ function spawnCard(
       targetsBuildingsOnly: definition.targetsBuildingsOnly,
       lifetime: definition.lifetime,
       age: 0,
-      appearanceDelayRemaining: appearanceDelay,
-      deploymentDuration,
-      deploymentRemaining: deploymentDuration,
+      deployment: {
+        appearanceDelay,
+        duration: deploymentDuration,
+        remaining: deploymentDuration
+      },
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
       presentation: {
         animationOffset: nextRandom(state) * Math.PI * 2,
