@@ -21,7 +21,6 @@ function makeUnit(id: number, side: "blue" | "red", x: number, y: number): Troop
     movement: { speed: 0, isAir: false },
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
-    audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 }
   };
 }
