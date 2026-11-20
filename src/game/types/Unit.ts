@@ -52,7 +52,6 @@ export interface UnitCombat {
   attackCooldown: number;
   attack: UnitAttack;
   splashRadius: number;
-  attackAnim: number;
 }
 
 export interface UnitTargeting {
@@ -73,6 +72,7 @@ export interface UnitDeployment {
 
 export interface UnitPresentation {
   animationOffset: number;
+  attackAnim: number;
 }
 
 export interface Unit
@@ -84,5 +84,6 @@ export interface Unit
     UnitCombat,
     UnitTargeting,
     UnitLifetime,
-    UnitDeployment,
-    UnitPresentation {}
+    UnitDeployment {
+  presentation: UnitPresentation;
+}
