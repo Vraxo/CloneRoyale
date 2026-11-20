@@ -222,6 +222,7 @@ test("bot stops prioritizing more archers once two are already deployed", () => 
 
   assert.deepEqual(chooseBotAction(game, "blue"), {
     cardId: "knight",
-    lane: "left"
+    lane: "right",
+    targetX: 435
   });
 });
