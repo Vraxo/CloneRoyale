@@ -251,3 +251,13 @@ test("deploys the full skeleton army in rows with staggered appearance", () => {
   assert.equal(game.units[0].deployment.duration, 1);
   assert.ok(Math.abs(game.units[14].deployment.duration - 1.45) < 0.000001);
 });
+
+test("rejects non-finite card placement coordinates", () => {
+  const game = createGame();
+  game.sides.blue.hand.push("fireball");
+  game.sides.blue.elixir = 10;
+
+  assert.equal(canPlaceCard(game, "blue", "giant", Number.NaN, 800), false);
+  assert.equal(canPlaceCard(game, "blue", "giant", 135, Number.POSITIVE_INFINITY), false);
+  assert.equal(canPlaceCard(game, "blue", "fireball", Number.NEGATIVE_INFINITY, 480), false);
+});
