@@ -3,6 +3,8 @@ import * as THREE from "three";
 const FIELD_WIDTH = 540;
 const FIELD_DEPTH = 960;
 const LANE_X = [-165, 165];
+const CAMERA_DISTANCE = 1680;
+const CAMERA_TILT = THREE.MathUtils.degToRad(55);
 
 const host = document.createElement("main");
 host.className = "three-prototype";
@@ -29,7 +31,11 @@ scene.background = new THREE.Color("#172c35");
 scene.fog = new THREE.Fog("#172c35", 1250, 2300);
 
 const camera = new THREE.PerspectiveCamera(34, 540 / 960, 1, 4000);
-camera.position.set(0, 1180, 1160);
+// Keep the prototype camera aligned with the live battle renderer.
+camera.position.set(0,
+  Math.sin(CAMERA_TILT) * CAMERA_DISTANCE,
+  Math.cos(CAMERA_TILT) * CAMERA_DISTANCE
+);
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
