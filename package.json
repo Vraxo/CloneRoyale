@@ -24,7 +24,8 @@
     "test:unit:coverage": "tsc -p tsconfig.tests.json && node scripts/run-unit-tests.mjs --coverage"
   },
   "dependencies": {
-    "pixi.js": "^8.23.0"
+    "pixi.js": "^8.23.0",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
