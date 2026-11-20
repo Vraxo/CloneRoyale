@@ -243,3 +243,19 @@ test("does not alter facing or moving state when already at the target", () => {
   assert.equal(unit.transform.facing, 0);
   assert.equal(unit.movement.isMoving, false);
 });
+
+
+test("does not move a troop with zero movement speed", () => {
+  const game = createGame();
+  const unit = makeUnit(303, "blue", 200, 700, {
+    movement: { speed: 0, isAir: false, isMoving: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+
+  moveUnitTowardTarget(game, unit, 200, 600, 1, 999);
+
+  assert.equal(unit.transform.x, 200);
+  assert.equal(unit.transform.y, 700);
+  assert.equal(unit.transform.facing, 0);
+  assert.equal(unit.movement.isMoving, false);
+});
