@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveUnitCollisions } from "../../../src/game/collision.js";
+import { playCard } from "../../../src/game/deployment.js";
 import { createGame } from "../../../src/game/simulation.js";
 import type { TroopUnit } from "../../../src/game/types/index.js";
 
@@ -64,4 +65,47 @@ test("collision separation moves an active unit around a deploying unit", () => 
     active.transform.x - deploying.transform.x,
     active.transform.y - deploying.transform.y
   ) >= deploying.collision.radius + active.collision.radius + 2);
+});
+
+
+test("moves a troop away from a stationary building when the troop is first", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["cannon"];
+  game.sides.blue.elixir = 10;
+  assert.equal(playCard(game, "blue", "cannon", "left"), true);
+
+  const building = game.units[0];
+  assert.equal(building.kind, "building");
+  building.transform.x = 100;
+  building.transform.y = 500;
+  building.deployment.appearanceDelay = 0;
+  building.deployment.remaining = 0;
+  const troop = makeTroop(100, 110);
+  game.units.unshift(troop);
+
+  resolveUnitCollisions(game);
+
+  assert.equal(building.transform.x, 100);
+  assert.ok(troop.transform.x > 110);
+});
+
+test("moves a troop away from a stationary building when the building is first", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["cannon"];
+  game.sides.blue.elixir = 10;
+  assert.equal(playCard(game, "blue", "cannon", "left"), true);
+
+  const building = game.units[0];
+  assert.equal(building.kind, "building");
+  building.transform.x = 110;
+  building.transform.y = 500;
+  building.deployment.appearanceDelay = 0;
+  building.deployment.remaining = 0;
+  const troop = makeTroop(100, 100);
+  game.units.unshift(troop);
+
+  resolveUnitCollisions(game);
+
+  assert.equal(building.transform.x, 110);
+  assert.ok(troop.transform.x < 100);
 });
