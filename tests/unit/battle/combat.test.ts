@@ -552,7 +552,7 @@ test("defeated troops and buildings are skipped before combat and movement updat
       splashRadius: 0
     },
     lifetime: { duration: 10, elapsed: 2 },
-    audio: { movement: { event: "defeated-step", interval: 0.2 } },
+    audio: { movement: { event: "giant-step", interval: 0.2 } },
     movement: { speed: 80, isAir: false, isMoving: true, footstepCooldown: 0 }
   });
   const defeatedBuilding = makeBuilding(502, "blue", 140, 700, {
@@ -578,5 +578,5 @@ test("defeated troops and buildings are skipped before combat and movement updat
   assert.equal(defeatedBuilding.combat.attackCooldown, 0.5);
   assert.equal(defeatedBuilding.lifetime?.elapsed, 2);
   assert.equal(game.projectiles.length, 0);
-  assert.equal(game.audioEvents.includes("defeated-step"), false);
+  assert.equal(game.audioEvents.includes("giant-step"), false);
 });
