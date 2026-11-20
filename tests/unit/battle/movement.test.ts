@@ -142,7 +142,7 @@ test("pushes ground units out of tower collision space", () => {
 
   const unit = makeUnit(100, "blue", tower.x, tower.y, {
     speed: 100,
-    deploymentRemaining: 10
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 10 }
   });
   addUnit(game, unit);
   updateUnits(game, 1 / 30);
