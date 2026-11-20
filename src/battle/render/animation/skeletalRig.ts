@@ -108,7 +108,7 @@ export class SkeletalRig {
 
   public update(unit: DeepReadonly<Unit>, time: number): void {
     const phase = time * 8.2 + unit.presentation.animationOffset;
-    const moving = unit.isMoving ?? false;
+    const moving = unit.movement.isMoving ?? false;
     const stride = moving ? Math.sin(phase) * 0.42 : 0;
     const attackProgress = unit.presentation.attackAnim > 0 ? 1 - unit.presentation.attackAnim / 0.32 : 0;
     const attackSwing = unit.presentation.attackAnim > 0 ? Math.sin(attackProgress * Math.PI) : 0;
