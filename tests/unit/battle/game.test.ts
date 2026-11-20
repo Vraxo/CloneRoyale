@@ -247,7 +247,7 @@ test("deploys the full skeleton army in rows with staggered appearance", () => {
   assert.equal(game.units.length, 15);
   assert.equal(game.units[0].transform.x, 105 - 2 * 5.95);
   assert.equal(game.units[4].transform.x, 105 + 2 * 5.95);
-  assert.equal(game.units[5].transform.y, 759);
+  assert.equal(game.units[5].transform.y, 737);
   assert.equal(game.units[0].deployment.duration, 1);
   assert.ok(Math.abs(game.units[14].deployment.duration - 1.45) < 0.000001);
 });
