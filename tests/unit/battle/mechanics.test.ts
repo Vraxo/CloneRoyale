@@ -197,3 +197,25 @@ test("overtime continues when both sides take a tower in the same step", () => {
   assert.equal(game.gameOver, false);
   assert.equal(game.winner, null);
 });
+
+test("overtime timeout enters tiebreaker and clears the battlefield", () => {
+  const game = createGame();
+  game.phase = "overtime";
+  game.time = 299.9;
+  game.overtimeStartCrowns = { blue: 0, red: 0 };
+  game.sides.blue.hand.push("fireball");
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "giant", "left"), true);
+  assert.equal(playCard(game, "blue", "fireball", "left"), true);
+  assert.ok(game.units.length > 0);
+  assert.ok(game.projectiles.length > 0);
+
+  stepGame(game, 0.1, null, true);
+
+  assert.equal(game.phase, "tiebreaker");
+  assert.equal(game.gameOver, false);
+  assert.equal(game.units.length, 0);
+  assert.equal(game.projectiles.length, 0);
+  assert.equal(game.effects.length, 0);
+});
