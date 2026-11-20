@@ -14,6 +14,12 @@ type MovingUnit =
   & Pick<UnitTransform, "x" | "y" | "facing">
   & Pick<UnitMovement, "speed" | "isMoving">;
 
+type ObstacleAvoidanceUnit =
+  & Pick<UnitIdentity, "id">
+  & Pick<UnitTransform, "x" | "y">
+  & Pick<UnitMovement, "isAir">
+  & Pick<UnitCollision, "radius">;
+
 function riverBank(y: number): -1 | 0 | 1 {
   if (y < RIVER_TOP) return -1;
   if (y > RIVER_BOTTOM) return 1;
@@ -78,7 +84,7 @@ interface MovementObstacle {
 
 function findObstacleWaypoint(
   state: GameState,
-  unit: Unit,
+  unit: ObstacleAvoidanceUnit,
   targetX: number,
   targetY: number,
   targetId: number
