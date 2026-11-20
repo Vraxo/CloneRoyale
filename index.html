@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1e38" />
-    <meta name="description" content="A real-time strategy battle game. Install once and play from your device." />
+    <meta name="description" content="A real-time strategy battle game. Play instantly in your browser, with optional offline support." />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -19,15 +19,15 @@
     <section id="offline-setup" class="offline-setup" aria-labelledby="offline-setup-title" aria-live="polite">
       <div class="offline-setup-panel">
         <div class="offline-setup-mark" aria-hidden="true">♜</div>
-        <span class="offline-setup-eyebrow">ONE-TIME SETUP</span>
-        <h2 id="offline-setup-title">Preparing your game</h2>
-        <p id="offline-setup-status">Saving the game to this device so it loads quickly next time.</p>
+        <span class="offline-setup-eyebrow">OPTIONAL · OFFLINE PLAY</span>
+        <h2 id="offline-setup-title">Save Clone Royale for offline play</h2>
+        <p id="offline-setup-status">You can play right away in your browser. This optional download saves the game on this device for offline solo play and quicker future launches.</p>
         <div class="offline-progress-track" role="progressbar" aria-label="Preparing game files" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="offline-progress">
           <span id="offline-progress-fill"></span>
         </div>
         <div class="offline-progress-meta"><strong id="offline-progress-percent">0%</strong><span id="offline-progress-count">Getting things ready…</span></div>
         <p id="offline-setup-error" class="offline-setup-error" hidden></p>
-        <button id="offline-continue" class="offline-continue" type="button" hidden>Continue online</button>
+        <button id="offline-continue" class="offline-continue" type="button">Close</button>
       </div>
     </section>
     <div class="app-shell">
@@ -66,7 +66,8 @@
             <div class="cr-resource-chip cr-gold-chip"><span class="cr-resource-icon">●</span><strong>0</strong><b>＋</b></div>
             <div class="cr-resource-chip cr-gem-chip"><span class="cr-resource-icon">◆</span><strong>0</strong><b>＋</b></div>
           </div>
-          <button id="install-game" class="cr-install-button" type="button" hidden><span aria-hidden="true">↓</span> INSTALL</button>
+          <button id="offline-save" class="cr-offline-save-button" type="button" hidden><span aria-hidden="true">↓</span> SAVE OFFLINE</button>
+          <button id="install-game" class="cr-install-button" type="button" hidden><span aria-hidden="true">＋</span> INSTALL APP</button>
           <div id="network-status" class="cr-network-status" role="status" aria-live="polite" hidden>NO INTERNET · SOLO PLAY AVAILABLE</div>
         </header>
 
