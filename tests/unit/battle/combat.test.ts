@@ -449,3 +449,23 @@ test("troops advance toward the enemy tower when it is outside attack range", ()
   assert.ok(attacker.transform.y < 700);
   assert.equal(game.projectiles.length, 0);
 });
+
+
+test("troops remain idle when no enemy towers remain", () => {
+  const game = createGame();
+  for (const tower of game.towers) {
+    if (tower.side === "red") tower.hp = 0;
+  }
+  const troop = makeUnit(300, "blue", 135, 700, {
+    movement: { speed: 100, isAir: false, isMoving: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  addUnit(game, troop);
+
+  updateUnits(game, 0.1);
+
+  assert.equal(troop.transform.x, 135);
+  assert.equal(troop.transform.y, 700);
+  assert.equal(troop.movement.isMoving, false);
+  assert.equal(game.projectiles.length, 0);
+});
