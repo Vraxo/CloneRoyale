@@ -58,6 +58,12 @@ export class ArenaRenderer {
     host.replaceChildren(...(this.threeScene ? [this.threeScene.canvas, this.app.canvas] : [this.app.canvas]));
     this.entities.sortableChildren = true;
     this.entities.visible = !this.threeScene;
+    if (this.threeScene) {
+      this.invalidDeploymentOverlay.visible = false;
+      this.spellPreview.visible = false;
+      this.unitPreviewLayer.visible = false;
+      this.placementOverlay.visible = false;
+    }
     this.world.addChild(
       this.arena,
       this.invalidDeploymentOverlay,
@@ -77,7 +83,9 @@ export class ArenaRenderer {
     clientY: number
   ): { x: number; y: number } | null {
     if (!this.initialized || !this.viewport) return null;
-    return this.viewport.screenToWorld(clientX, clientY);
+    return this.threeScene
+      ? this.threeScene.screenToWorld(clientX, clientY)
+      : this.viewport.screenToWorld(clientX, clientY);
   }
 
   public setPlacementPreview(
@@ -171,6 +179,11 @@ export class ArenaRenderer {
   }
 
   public setUnitPreview(cardId: CardId | null, point: { x: number; y: number } | null, side: Side = "blue"): void {
+    if (this.threeScene) {
+      if (!point || !cardId) this.threeScene.clearPreview();
+      else this.threeScene.setPreview(cardId, point, side);
+      return;
+    }
     if (!this.initialized || !point || !cardId) {
       this.clearUnitPreview();
       return;
@@ -267,6 +280,7 @@ export class ArenaRenderer {
   }
 
   public clearUnitPreview(): void {
+    this.threeScene?.clearPreview();
     this.spellPreview.clear();
     for (const view of this.unitPreviewViews) {
       this.unitPreviewLayer.removeChild(view.container);
