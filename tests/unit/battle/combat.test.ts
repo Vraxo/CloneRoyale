@@ -405,3 +405,27 @@ test("buildings do not attack when no enemy troops are in range", () => {
   assert.equal(building.combat.attackCooldown, 0);
   assert.equal(building.health.hp, 500);
 });
+
+
+test("buildings wait for their attack cooldown before firing", () => {
+  const game = createGame();
+  const building = makeBuilding(100, "blue", 120, 700, {
+    combat: {
+      damage: 100,
+      range: 55,
+      attackInterval: 1,
+      attackCooldown: 0.5,
+      attack: { type: "projectile", style: "cannon", speed: 300 },
+      splashRadius: 0
+    }
+  });
+  const target = makeUnit(101, "red", 145, 700);
+  addUnit(game, building);
+  addUnit(game, target);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(game.projectiles.length, 0);
+  assert.ok(building.combat.attackCooldown > 0);
+  assert.equal(target.health.hp, 500);
+});
