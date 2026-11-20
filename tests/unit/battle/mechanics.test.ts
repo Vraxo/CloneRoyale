@@ -467,6 +467,7 @@ test("Zap deals instant area damage, briefly stuns enemies, and costs two elixir
 test("Zap stun pauses troop attacks and tower firing for its remaining duration", () => {
   const game = createGame();
   const enemy = makeUnit(100, "red", 135, 180);
+  enemy.deployment.remaining = 0;
   enemy.stunRemaining = 0.5;
   enemy.combat.attackCooldown = 0;
   game.units.push(enemy);
