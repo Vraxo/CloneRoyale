@@ -1,14 +1,13 @@
 import { createBattleMusic, type BattleMusic } from "../audio/battleMusic";
 import { createSoundEffects, type SoundEffects } from "../audio/soundEffects";
-import { SIMULATION_STEP } from "../game/simulation";
-import { SimulationRuntime } from "../battle/simulationRuntime";
+import { createGame, SIMULATION_STEP, stepGame } from "../game/simulation";
 import { createGameHistory } from "../game/history";
 import { isBattleReplay, type BattleReplay } from "../game/replay";
 import { ReplayRecordingSession } from "../game/replayRecording";
 import { ReplayPlaybackSession } from "../game/replayPlayback";
 import { saveBattleReplay, saveReplayShareToken } from "../game/replayStorage";
 import { STARTER_DECK } from "../game/cards";
-import type { CardId, GameState, Side } from "../game/types";
+import type { CardId, GameState, ReadonlyGameState, Side } from "../game/types";
 import type { ArenaRenderer } from "../battle/render/arenaRenderer";
 import type { OnlineClient } from "../multiplayer/onlineClient";
 import { createBattleHud, type BattleHud } from "../battle/battleHud";
@@ -19,7 +18,6 @@ import { completeBattle } from "../battle/battleCompletion";
 
 export class BattleController {
   private game: GameState;
-  private readonly runtime: SimulationRuntime;
   private history: ReturnType<typeof createGameHistory> | null;
   private paused = false;
   private readonly simulation = new BattleSimulationClock();
@@ -44,8 +42,7 @@ export class BattleController {
     enableDebugTools = false
   ) {
     this.battleSeed = Date.now() >>> 0;
-    this.runtime = new SimulationRuntime(this.battleSeed);
-    this.game = this.runtime.state;
+    this.game = createGame(this.battleSeed);
     this.replayRecording = new ReplayRecordingSession(this.battleSeed, this.playerDeck);
     this.history = enableDebugTools ? createGameHistory(this.game) : null;
     this.music = createBattleMusic();
@@ -115,7 +112,7 @@ export class BattleController {
     player.drawPile = this.playerDeck.slice(4);
   }
 
-  public get state(): GameState {
+  public get state(): ReadonlyGameState {
     return this.game;
   }
 
@@ -236,8 +233,7 @@ export class BattleController {
     if (this.isOnline) return;
     this.soundEffects.stopAll();
     this.battleSeed = (Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0;
-    this.runtime.reset(this.battleSeed);
-    this.game = this.runtime.state;
+    this.game = createGame(this.battleSeed);
     this.applyPlayerDeck();
     this.replayRecording.reset(this.battleSeed, this.playerDeck);
     this.lastReplay = null;
@@ -347,7 +343,7 @@ export class BattleController {
       return;
     }
     const previousTime = this.game.time;
-    this.runtime.step(SIMULATION_STEP, "red");
+    stepGame(this.game, SIMULATION_STEP, "red");
     this.renderer.setDeploymentArea(this.game, "blue", this.selectedCard);
     if (this.game.time === previousTime) return;
 
