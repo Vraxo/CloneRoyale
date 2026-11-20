@@ -43,6 +43,15 @@ test("rejects a card that is not in the player's hand without changing state", (
   assert.deepEqual(game, before);
 });
 
+test("applies formation slots from the unit movement definition", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["archers"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "archers", "left"), true);
+  assert.deepEqual(game.units.map((unit) => unit.movement.formationSlot), [-1, 1]);
+});
+
 test("allows deployment when elixir exactly matches the card cost", () => {
   const game = createGame();
   game.sides.blue.elixir = 5;
