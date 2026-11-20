@@ -22,6 +22,8 @@ export type OnlineMessage =
   | { type: "state"; state: GameState }
   | { type: "match-replay"; replay: BattleReplay; shareToken?: string }
   | { type: "emote"; side: Side; emoteId: number; name: string }
+  | { type: "global-chat-history"; messages: { id: string; name: string; text: string; timestamp: number }[] }
+  | { type: "global-chat-message"; message: { id: string; name: string; text: string; timestamp: number } }
   | { type: "opponent-left" }
   | { type: "action-error"; message: string }
   | { type: "error"; message: string };
@@ -45,6 +47,15 @@ function isPlayers(value: unknown): value is { side: Side; name: string }[] {
   return Array.isArray(value) && value.every(player =>
     isRecord(player) && isSide(player.side) && typeof player.name === "string"
   );
+}
+
+function isChatMessage(value: unknown): value is { id: string; name: string; text: string; timestamp: number } {
+  return isRecord(value)
+    && typeof value.id === "string"
+    && typeof value.name === "string"
+    && typeof value.text === "string"
+    && typeof value.timestamp === "number"
+    && Number.isFinite(value.timestamp);
 }
 
 function isGameState(value: unknown): value is GameState {
@@ -111,6 +122,10 @@ export function isOnlineMessage(value: unknown): value is OnlineMessage {
     case "match-replay":
       return isReplay(value.replay)
         && (value.shareToken === undefined || typeof value.shareToken === "string");
+    case "global-chat-history":
+      return Array.isArray(value.messages) && value.messages.length <= 50 && value.messages.every(isChatMessage);
+    case "global-chat-message":
+      return isChatMessage(value.message);
     case "emote":
       return isSide(value.side)
         && Number.isInteger(value.emoteId)
