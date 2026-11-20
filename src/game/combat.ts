@@ -15,7 +15,7 @@ function findEnemyUnit(
   let nearestDistance = detectionRange;
 
   for (const candidate of state.units) {
-    if (candidate.side === unit.side || candidate.hp <= 0) continue;
+    if (candidate.side === unit.side || candidate.health.hp <= 0) continue;
     if ((candidate.deployment.appearanceDelay) > 0) continue;
     if (buildingsOnly && candidate.kind !== "building") continue;
     if (!unit.canTargetAir && candidate.isAir) continue;
@@ -94,7 +94,7 @@ export function updateUnits(state: GameState, dt: number): void {
   const pendingMeleeAttacks: PendingMeleeAttack[] = [];
 
   for (const unit of state.units) {
-    if (unit.hp <= 0) continue;
+    if (unit.health.hp <= 0) continue;
 
     const appearanceDelay = unit.deployment.appearanceDelay;
     if (appearanceDelay > 0) {
@@ -135,7 +135,7 @@ export function updateUnits(state: GameState, dt: number): void {
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
 
     if (unit.lifetime > 0 && unit.age >= unit.lifetime) {
-      unit.hp = 0;
+      unit.health.hp = 0;
       continue;
     }
 
@@ -174,7 +174,7 @@ export function updateUnits(state: GameState, dt: number): void {
   }
 
   for (const unit of state.units) {
-    if (unit.hp <= 0) continue;
+    if (unit.health.hp <= 0) continue;
 
     const hasMovementSound = unit.type === "mini-pekka"
       || unit.type === "giant"
@@ -230,7 +230,7 @@ export function updateTowers(state: GameState, dt: number): void {
     let nearestDistance = tower.range;
 
     for (const unit of state.units) {
-      if (unit.side === tower.side || unit.hp <= 0) continue;
+      if (unit.side === tower.side || unit.health.hp <= 0) continue;
       if ((unit.deployment.appearanceDelay) > 0) continue;
 
       const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y) - unit.radius;

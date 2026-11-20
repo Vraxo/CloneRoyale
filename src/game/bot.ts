@@ -77,7 +77,7 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
     return { cardId: "mini-pekka", lane: enemyGiant.lane };
   }
 
-  const enemyTank = threats.find((unit) => unit.hp > 650);
+  const enemyTank = threats.find((unit) => unit.health.hp > 650);
   if (enemyTank && affordable.has("knight") && !affordable.has("mini-pekka")) {
     return { cardId: "knight", lane: enemyTank.lane };
   }

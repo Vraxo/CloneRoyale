@@ -282,7 +282,7 @@ export function stepGame(
   updateEffects(state, dt);
 
   state.units = state.units.filter((unit) =>
-    unit.hp > 0
+    unit.health.hp > 0
     && unit.x > -40
     && unit.x < 760
     && unit.y > -40

@@ -108,7 +108,7 @@ function findObstacleWaypoint(
         candidate.id !== targetId
         && candidate.id !== unit.id
         && candidate.kind === "building"
-        && candidate.hp > 0
+        && candidate.health.hp > 0
         && !candidate.isAir
         && (candidate.deployment.appearanceDelay) <= 0
       )
@@ -200,7 +200,7 @@ export function moveUnitTowardTarget(
 
 function keepGroundUnitsOnBridges(units: Unit[]): void {
   for (const unit of units) {
-    if (unit.hp <= 0 || unit.isAir || (unit.deployment.appearanceDelay) > 0) continue;
+    if (unit.health.hp <= 0 || unit.isAir || (unit.deployment.appearanceDelay) > 0) continue;
     if (unit.y < RIVER_TOP || unit.y > RIVER_BOTTOM) continue;
 
     const bridgeX = LANE_X[unit.lane];
@@ -213,12 +213,12 @@ function separateUnits(units: Unit[]): void {
   for (let iteration = 0; iteration < 3; iteration += 1) {
     for (let firstIndex = 0; firstIndex < units.length; firstIndex += 1) {
       const first = units[firstIndex];
-      if (first.hp <= 0 || (first.deployment.appearanceDelay) > 0) continue;
+      if (first.health.hp <= 0 || (first.deployment.appearanceDelay) > 0) continue;
 
       for (let secondIndex = firstIndex + 1; secondIndex < units.length; secondIndex += 1) {
         const second = units[secondIndex];
         if (
-          second.hp <= 0
+          second.health.hp <= 0
           || (second.deployment.appearanceDelay) > 0
           || first.isAir !== second.isAir
         ) continue;
@@ -280,7 +280,7 @@ function separateUnits(units: Unit[]): void {
 function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
   for (let iteration = 0; iteration < 2; iteration += 1) {
     for (const unit of units) {
-      if (unit.hp <= 0 || unit.isAir || (unit.deployment.appearanceDelay) > 0) continue;
+      if (unit.health.hp <= 0 || unit.isAir || (unit.deployment.appearanceDelay) > 0) continue;
 
       for (const tower of towers) {
         if (tower.hp <= 0) continue;

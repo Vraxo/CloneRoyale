@@ -78,12 +78,12 @@ export interface UnitPresentation {
 export interface Unit
   extends UnitIdentity,
     UnitTransform,
-    UnitHealth,
     UnitCollision,
     UnitMovement,
     UnitCombat,
     UnitTargeting,
     UnitLifetime {
+  health: UnitHealth;
   deployment: UnitDeployment;
   presentation: UnitPresentation;
 }

@@ -286,8 +286,7 @@ export class ArenaRenderer {
       lane: x < WORLD_WIDTH / 2 ? "left" : "right",
       x,
       y,
-      hp: definition.hp,
-      maxHp: definition.hp,
+      health: { hp: definition.hp, maxHp: definition.hp },
       radius: definition.radius,
       collisionMass: definition.collisionMass ?? 1,
       formationSlot: definition.type === "archer" && index < 2
