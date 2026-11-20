@@ -296,3 +296,23 @@ test("awards the regulation win to red when blue has more destroyed princess tow
   assert.equal(game.phase, "finished");
   assert.ok(game.audioEvents.includes("match-defeat"));
 });
+
+
+test("deploys every Skeleton Army troop in staggered rows on the red side", () => {
+  const game = createGame();
+  game.sides.red.hand = ["skeleton-army"];
+  game.sides.red.elixir = 10;
+
+  assert.equal(playCard(game, "red", "skeleton-army", "right"), true);
+
+  assert.equal(game.units.length, 15);
+  assert.ok(game.units.every((unit) => unit.kind === "troop" && unit.side === "red"));
+  assert.ok(game.units.every((unit) => unit.transform.facing === Math.PI / 2));
+  assert.equal(game.units[0].transform.y, 212);
+  assert.equal(game.units[5].transform.y, 223);
+  assert.equal(game.units[14].transform.y, 234);
+  assert.equal(new Set(game.units.slice(0, 5).map((unit) => unit.transform.x)).size, 5);
+  assert.ok(game.units[14].deployment.duration > game.units[0].deployment.duration);
+  assert.equal(game.sides.red.cardsPlayed, 1);
+  assert.equal(game.sides.red.elixir, 7);
+});
