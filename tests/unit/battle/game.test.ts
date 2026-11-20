@@ -265,6 +265,8 @@ test("rejects non-finite card placement coordinates", () => {
 
 test("deploys buildings without troop movement state", () => {
   const game = createGame();
+  game.sides.blue.hand = ["cannon"];
+  game.sides.blue.elixir = 10;
 
   assert.equal(playCard(game, "blue", "cannon", "right"), true);
   assert.equal(game.units.length, 1);
