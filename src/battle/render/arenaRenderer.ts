@@ -99,7 +99,7 @@ export class ArenaRenderer {
       return;
     }
 
-    const zones = getGroundDeploymentZones(state, side, card.unit.radius);
+    const zones = getGroundDeploymentZones(state, side, card.unit.collision.radius);
     const boundaries = [...new Set([
       0,
       WORLD_HEIGHT,
@@ -210,7 +210,7 @@ export class ArenaRenderer {
 
     this.spellPreview.clear();
 
-    const spacing = Math.max(18, card.unit.radius * 2 + 8);
+    const spacing = Math.max(18, card.unit.collision.radius * 2 + 8);
     const columns = Math.min(card.count, 5);
     const rows = Math.ceil(card.count / columns);
     const getOffset = (index: number): { x: number; y: number } => ({
