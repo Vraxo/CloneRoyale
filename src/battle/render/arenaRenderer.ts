@@ -305,9 +305,7 @@ export class ArenaRenderer {
       targetsBuildingsOnly: definition.targetsBuildingsOnly,
       lifetime: definition.lifetime,
       age: 0,
-      appearanceDelayRemaining: 0,
-      deploymentDuration: 0,
-      deploymentRemaining: 0,
+      deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
       presentation: {
         animationOffset: index * 0.37,
