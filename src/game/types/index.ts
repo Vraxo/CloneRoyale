@@ -16,3 +16,4 @@ export type { Effect } from "./Effect";
 export type { SideState } from "./SideState";
 export type { GameState } from "./GameState";
 export type { ReadonlyGameState } from "./GameState";
+export type { DeepReadonly } from "./GameState";
