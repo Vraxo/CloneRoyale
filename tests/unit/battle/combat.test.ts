@@ -469,3 +469,27 @@ test("troops remain idle when no enemy towers remain", () => {
   assert.equal(troop.movement.isMoving, false);
   assert.equal(game.projectiles.length, 0);
 });
+
+test("troops wait for their melee attack cooldown before damaging an in-range enemy", () => {
+  const game = createGame();
+  const attacker = makeUnit(100, "blue", 120, 700, {
+    combat: {
+      damage: 100,
+      range: 55,
+      attackInterval: 1,
+      attackCooldown: 0.5,
+      attack: { type: "melee" },
+      splashRadius: 0
+    },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  const target = makeUnit(101, "red", 145, 700);
+
+  addUnit(game, attacker);
+  addUnit(game, target);
+  updateUnits(game, 1 / 30);
+
+  assert.equal(target.health.hp, 500);
+  assert.ok(attacker.combat.attackCooldown > 0);
+  assert.equal(attacker.presentation.attackAnim, 0);
+});
