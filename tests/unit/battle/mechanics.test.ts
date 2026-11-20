@@ -437,3 +437,48 @@ test("red troop placement uses the red-side deployment half", () => {
   assert.equal(canPlaceCard(game, "red", "giant", 135, 100), true);
   assert.equal(canPlaceCard(game, "red", "giant", 135, 800), false);
 });
+
+
+test("Zap deals instant area damage, briefly stuns enemies, and costs two elixir", () => {
+  const game = createGame();
+  const enemy = makeUnit(100, "red", 140, 180);
+  const ally = makeUnit(101, "blue", 145, 180);
+  const outside = makeUnit(102, "red", 260, 180);
+  game.units.push(enemy, ally, outside);
+  game.sides.blue.hand = ["zap"];
+  game.sides.blue.elixir = 2;
+
+  const enemyTower = tower(game, "red", "princess", "left");
+  assert.ok(enemyTower);
+  const originalTowerHp = enemyTower.hp;
+
+  assert.equal(playCard(game, "blue", "zap", "left", 135, 180), true);
+  assert.equal(game.sides.blue.elixir, 0);
+  assert.equal(game.projectiles.length, 0);
+  assert.equal(enemy.health.hp, 400);
+  assert.equal(enemy.stunRemaining, 0.5);
+  assert.equal(ally.health.hp, 500);
+  assert.equal(outside.health.hp, 500);
+  assert.equal(enemyTower.hp, originalTowerHp - 28);
+  assert.equal(enemyTower.stunRemaining, 0.5);
+  assert.equal(game.effects.at(-1)?.style, "zap");
+});
+
+test("Zap stun pauses troop attacks and tower firing for its remaining duration", () => {
+  const game = createGame();
+  const enemy = makeUnit(100, "red", 135, 180);
+  enemy.stunRemaining = 0.5;
+  enemy.combat.attackCooldown = 0;
+  game.units.push(enemy);
+  const enemyTower = tower(game, "red", "princess", "left");
+  assert.ok(enemyTower);
+  enemyTower.stunRemaining = 0.5;
+  enemyTower.attackCooldown = 0;
+
+  stepGame(game, 0.2, null, true);
+
+  assert.equal(enemy.stunRemaining, 0.3);
+  assert.equal(enemyTower.stunRemaining, 0.3);
+  assert.equal(enemy.combat.attackCooldown, 0);
+  assert.equal(game.projectiles.length, 0);
+});
