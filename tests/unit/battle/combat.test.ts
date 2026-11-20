@@ -82,6 +82,25 @@ test("units expire after their configured lifetime", () => {
   assert.equal(unit.lifetime?.elapsed, 0.1);
 });
 
+test("deployment appearance completes before a unit can attack", () => {
+  const game = createGame();
+  const deploying = makeUnit(100, "blue", 120, 700, {
+    audio: { deploy: "giant-deploy" },
+    deployment: { appearanceDelay: 0.05, duration: 0, remaining: 0 }
+  });
+  const enemy = makeUnit(101, "red", 145, 700);
+  addUnit(game, deploying);
+  addUnit(game, enemy);
+
+  updateUnits(game, 0.1);
+
+  assert.equal(deploying.deployment.appearanceDelay, 0);
+  assert.equal(deploying.combat.attackCooldown, 0);
+  assert.equal(enemy.health.hp, 500);
+  assert.ok(game.audioEvents.includes("giant-deploy"));
+  assert.ok(game.effects.some((effect) => effect.style === "deployment"));
+});
+
 test("melee units damage an enemy in range and start their attack cooldown", () => {
   const game = createGame();
   const attacker = makeUnit(100, "blue", 120, 700);
