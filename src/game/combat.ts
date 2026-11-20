@@ -1,6 +1,7 @@
 import type { GameState } from "./types";
 import { damageTarget } from "./health";
-import { moveUnitTowardTarget, resolveUnitCollisions } from "./movement";
+import { moveUnitTowardTarget, keepGroundUnitsOnBridges } from "./movement";
+import { resolveUnitCollisions } from "./collision";
 import { updateUnitLifetime } from "./lifetime";
 import { updateUnitDeployment } from "./unitDeployment";
 import { updateMovementAudio } from "./unitAudio";
@@ -64,4 +65,5 @@ export function updateUnits(state: GameState, dt: number): void {
   }
 
   resolveUnitCollisions(state);
+  keepGroundUnitsOnBridges(state.units);
 }
