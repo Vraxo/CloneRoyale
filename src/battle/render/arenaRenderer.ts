@@ -351,7 +351,7 @@ export class ArenaRenderer {
       this.entities,
       createUnitView,
       (view, unit) => view.update(unit, state.time),
-      (unit) => unit.y + unit.collision.radius
+      (unit) => unit.transform.y + unit.collision.radius
     );
 
     synchronizeViews(
