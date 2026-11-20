@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import type { ReadonlyGameState, Unit } from "../../game/types";
+import type { CardId, ReadonlyGameState, Side, Unit } from "../../game/types";
+import { cardById } from "../../game/cards";
 import { FIELD_HEIGHT, FIELD_WIDTH, RIVER_BOTTOM, RIVER_TOP } from "../../game/state";
 
 const HALF_WIDTH = FIELD_WIDTH / 2;
@@ -20,6 +21,9 @@ export class ThreeBattleScene {
   private readonly unitModels = new Map<number, Model>();
   private readonly projectileModels = new Map<number, THREE.Mesh>();
   private readonly effectModels = new Map<number, THREE.Mesh>();
+  private readonly preview = new THREE.Group();
+  private readonly raycaster = new THREE.Raycaster();
+  private readonly groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -8);
   private readonly materials = {
     grass: new THREE.MeshStandardMaterial({ color: "#779b57", roughness: 1 }),
     grassLight: new THREE.MeshStandardMaterial({ color: "#8eaa68", roughness: 1 }),
@@ -78,10 +82,68 @@ export class ThreeBattleScene {
     fill.position.set(420, 380, -520);
     this.scene.add(fill);
     this.createArena();
+    this.scene.add(this.preview);
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(host);
     this.resize();
     this.animate();
+  }
+
+  public screenToWorld(clientX: number, clientY: number): { x: number; y: number } | null {
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    const pointer = new THREE.Vector2(
+      ((clientX - rect.left) / rect.width) * 2 - 1,
+      -((clientY - rect.top) / rect.height) * 2 + 1
+    );
+    this.raycaster.setFromCamera(pointer, this.camera);
+    const intersection = new THREE.Vector3();
+    if (!this.raycaster.ray.intersectPlane(this.groundPlane, intersection)) return null;
+    const x = intersection.x + HALF_WIDTH;
+    const y = intersection.z + HALF_HEIGHT;
+    if (x < 0 || x > FIELD_WIDTH || y < 0 || y > FIELD_HEIGHT) return null;
+    return { x, y };
+  }
+
+  public setPreview(cardId: CardId, point: { x: number; y: number }, side: Side): void {
+    this.clearPreview();
+    const card = cardById(cardId);
+    const color = side === "blue" ? "#91c9ff" : "#ff958c";
+    if (card.category === "spell") {
+      const ring = new THREE.Mesh(
+        new THREE.CircleGeometry(card.effect.radius, 48),
+        new THREE.MeshBasicMaterial({ color: card.preview?.style === "arrows" ? "#e5c47f" : "#ff8b3d", transparent: true, opacity: 0.22, side: THREE.DoubleSide })
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(point.x - HALF_WIDTH, 9, point.y - HALF_HEIGHT);
+      this.preview.add(ring);
+      return;
+    }
+    const spacing = Math.max(18, card.unit.collision.radius * 2 + 8);
+    const columns = Math.min(card.count, 5);
+    const rows = Math.ceil(card.count / columns);
+    for (let index = 0; index < card.count; index += 1) {
+      const x = point.x + (index % columns - (columns - 1) / 2) * spacing;
+      const y = point.y + (Math.floor(index / columns) - (rows - 1) / 2) * spacing;
+      const marker = new THREE.Mesh(
+        new THREE.CircleGeometry(card.unit.collision.radius * 0.8, 24),
+        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.45, side: THREE.DoubleSide })
+      );
+      marker.rotation.x = -Math.PI / 2;
+      marker.position.set(x - HALF_WIDTH, 9, y - HALF_HEIGHT);
+      this.preview.add(marker);
+    }
+  }
+
+  public clearPreview(): void {
+    for (const child of [...this.preview.children]) {
+      this.preview.remove(child);
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        for (const material of materials) material.dispose();
+      }
+    }
   }
 
   public render(state: ReadonlyGameState): void {
