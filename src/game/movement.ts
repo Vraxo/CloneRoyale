@@ -5,25 +5,25 @@ import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, LANE_X, RIVER_BOTTOM, RIVER
 const BRIDGE_HALF_WIDTH = 1.5 * ARENA_TILE_SIZE;
 
 type PathingUnit =
-  & Pick<UnitTransform, "x" | "y">
+  & { transform: Pick<UnitTransform, "x" | "y"> }
   & { movement: Pick<UnitMovement, "isAir"> }
   & { collision: Pick<UnitCollision, "radius"> }
   & Pick<UnitIdentity, "lane">;
 
 type MovingUnit =
-  & Pick<UnitTransform, "x" | "y" | "facing">
+  & { transform: Pick<UnitTransform, "x" | "y" | "facing"> }
   & { movement: Pick<UnitMovement, "speed" | "isMoving"> };
 
 type ObstacleAvoidanceUnit =
   & Pick<UnitIdentity, "id">
-  & Pick<UnitTransform, "x" | "y">
+  & { transform: Pick<UnitTransform, "x" | "y"> }
   & { movement: Pick<UnitMovement, "isAir"> }
   & { collision: Pick<UnitCollision, "radius"> };
 
 type MovementUnit =
   & PathingUnit
   & Pick<UnitIdentity, "id">
-  & Pick<UnitTransform, "facing">
+  & { transform: Pick<UnitTransform, "facing"> }
   & { movement: Pick<UnitMovement, "formationSlot" | "speed" | "isMoving" | "isAir"> };
 
 function riverBank(y: number): -1 | 0 | 1 {
@@ -35,7 +35,7 @@ function riverBank(y: number): -1 | 0 | 1 {
 function movementTarget(unit: PathingUnit, targetX: number, targetY: number): { x: number; y: number } {
   if (unit.movement.isAir) return { x: targetX, y: targetY };
 
-  const currentBank = riverBank(unit.y);
+  const currentBank = riverBank(unit.transform.y);
   const targetBank = riverBank(targetY);
   const bridgeX = LANE_X[unit.lane];
 
@@ -69,16 +69,16 @@ function movementTarget(unit: PathingUnit, targetX: number, targetY: number): { 
 }
 
 function moveToward(unit: MovingUnit, x: number, y: number, dt: number): void {
-  const dx = x - unit.x;
-  const dy = y - unit.y;
+  const dx = x - unit.transform.x;
+  const dy = y - unit.transform.y;
   const distance = Math.hypot(dx, dy);
   if (distance < 0.001 || unit.movement.speed <= 0) return;
 
-  unit.facing = Math.atan2(dy, dx);
+  unit.transform.facing = Math.atan2(dy, dx);
   unit.movement.isMoving = true;
   const amount = Math.min(distance, unit.movement.speed * dt);
-  unit.x += (dx / distance) * amount;
-  unit.y += (dy / distance) * amount;
+  unit.transform.x += (dx / distance) * amount;
+  unit.transform.y += (dy / distance) * amount;
 }
 
 interface MovementObstacle {
@@ -97,8 +97,8 @@ function findObstacleWaypoint(
 ): { x: number; y: number } | null {
   if (unit.movement.isAir) return null;
 
-  const dx = targetX - unit.x;
-  const dy = targetY - unit.y;
+  const dx = targetX - unit.transform.x;
+  const dy = targetY - unit.transform.y;
   const pathLengthSquared = dx * dx + dy * dy;
   if (pathLengthSquared < 1) return null;
 
@@ -114,8 +114,8 @@ function findObstacleWaypoint(
       )
       .map((candidate) => ({
         id: candidate.id,
-        x: candidate.x,
-        y: candidate.y,
+        x: candidate.transform.x,
+        y: candidate.transform.y,
         radius: candidate.collision.radius
       })),
     ...state.towers
@@ -133,12 +133,12 @@ function findObstacleWaypoint(
 
   for (const obstacle of obstacles) {
     const projection = (
-      (obstacle.x - unit.x) * dx + (obstacle.y - unit.y) * dy
+      (obstacle.x - unit.transform.x) * dx + (obstacle.y - unit.transform.y) * dy
     ) / pathLengthSquared;
     if (projection <= 0 || projection >= 1 || projection >= firstProjection) continue;
 
-    const closestX = unit.x + dx * projection;
-    const closestY = unit.y + dy * projection;
+    const closestX = unit.transform.x + dx * projection;
+    const closestY = unit.transform.y + dy * projection;
     const clearance = unit.collision.radius + obstacle.radius + 7;
     const offsetX = obstacle.x - closestX;
     const offsetY = obstacle.y - closestY;
@@ -162,9 +162,9 @@ function findObstacleWaypoint(
     x: firstObstacle.x - perpendicularX * clearance,
     y: firstObstacle.y - perpendicularY * clearance
   };
-  const leftDistance = Math.hypot(left.x - unit.x, left.y - unit.y)
+  const leftDistance = Math.hypot(left.x - unit.transform.x, left.y - unit.transform.y)
     + Math.hypot(targetX - left.x, targetY - left.y);
-  const rightDistance = Math.hypot(right.x - unit.x, right.y - unit.y)
+  const rightDistance = Math.hypot(right.x - unit.transform.x, right.y - unit.transform.y)
     + Math.hypot(targetX - right.x, targetY - right.y);
 
   if (Math.abs(leftDistance - rightDistance) < 0.01) {
@@ -183,8 +183,8 @@ export function moveUnitTowardTarget(
   targetId: number
 ): void {
   if (unit.movement.formationSlot !== undefined) {
-    const dx = unit.x - x;
-    const dy = unit.y - y;
+    const dx = unit.transform.x - x;
+    const dy = unit.transform.y - y;
     const distance = Math.hypot(dx, dy) || 1;
     const offset = unit.movement.formationSlot * (unit.collision.radius + 3);
     const perpendicularX = -dy / distance;
@@ -201,11 +201,11 @@ export function moveUnitTowardTarget(
 function keepGroundUnitsOnBridges(units: Unit[]): void {
   for (const unit of units) {
     if (unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
-    if (unit.y < RIVER_TOP || unit.y > RIVER_BOTTOM) continue;
+    if (unit.transform.y < RIVER_TOP || unit.transform.y > RIVER_BOTTOM) continue;
 
     const bridgeX = LANE_X[unit.lane];
     const halfWidth = Math.max(0, BRIDGE_HALF_WIDTH - unit.collision.radius);
-    unit.x = clamp(unit.x, bridgeX - halfWidth, bridgeX + halfWidth);
+    unit.transform.x = clamp(unit.transform.x, bridgeX - halfWidth, bridgeX + halfWidth);
   }
 }
 
@@ -231,8 +231,8 @@ function separateUnits(units: Unit[]): void {
         const secondCanMove = second.kind !== "building" && second.movement.speed > 0;
         if (!firstCanMove && !secondCanMove) continue;
 
-        const dx = second.x - first.x;
-        const dy = second.y - first.y;
+        const dx = second.transform.x - first.transform.x;
+        const dy = second.transform.y - first.transform.y;
         const distanceSquared = dx * dx + dy * dy;
         const minimumDistance = first.collision.radius + second.collision.radius + 2;
         if (distanceSquared >= minimumDistance * minimumDistance) continue;
@@ -264,13 +264,13 @@ function separateUnits(units: Unit[]): void {
         }
 
         if (firstDisplacement > 0) {
-          first.x = clamp(first.x - directionX * firstDisplacement, first.collision.radius, FIELD_WIDTH - first.collision.radius);
-          first.y = clamp(first.y - directionY * firstDisplacement, first.collision.radius, FIELD_HEIGHT - first.collision.radius);
+          first.transform.x = clamp(first.transform.x - directionX * firstDisplacement, first.collision.radius, FIELD_WIDTH - first.collision.radius);
+          first.transform.y = clamp(first.transform.y - directionY * firstDisplacement, first.collision.radius, FIELD_HEIGHT - first.collision.radius);
         }
 
         if (secondDisplacement > 0) {
-          second.x = clamp(second.x + directionX * secondDisplacement, second.collision.radius, FIELD_WIDTH - second.collision.radius);
-          second.y = clamp(second.y + directionY * secondDisplacement, second.collision.radius, FIELD_HEIGHT - second.collision.radius);
+          second.transform.x = clamp(second.transform.x + directionX * secondDisplacement, second.collision.radius, FIELD_WIDTH - second.collision.radius);
+          second.transform.y = clamp(second.transform.y + directionY * secondDisplacement, second.collision.radius, FIELD_HEIGHT - second.collision.radius);
         }
       }
     }
@@ -285,8 +285,8 @@ function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
       for (const tower of towers) {
         if (tower.hp <= 0) continue;
 
-        const dx = unit.x - tower.x;
-        const dy = unit.y - tower.y;
+        const dx = unit.transform.x - tower.x;
+        const dy = unit.transform.y - tower.y;
         const distanceSquared = dx * dx + dy * dy;
         const minimumDistance = unit.collision.radius + tower.radius + 2;
         if (distanceSquared >= minimumDistance * minimumDistance) continue;
@@ -300,13 +300,13 @@ function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
           : unit.side === "blue" ? 1 : -1;
         const overlap = minimumDistance - distance;
 
-        unit.x = clamp(
-          unit.x + directionX * overlap,
+        unit.transform.x = clamp(
+          unit.transform.x + directionX * overlap,
           unit.collision.radius,
           FIELD_WIDTH - unit.collision.radius
         );
-        unit.y = clamp(
-          unit.y + directionY * overlap,
+        unit.transform.y = clamp(
+          unit.transform.y + directionY * overlap,
           unit.collision.radius,
           FIELD_HEIGHT - unit.collision.radius
         );
