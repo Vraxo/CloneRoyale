@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Effect } from "../../../game/types";
+import type { DeepReadonly, Effect } from "../../../game/types";
 import { drawArrow } from "./arrowArt";
 
 export class EffectView {
@@ -18,7 +18,7 @@ export class EffectView {
   private readonly arrowHead = new Graphics();
   private readonly arrowDetails = new Graphics();
 
-  public constructor(effect: Effect) {
+  public constructor(effect: DeepReadonly<Effect>) {
     this.id = effect.id;
     this.container.addChild(
       this.fireballGlow,
@@ -36,7 +36,7 @@ export class EffectView {
     this.update(effect);
   }
 
-  public update(effect: Effect): void {
+  public update(effect: DeepReadonly<Effect>): void {
     const progress = Math.min(1, effect.age / effect.lifetime);
     this.container.position.set(effect.x, effect.y);
     this.graphic.clear();
@@ -82,7 +82,7 @@ export class EffectView {
     this.container.destroy({ children: true });
   }
 
-  private drawFireballExplosion(effect: Effect, progress: number): void {
+  private drawFireballExplosion(effect: DeepReadonly<Effect>, progress: number): void {
     const radius = effect.radius;
     const expansion = 1 - Math.pow(1 - progress, 3);
     const fade = Math.pow(1 - progress, 1.12);
@@ -227,7 +227,7 @@ export class EffectView {
     }
   }
 
-  private drawArrowVolley(effect: Effect, progress: number): void {
+  private drawArrowVolley(effect: DeepReadonly<Effect>, progress: number): void {
     const radius = effect.radius;
     const age = effect.age;
     const ringProgress = Math.min(1, age / 0.24);
@@ -329,7 +329,7 @@ export class EffectView {
     void progress;
   }
 
-  private drawDeployment(effect: Effect, progress: number): void {
+  private drawDeployment(effect: DeepReadonly<Effect>, progress: number): void {
     const color = effect.side === "red" ? 0xff958c : 0x91c9ff;
     const fade = 1 - progress;
     const expansion = 1 - Math.pow(1 - progress, 3);
