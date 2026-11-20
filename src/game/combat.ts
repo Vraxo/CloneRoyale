@@ -1,5 +1,6 @@
 import type { GameState } from "./types";
 import { damageTarget } from "./effects";
+import { addProjectile } from "./projectiles";
 import { moveUnitTowardTarget, resolveUnitCollisions } from "./movement";
 import { updateUnitLifetime } from "./lifetime";
 import { updateUnitDeployment } from "./unitDeployment";
