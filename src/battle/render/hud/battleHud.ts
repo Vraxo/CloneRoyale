@@ -4,8 +4,6 @@ import { cardById } from "../../../game/cards";
 import { MATCH_RULES } from "../../../game/matchRules";
 import { calculateHudLayout } from "./hudLayout";
 
-const HUD_HEIGHT = 176;
-
 const CARD_ART: Record<CardId, string> = {
   giant: "/cards/giant.png",
   archers: "/cards/archers.png",
