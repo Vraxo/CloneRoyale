@@ -2,6 +2,7 @@ import { cardById } from "./cards";
 import type { CardId, GameState, Lane, Side, UnitCardDefinition } from "./types";
 import { addEvent, directionFor, FIELD_HEIGHT, FIELD_WIDTH, LANE_X, nextRandom } from "./state";
 import { addProjectile } from "./projectiles";
+import { resolveZap } from "./spells";
 
 function rotateCard(state: GameState, side: Side, cardId: CardId): void {
   const runtime = state.sides[side];
@@ -118,22 +119,26 @@ export function playCard(
       ?? enemyTowers.find((tower) => tower.kind === "king");
     const x = targetX ?? defaultTower?.x ?? LANE_X[lane];
     const y = targetY ?? defaultTower?.y ?? (side === "blue" ? 180 : 780);
-    const { damage, radius, projectile } = card.effect;
+    const { damage, radius, projectile, stunDuration } = card.effect;
     if (card.audio?.launch) state.audioEvents.push(card.audio.launch);
 
-    addProjectile(
-      state,
-      side,
-      x,
-      side === "blue" ? FIELD_HEIGHT - 50 : 50,
-      null,
-      x,
-      y,
-      damage,
-      radius,
-      projectile.style,
-      projectile.duration
-    );
+    if (projectile) {
+      addProjectile(
+        state,
+        side,
+        x,
+        side === "blue" ? FIELD_HEIGHT - 50 : 50,
+        null,
+        x,
+        y,
+        damage,
+        radius,
+        projectile.style,
+        projectile.duration
+      );
+    } else if (stunDuration !== undefined) {
+      resolveZap(state, side, x, y, damage, radius, stunDuration);
+    }
   } else {
     spawnCard(state, side, card, lane, placement);
   }
