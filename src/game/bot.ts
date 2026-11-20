@@ -14,7 +14,7 @@ function otherSide(side: Side): Side {
 }
 
 function isOnOwnHalf(unit: Unit, side: Side): boolean {
-  return side === "blue" ? unit.y > 480 : unit.y < 480;
+  return side === "blue" ? unit.transform.y > 480 : unit.transform.y < 480;
 }
 
 function laneForX(x: number): Lane {
@@ -25,10 +25,10 @@ function bestEnemyCluster(enemies: Unit[], radius: number): { x: number; y: numb
   let best: { x: number; y: number; count: number; units: Unit[] } | null = null;
 
   for (const candidate of enemies) {
-    const nearby = enemies.filter((unit) => Math.hypot(unit.x - candidate.x, unit.y - candidate.y) <= radius);
+    const nearby = enemies.filter((unit) => Math.hypot(unit.transform.x - candidate.transform.x, unit.transform.y - candidate.transform.y) <= radius);
     if (!best || nearby.length > best.count) {
-      const x = nearby.reduce((sum, unit) => sum + unit.x, 0) / nearby.length;
-      const y = nearby.reduce((sum, unit) => sum + unit.y, 0) / nearby.length;
+      const x = nearby.reduce((sum, unit) => sum + unit.transform.x, 0) / nearby.length;
+      const y = nearby.reduce((sum, unit) => sum + unit.transform.y, 0) / nearby.length;
       best = { x, y, count: nearby.length, units: nearby };
     }
   }
@@ -95,7 +95,7 @@ export function chooseBotAction(state: GameState, side: Side): BotDecision | nul
   }
 
   const friendlySplashNearby = ownTroops.some((unit) =>
-    unit.type === "baby-dragon" && Math.hypot(unit.x - (enemyTank?.x ?? 0), unit.y - (enemyTank?.y ?? 0)) < 180
+    unit.type === "baby-dragon" && Math.hypot(unit.transform.x - (enemyTank?.transform.x ?? 0), unit.transform.y - (enemyTank?.transform.y ?? 0)) < 180
   );
   if (enemyTank && !friendlySplashNearby && affordable.has("skeleton-army")) {
     return { cardId: "skeleton-army", lane: enemyTank.lane };
