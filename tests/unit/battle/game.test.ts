@@ -261,3 +261,16 @@ test("rejects non-finite card placement coordinates", () => {
   assert.equal(canPlaceCard(game, "blue", "giant", 135, Number.POSITIVE_INFINITY), false);
   assert.equal(canPlaceCard(game, "blue", "fireball", Number.NEGATIVE_INFINITY, 480), false);
 });
+
+
+test("deploys buildings without troop movement state", () => {
+  const game = createGame();
+
+  assert.equal(playCard(game, "blue", "cannon", "right"), true);
+  assert.equal(game.units.length, 1);
+  assert.equal(game.units[0].kind, "building");
+  assert.equal(game.units[0].cardId, "cannon");
+  assert.equal("movement" in game.units[0], false);
+  assert.equal(game.units[0].transform.x, 435);
+  assert.equal(game.units[0].transform.y, 690);
+});
