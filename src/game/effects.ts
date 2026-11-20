@@ -4,9 +4,9 @@ import { addEvent } from "./state";
 export function damageTarget(state: GameState, targetId: number, damage: number): void {
   const unit = state.units.find((candidate) => candidate.id === targetId);
   if (unit) {
-    const wasAlive = unit.hp > 0;
-    unit.hp -= damage;
-    if (wasAlive && unit.hp <= 0) {
+    const wasAlive = unit.health.hp > 0;
+    unit.health.hp -= damage;
+    if (wasAlive && unit.health.hp <= 0) {
       if (unit.type === "giant") state.audioEvents.push("giant-death");
       if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-death");
       if (unit.type === "baby-dragon") state.audioEvents.push("baby-dragon-death");
