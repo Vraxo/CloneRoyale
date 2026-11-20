@@ -41,12 +41,11 @@ function spawnCard(
     const y = baseY + offsetY;
     const deploymentDuration = baseDeployTime + index * staggerInterval;
 
-    state.units.push({
+    const unit = {
       id: state.nextId++,
       side,
       cardId: card.id,
       type: definition.identity.type,
-      kind: card.category === "building" ? "building" : "troop",
       lane,
       transform: {
         x,
@@ -54,13 +53,6 @@ function spawnCard(
         facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2
       },
       health: { hp: definition.health.hp, maxHp: definition.health.hp },
-      movement: {
-        speed: definition.movement.speed,
-        isAir: definition.movement.isAir,
-        formationSlot: definition.formation?.pattern === "paired" && card.count === 2
-          ? (index === 0 ? -1 : 1)
-          : undefined
-      },
       collision: { radius: definition.collision.radius, mass: definition.collision.mass ?? 1 },
       combat: {
         damage: definition.combat.damage,
@@ -85,7 +77,23 @@ function spawnCard(
         animationOffset: nextRandom(state) * Math.PI * 2,
         attackAnim: 0
       }
-    });
+    };
+
+    if (card.category === "building") {
+      state.units.push({ ...unit, kind: "building" });
+    } else {
+      state.units.push({
+        ...unit,
+        kind: "troop",
+        movement: {
+          speed: definition.movement.speed,
+          isAir: definition.movement.isAir,
+          formationSlot: definition.formation?.pattern === "paired" && card.count === 2
+            ? (index === 0 ? -1 : 1)
+            : undefined
+        }
+      });
+    }
   }
 }
 

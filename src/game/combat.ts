@@ -22,7 +22,7 @@ function findEnemyUnit(
     if (candidate.side === unit.side || candidate.health.hp <= 0) continue;
     if ((candidate.deployment.appearanceDelay) > 0) continue;
     if (buildingsOnly && candidate.kind !== "building") continue;
-    if (!unit.targeting.canTargetAir && candidate.movement.isAir) continue;
+    if (!unit.targeting.canTargetAir && candidate.kind === "troop" && candidate.movement.isAir) continue;
 
     const distance = Math.hypot(candidate.transform.x - unit.transform.x, candidate.transform.y - unit.transform.y);
     const effectiveDistance = distance - (includeTargetRadius ? candidate.collision.radius : 0);
@@ -122,7 +122,6 @@ export function updateUnits(state: GameState, dt: number): void {
       continue;
     }
 
-    unit.movement.isMoving = false;
     unit.lifetime.elapsed += dt;
     unit.combat.attackCooldown = Math.max(0, unit.combat.attackCooldown - dt);
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
@@ -137,6 +136,8 @@ export function updateUnits(state: GameState, dt: number): void {
       if (target && unit.combat.attackCooldown <= 0) attackUnit(state, unit, target, pendingMeleeAttacks);
       continue;
     }
+
+    unit.movement.isMoving = false;
 
     const detectionRange = Math.max(105, unit.combat.range + 65);
     const enemy = findEnemyUnit(state, unit, detectionRange, unit.targeting.targetsBuildingsOnly);
@@ -167,7 +168,7 @@ export function updateUnits(state: GameState, dt: number): void {
   }
 
   for (const unit of state.units) {
-    if (unit.health.hp <= 0) continue;
+    if (unit.health.hp <= 0 || unit.kind === "building") continue;
 
     const movementSound = unit.audio.movement;
     if (!movementSound) continue;

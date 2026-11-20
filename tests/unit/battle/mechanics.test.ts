@@ -4,9 +4,9 @@ import { playCard } from "../../../src/game/deployment.js";
 import { damageTarget } from "../../../src/game/effects.js";
 import { canPlaceCard } from "../../../src/game/placement.js";
 import { createGame, stepGame } from "../../../src/game/simulation.js";
-import type { GameState, Unit } from "../../../src/game/types/index.js";
+import type { GameState, TroopUnit } from "../../../src/game/types/index.js";
 
-function makeUnit(id: number, side: "blue" | "red", x: number, y: number): Unit {
+function makeUnit(id: number, side: "blue" | "red", x: number, y: number): TroopUnit {
   return {
     id,
     side,
@@ -41,6 +41,16 @@ test("rejects a card that is not in the player's hand without changing state", (
 
   assert.equal(playCard(game, "blue", "knight", "left"), false);
   assert.deepEqual(game, before);
+});
+
+test("deploys stationary buildings without a movement component", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["cannon"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "cannon", "left"), true);
+  assert.equal(game.units[0].kind, "building");
+  assert.equal("movement" in game.units[0], false);
 });
 
 test("allows deployment when elixir exactly matches the card cost", () => {

@@ -4,15 +4,15 @@ import { updateTowers, updateUnits } from "../../../src/game/combat.js";
 import { damageTarget } from "../../../src/game/effects.js";
 import { addProjectile, updateProjectiles } from "../../../src/game/projectiles.js";
 import { createGame } from "../../../src/game/simulation.js";
-import type { GameState, Unit } from "../../../src/game/types/index.js";
+import type { BuildingUnit, GameState, TroopUnit, Unit } from "../../../src/game/types/index.js";
 
 function makeUnit(
   id: number,
   side: "blue" | "red",
   x: number,
   y: number,
-  overrides: Partial<Unit> = {}
-): Unit {
+  overrides: Partial<TroopUnit> = {}
+): TroopUnit {
   return {
     id,
     side,
@@ -28,6 +28,40 @@ function makeUnit(
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
+    audio: {},
+    presentation: { animationOffset: 0, attackAnim: 0 },
+    ...overrides
+  };
+}
+
+function makeBuilding(
+  id: number,
+  side: "blue" | "red",
+  x: number,
+  y: number,
+  overrides: Partial<BuildingUnit> = {}
+): BuildingUnit {
+  return {
+    id,
+    side,
+    cardId: "cannon",
+    type: "cannon",
+    kind: "building",
+    lane: "left",
+    transform: { x, y, facing: 0 },
+    health: { hp: 500, maxHp: 500 },
+    collision: { radius: 12 },
+    combat: {
+      damage: 100,
+      range: 55,
+      attackInterval: 1,
+      attackCooldown: 0,
+      attack: { type: "melee" },
+      splashRadius: 0
+    },
+    targeting: { canTargetAir: true, targetsBuildingsOnly: false },
+    lifetime: { duration: 0, elapsed: 0 },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
     audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
@@ -226,11 +260,15 @@ test("destroying a princess tower activates its side's king tower", () => {
 
 test("buildings include target radius when checking attack range", () => {
   const game = createGame();
-  const building = makeUnit(100, "blue", 120, 700, {
-    type: "cannon",
-    kind: "building",
-    combat: { damage: 100, range: 55, attackInterval: 1, attackCooldown: 0, attack: { type: "projectile", style: "cannon", speed: 300 }, splashRadius: 0 },
-    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  const building = makeBuilding(100, "blue", 120, 700, {
+    combat: {
+      damage: 100,
+      range: 55,
+      attackInterval: 1,
+      attackCooldown: 0,
+      attack: { type: "projectile", style: "cannon", speed: 300 },
+      splashRadius: 0
+    }
   });
   const target = makeUnit(101, "red", 120 + 55 + 12 - 1, 700);
 

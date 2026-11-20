@@ -1,30 +1,12 @@
-import type { GameState, Tower, Unit } from "./types";
-import type { UnitCollision, UnitIdentity, UnitMovement, UnitTransform } from "./types/Unit";
+import type { GameState, Tower, TroopUnit, Unit } from "./types";
 import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "./state";
 
 const BRIDGE_HALF_WIDTH = 1.5 * ARENA_TILE_SIZE;
 
-type PathingUnit =
-  & { transform: Pick<UnitTransform, "x" | "y"> }
-  & { movement: Pick<UnitMovement, "isAir"> }
-  & { collision: Pick<UnitCollision, "radius"> }
-  & Pick<UnitIdentity, "lane">;
-
-type MovingUnit =
-  & { transform: Pick<UnitTransform, "x" | "y" | "facing"> }
-  & { movement: Pick<UnitMovement, "speed" | "isMoving"> };
-
-type ObstacleAvoidanceUnit =
-  & Pick<UnitIdentity, "id">
-  & { transform: Pick<UnitTransform, "x" | "y"> }
-  & { movement: Pick<UnitMovement, "isAir"> }
-  & { collision: Pick<UnitCollision, "radius"> };
-
-type MovementUnit =
-  & PathingUnit
-  & Pick<UnitIdentity, "id">
-  & { transform: Pick<UnitTransform, "facing"> }
-  & { movement: Pick<UnitMovement, "formationSlot" | "speed" | "isMoving" | "isAir"> };
+type PathingUnit = Pick<TroopUnit, "lane" | "transform" | "movement" | "collision">;
+type MovingUnit = Pick<TroopUnit, "transform" | "movement">;
+type ObstacleAvoidanceUnit = Pick<TroopUnit, "id" | "transform" | "movement" | "collision">;
+type MovementUnit = Pick<TroopUnit, "id" | "lane" | "transform" | "movement" | "collision">;
 
 function riverBank(y: number): -1 | 0 | 1 {
   if (y < RIVER_TOP) return -1;
@@ -109,7 +91,6 @@ function findObstacleWaypoint(
         && candidate.id !== unit.id
         && candidate.kind === "building"
         && candidate.health.hp > 0
-        && !candidate.movement.isAir
         && (candidate.deployment.appearanceDelay) <= 0
       )
       .map((candidate) => ({
@@ -200,7 +181,7 @@ export function moveUnitTowardTarget(
 
 function keepGroundUnitsOnBridges(units: Unit[]): void {
   for (const unit of units) {
-    if (unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
+    if (unit.kind === "building" || unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
     if (unit.transform.y < RIVER_TOP || unit.transform.y > RIVER_BOTTOM) continue;
 
     const bridgeX = LANE_X[unit.lane];
@@ -220,15 +201,15 @@ function separateUnits(units: Unit[]): void {
         if (
           second.health.hp <= 0
           || (second.deployment.appearanceDelay) > 0
-          || first.movement.isAir !== second.movement.isAir
+          || (first.kind === "troop" && first.movement.isAir) !== (second.kind === "troop" && second.movement.isAir)
         ) continue;
 
         const firstDeploying = (first.deployment.appearanceDelay) > 0
           || (first.deployment.remaining) > 0;
         const secondDeploying = (second.deployment.appearanceDelay) > 0
           || (second.deployment.remaining) > 0;
-        const firstCanMove = first.kind !== "building" && first.movement.speed > 0;
-        const secondCanMove = second.kind !== "building" && second.movement.speed > 0;
+        const firstCanMove = first.kind === "troop" && first.movement.speed > 0;
+        const secondCanMove = second.kind === "troop" && second.movement.speed > 0;
         if (!firstCanMove && !secondCanMove) continue;
 
         const dx = second.transform.x - first.transform.x;
@@ -280,7 +261,7 @@ function separateUnits(units: Unit[]): void {
 function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
   for (let iteration = 0; iteration < 2; iteration += 1) {
     for (const unit of units) {
-      if (unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
+      if (unit.kind === "building" || unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
 
       for (const tower of towers) {
         if (tower.hp <= 0) continue;

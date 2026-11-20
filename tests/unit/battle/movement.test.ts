@@ -3,15 +3,15 @@ import test from "node:test";
 import { updateUnits } from "../../../src/game/combat.js";
 import { createGame } from "../../../src/game/simulation.js";
 import { ARENA_TILE_SIZE, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "../../../src/game/state.js";
-import type { GameState, Unit } from "../../../src/game/types/index.js";
+import type { BuildingUnit, GameState, TroopUnit, Unit } from "../../../src/game/types/index.js";
 
 function makeUnit(
   id: number,
   side: "blue" | "red",
   x: number,
   y: number,
-  overrides: Partial<Unit> = {}
-): Unit {
+  overrides: Partial<TroopUnit> = {}
+): TroopUnit {
   return {
     id,
     side,
@@ -27,6 +27,40 @@ function makeUnit(
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
+    audio: {},
+    presentation: { animationOffset: 0, attackAnim: 0 },
+    ...overrides
+  };
+}
+
+function makeBuilding(
+  id: number,
+  side: "blue" | "red",
+  x: number,
+  y: number,
+  overrides: Partial<BuildingUnit> = {}
+): BuildingUnit {
+  return {
+    id,
+    side,
+    cardId: "cannon",
+    type: "cannon",
+    kind: "building",
+    lane: "left",
+    transform: { x, y, facing: 0 },
+    health: { hp: 500, maxHp: 500 },
+    collision: { radius: 12 },
+    combat: {
+      damage: 100,
+      range: 55,
+      attackInterval: 1,
+      attackCooldown: 0,
+      attack: { type: "melee" },
+      splashRadius: 0
+    },
+    targeting: { canTargetAir: true, targetsBuildingsOnly: false },
+    lifetime: { duration: 0, elapsed: 0 },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
     audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
@@ -106,13 +140,8 @@ test("routes ground troops around blocking buildings instead of moving straight 
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
     lane: "left"
   });
-  const blocker = makeUnit(200, "blue", 105, 650, {
-    cardId: "cannon",
-    type: "cannon",
-    kind: "building",
-    collision: { radius: 20 },
-    movement: { speed: 0, isAir: false },
-    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  const blocker = makeBuilding(200, "blue", 105, 650, {
+    collision: { radius: 20 }
   });
 
   addUnit(game, troop);

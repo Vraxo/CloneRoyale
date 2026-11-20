@@ -96,7 +96,7 @@ test("deploys archers using their configured paired formation", () => {
 
   assert.equal(playCard(game, "blue", "archers", "left"), true);
   assert.equal(game.units.length, 2);
-  assert.deepEqual(game.units.map((unit) => unit.movement.formationSlot), [-1, 1]);
+  assert.deepEqual(game.units.map((unit) => unit.kind === "troop" ? unit.movement.formationSlot : null), [-1, 1]);
 });
 
 test("configures the arrows spell preview style", () => {

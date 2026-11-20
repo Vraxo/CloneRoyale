@@ -1,5 +1,5 @@
 import { Application, Container, Graphics } from "pixi.js";
-import type { CardId, ReadonlyGameState, Side, Unit } from "../../game/types";
+import type { CardId, Lane, ReadonlyGameState, Side, Unit } from "../../game/types";
 import { cardById } from "../../game/cards";
 import { getGroundDeploymentZones } from "../../game/placement";
 import { EffectView } from "./entities/effectView";
@@ -277,22 +277,14 @@ export class ArenaRenderer {
     y: number,
     side: Side
   ): Unit {
-    return {
+    const unit = {
       id: -1000 - index,
       side,
       cardId,
       type: definition.identity.type,
-      kind: category,
-      lane: x < WORLD_WIDTH / 2 ? "left" : "right",
+      lane: (x < WORLD_WIDTH / 2 ? "left" : "right") as Lane,
       transform: { x, y, facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2 },
       health: { hp: definition.health.hp, maxHp: definition.health.hp },
-      movement: {
-        speed: definition.movement.speed,
-        isAir: definition.movement.isAir,
-        formationSlot: definition.formation?.pattern === "paired" && index < 2
-          ? (index === 0 ? -1 : 1)
-          : undefined
-      },
       collision: { radius: definition.collision.radius, mass: definition.collision.mass ?? 1 },
       combat: {
         damage: definition.combat.damage,
@@ -312,6 +304,19 @@ export class ArenaRenderer {
       presentation: {
         animationOffset: index * 0.37,
         attackAnim: 0
+      }
+    };
+
+    if (category === "building") return { ...unit, kind: "building" };
+    return {
+      ...unit,
+      kind: "troop",
+      movement: {
+        speed: definition.movement.speed,
+        isAir: definition.movement.isAir,
+        formationSlot: definition.formation?.pattern === "paired" && index < 2
+          ? (index === 0 ? -1 : 1)
+          : undefined
       }
     };
   }
