@@ -178,3 +178,22 @@ test("ends overtime immediately when one side destroys a tower", () => {
   assert.equal(game.winner, "blue");
   assert.ok(game.events.some((event) => event.includes("wins in overtime")));
 });
+
+test("overtime continues when both sides take a tower in the same step", () => {
+  const game = createGame();
+  game.phase = "overtime";
+  game.overtimeStartCrowns = { blue: 0, red: 0 };
+
+  const redPrincess = tower(game, "red", "princess", "left");
+  const bluePrincess = tower(game, "blue", "princess", "left");
+  assert.ok(redPrincess);
+  assert.ok(bluePrincess);
+  redPrincess.hp = 0;
+  bluePrincess.hp = 0;
+
+  stepGame(game, 1 / 30, null, true);
+
+  assert.equal(game.phase, "overtime");
+  assert.equal(game.gameOver, false);
+  assert.equal(game.winner, null);
+});
