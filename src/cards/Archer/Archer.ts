@@ -17,5 +17,11 @@ export const ARCHER: UnitDefinition = {
     splashRadius: 0
   },
   targeting: { canTargetAir: true, targetsBuildingsOnly: false },
+  audio: {
+    attack: "archer-attack",
+    deploy: "archer-deploy",
+    death: "archer-death",
+    movement: { event: "archer-step", interval: 0.48 }
+  },
   lifetime: { duration: 0 }
 };
