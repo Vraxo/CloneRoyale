@@ -36,7 +36,7 @@ function makeUnit(
     targetsBuildingsOnly: false,
     lifetime: 0,
     age: 0,
-    deploymentRemaining: 10,
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
     facing: 0,
     presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
@@ -81,7 +81,7 @@ test("keeps ground units inside their lane's bridge corridor while crossing the 
   const halfBridgeWidth = 1.5 * ARENA_TILE_SIZE;
   const unit = makeUnit(100, "blue", 300, RIVER_BOTTOM + 10, {
     speed: 90,
-    deploymentRemaining: 0,
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
     lane: "left"
   });
   addUnit(game, unit);
@@ -113,7 +113,7 @@ test("routes ground troops around blocking buildings instead of moving straight 
   const game = createGame();
   const troop = makeUnit(100, "blue", 105, 800, {
     speed: 100,
-    deploymentRemaining: 0,
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
     lane: "left"
   });
   const blocker = makeUnit(200, "blue", 105, 650, {
@@ -122,7 +122,7 @@ test("routes ground troops around blocking buildings instead of moving straight 
     kind: "building",
     radius: 20,
     speed: 0,
-    deploymentRemaining: 0
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
 
   addUnit(game, troop);
