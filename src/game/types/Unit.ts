@@ -75,9 +75,8 @@ export interface UnitPresentation {
   attackAnim: number;
 }
 
-export interface Unit
-  extends UnitIdentity,
-    UnitTransform {
+export interface Unit extends UnitIdentity {
+  transform: UnitTransform;
   combat: UnitCombat;
   lifetime: UnitLifetime;
   targeting: UnitTargeting;
