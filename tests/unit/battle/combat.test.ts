@@ -171,7 +171,7 @@ test("projectile impacts apply damage when they reach their target", () => {
   const target = makeUnit(100, "red", 160, 700);
   addUnit(game, target);
 
-  addProjectile(game, "blue", 100, 700, target.id, target.x, target.y, 125, 0, "arrow", 0.2);
+  addProjectile(game, "blue", 100, 700, target.id, target.transform.x, target.transform.y, 125, 0, "arrow", 0.2);
   updateProjectiles(game, 0.2);
 
   assert.equal(target.health.hp, 375);
