@@ -81,7 +81,7 @@ test("units expire after their configured lifetime", () => {
   updateUnits(game, 0.1);
 
   assert.equal(unit.health.hp, 0);
-  assert.equal(unit.lifetime.elapsed, 0.1);
+  assert.equal(unit.lifetime?.elapsed, 0.1);
 });
 
 test("melee units damage an enemy in range and start their attack cooldown", () => {
