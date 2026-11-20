@@ -49,7 +49,7 @@ export function findEnemyTower(state: GameState, unit: LaneUnit): Tower | null {
   return kingDistance < princessDistance ? king : princess;
 }
 
-type TowerTarget = Pick<Unit, "id" | "side" | "health" | "deployment" | "transform" | "collision">;
+type TowerTarget = Pick<Unit, "id" | "transform" | "collision">;
 
 export function findTowerTarget(
   tower: Pick<Tower, "side" | "range" | "x" | "y">,
