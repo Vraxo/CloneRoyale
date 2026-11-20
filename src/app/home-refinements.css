@@ -208,38 +208,6 @@
   width: min(760px, 100%);
   margin-top: auto;
 }
-.cr-deck-panel {
-  width: min(470px, 100%);
-  margin: 0 auto 10px;
-  padding: 7px 9px 9px;
-  border: 2px solid #d8b36c;
-  border-radius: 9px;
-  background: linear-gradient(180deg, rgba(27,82,125,.97), rgba(8,39,70,.99));
-  box-shadow: 0 4px 0 #644324, 0 9px 19px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.2);
-}
-.cr-deck-heading {
-  margin-bottom: 5px;
-  font-size: 9px;
-}
-.cr-card-row {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-.cr-card-tile {
-  grid-template-rows: 62px auto;
-  gap: 1px;
-  padding: 3px 4px 4px;
-  border: 2px solid #e8c779;
-  border-radius: 6px;
-  background: linear-gradient(160deg, #4797ca, #174c7b 78%);
-  box-shadow: 0 3px 0 #714a2c, inset 0 1px rgba(255,255,255,.3);
-}
-.cr-card-tile img {
-  height: 62px;
-  max-width: 100%;
-  object-fit: contain;
-}
-.cr-card-tile span { font-size: 8px; }
 .cr-home-nav {
   grid-template-columns: .9fr .9fr 2.1fr;
   gap: 8px;
@@ -287,10 +255,6 @@
   .cr-arena-scene { top: 17%; width: 112vw; height: 49%; }
   .cr-home-center { top: 15%; }
   .cr-home-lower { width: 100%; }
-  .cr-deck-panel { width: min(430px, 100%); }
-  .cr-card-row { gap: 5px; }
-  .cr-card-tile { grid-template-rows: 48px auto; padding: 2px 3px 3px; }
-  .cr-card-tile img { height: 48px; }
   .cr-home-nav { width: min(500px, 100%); gap: 5px; }
   .cr-nav-button, .cr-battle-button { min-height: 52px; }
 }
@@ -309,11 +273,6 @@
   .cr-home-center { top: 14%; }
   .cr-arena-title { padding: 5px 11px 6px; }
   .cr-arena-title h1 { font-size: 16px; }
-  .cr-deck-panel { margin-bottom: 7px; padding: 6px; }
-  .cr-card-row { gap: 3px; }
-  .cr-card-tile { grid-template-rows: 40px auto; padding: 2px; }
-  .cr-card-tile img { height: 40px; }
-  .cr-card-tile span { font-size: 6px; }
   .cr-nav-button, .cr-battle-button { min-height: 48px; }
   .cr-nav-button span { font-size: 17px; }
   .cr-nav-button small { font-size: 7px; }
@@ -323,16 +282,12 @@
 @media (max-height: 650px) and (min-width: 761px) {
   .cr-arena-scene { top: 12%; height: 54%; }
   .cr-home-center { top: 12%; }
-  .cr-card-tile, .cr-card-tile img { height: auto; }
-  .cr-card-tile { grid-template-rows: 46px auto; }
-  .cr-card-tile img { height: 46px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cr-arena-scene, .cr-card-tile, .cr-battle-button, .cr-river { animation: none !important; }
+  .cr-arena-scene, .cr-battle-button, .cr-river { animation: none !important; }
 }
 
 /* Keep the home UI crisp and game-like; avoid decorative pulsing on primary controls. */
-.cr-card-tile { animation: none; }
 .cr-battle-button { animation: none; }
 .cr-battle-button::after { display: none; }
 .cr-arena-scene { animation-duration: 12s; }

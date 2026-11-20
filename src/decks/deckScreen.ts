@@ -26,7 +26,6 @@ export function initializeDeckScreen(setPlayerDeck: (deck: CardId[]) => void, se
   const deckCount = document.getElementById("deck-count");
   const deckAverage = document.getElementById("deck-average");
   const deckFeedback = document.getElementById("deck-feedback");
-  const homeDeckPreview = document.getElementById("home-deck-preview");
 
   function makeDeckCard(cardId: CardId, slot: number, selected: boolean): HTMLButtonElement {
     const card = CARDS[cardId];
@@ -48,22 +47,6 @@ export function initializeDeckScreen(setPlayerDeck: (deck: CardId[]) => void, se
     button.append(cost, image, name);
     button.dataset.slot = String(slot);
     return button;
-  }
-
-  function renderHomeDeckPreview(): void {
-    if (!(homeDeckPreview instanceof HTMLElement)) return;
-    homeDeckPreview.replaceChildren();
-    playerDeck.slice(0, 4).forEach(cardId => {
-      const card = document.createElement("div");
-      card.className = "cr-card-tile";
-      const image = document.createElement("img");
-      image.src = "/cards/" + cardId + (cardId === "knight" ? ".svg" : ".png");
-      image.alt = CARDS[cardId].name;
-      const name = document.createElement("span");
-      name.textContent = CARDS[cardId].name.toUpperCase();
-      card.append(image, name);
-      homeDeckPreview.append(card);
-    });
   }
 
   function renderDeckPage(): void {
@@ -97,7 +80,6 @@ export function initializeDeckScreen(setPlayerDeck: (deck: CardId[]) => void, se
           ? CARDS[cardId].name + " swapped into slot " + (selectedDeckSlot + 1) + "."
           : CARDS[cardId].name + " added to your deck. " + CARDS[displaced].name + " returned to your collection.";
         renderDeckPage();
-        renderHomeDeckPreview();
       });
       deckCollection.append(card);
     });
@@ -122,7 +104,6 @@ export function initializeDeckScreen(setPlayerDeck: (deck: CardId[]) => void, se
 
   setPlayerDeck(playerDeck);
   renderDeckPage();
-  renderHomeDeckPreview();
   document.getElementById("menu-decks")?.addEventListener("click", openDecksPage);
   document.getElementById("decks-back")?.addEventListener("click", closeDecksPage);
   document.getElementById("decks-done")?.addEventListener("click", closeDecksPage);

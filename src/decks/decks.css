@@ -107,12 +107,10 @@ body[data-screen="decks"] .workspace { visibility: hidden; pointer-events: none;
   min-width: 0;
   min-height: 110px;
   padding: 8px 6px 7px;
-  border: 2px solid #d6b36f;
-  border-radius: 8px;
-  background:
-    linear-gradient(145deg, rgba(112, 183, 225, .22), transparent 48%),
-    linear-gradient(160deg, #3b88b8, #174a75 75%);
-  box-shadow: 0 3px 0 #654326, 0 6px 10px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.28);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   color: #fff3d2;
   cursor: pointer;
   transition: transform .12s ease, border-color .12s ease, filter .12s ease;
@@ -154,12 +152,12 @@ body[data-screen="decks"] .workspace { visibility: hidden; pointer-events: none;
   text-shadow: 0 1px 2px #49226f;
 }
 .deck-card.is-selected {
-  border-color: #fff2a3;
-  background: linear-gradient(160deg, #5ca9d6, #205a88 75%);
-  box-shadow: 0 0 0 2px #f6d66e, 0 4px 0 #704725, 0 0 18px rgba(255,219,112,.24);
+  outline: 2px solid #fff2a3;
+  outline-offset: 2px;
+  filter: drop-shadow(0 0 8px rgba(255,219,112,.28));
   transform: translateY(-2px);
 }
-.deck-card.is-in-deck { border-color: rgba(144, 199, 226, .65); }
+.deck-card.is-in-deck { opacity: .78; }
 .deck-card:focus-visible, .decks-back:focus-visible, .decks-footer button:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;
