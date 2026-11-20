@@ -16,7 +16,7 @@ function findEnemyUnit(
 
   for (const candidate of state.units) {
     if (candidate.side === unit.side || candidate.hp <= 0) continue;
-    if ((candidate.deployment.appearanceDelay ?? 0) > 0) continue;
+    if ((candidate.deployment.appearanceDelay) > 0) continue;
     if (buildingsOnly && candidate.kind !== "building") continue;
     if (!unit.canTargetAir && candidate.isAir) continue;
 
@@ -96,7 +96,7 @@ export function updateUnits(state: GameState, dt: number): void {
   for (const unit of state.units) {
     if (unit.hp <= 0) continue;
 
-    const appearanceDelay = unit.deployment.appearanceDelay ?? 0;
+    const appearanceDelay = unit.deployment.appearanceDelay;
     if (appearanceDelay > 0) {
       const remaining = Math.max(0, appearanceDelay - dt);
       unit.deployment.appearanceDelay = remaining;
@@ -123,7 +123,7 @@ export function updateUnits(state: GameState, dt: number): void {
       continue;
     }
 
-    const deploymentRemaining = unit.deployment.remaining ?? 0;
+    const deploymentRemaining = unit.deployment.remaining;
     if (deploymentRemaining > 0) {
       unit.deployment.remaining = Math.max(0, deploymentRemaining - dt);
       continue;
@@ -231,7 +231,7 @@ export function updateTowers(state: GameState, dt: number): void {
 
     for (const unit of state.units) {
       if (unit.side === tower.side || unit.hp <= 0) continue;
-      if ((unit.deployment.appearanceDelay ?? 0) > 0) continue;
+      if ((unit.deployment.appearanceDelay) > 0) continue;
 
       const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y) - unit.radius;
       if (distance < nearestDistance) {
