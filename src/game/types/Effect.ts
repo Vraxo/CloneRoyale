@@ -7,6 +7,6 @@ export interface Effect {
   age: number;
   lifetime: number;
   radius: number;
-  style: "hit" | "explosion" | "fireball" | "arrows" | "deployment";
+  style: "hit" | "explosion" | "fireball" | "arrows" | "deployment" | "zap";
   side?: Side;
 }
