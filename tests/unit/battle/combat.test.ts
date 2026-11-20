@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { updateUnits } from "../../../src/game/combat.js";
 import { updateTowers } from "../../../src/game/towerCombat.js";
-import { damageTarget } from "../../../src/game/effects.js";
+import { damageTarget } from "../../../src/game/health.js";
 import { addProjectile, updateProjectiles } from "../../../src/game/projectiles.js";
 import { createGame } from "../../../src/game/simulation.js";
 import type { BuildingUnit, GameState, TroopUnit, Unit } from "../../../src/game/types/index.js";

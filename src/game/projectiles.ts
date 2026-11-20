@@ -1,5 +1,5 @@
 import type { GameState, Projectile, Side } from "./types";
-import { damageTarget } from "./effects";
+import { damageTarget } from "./health";
 
 export function addProjectile(
   state: GameState,
