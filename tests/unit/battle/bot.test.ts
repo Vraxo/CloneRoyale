@@ -254,3 +254,49 @@ test("bot avoids surrounding a tank when friendly splash damage is already nearb
     targetX: 435
   });
 });
+
+test("bot targets a fireball cluster on the right side of the arena", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["fireball"];
+  game.sides.blue.elixir = 10;
+  game.units.push(
+    ...Array.from({ length: 3 }, (_, index) =>
+      makeTroop(1100 + index, "red", 600 + index * 10, 700, {
+        cardId: "skeleton-army",
+        type: "skeleton"
+      })
+    )
+  );
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "fireball",
+    lane: "right",
+    targetX: 610,
+    targetY: 700
+  });
+});
+
+test("bot replaces an isolated first candidate with a larger enemy cluster", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["fireball"];
+  game.sides.blue.elixir = 10;
+  game.units.push(
+    makeTroop(1200, "red", 900, 700, {
+      cardId: "skeleton-army",
+      type: "skeleton"
+    }),
+    ...Array.from({ length: 3 }, (_, index) =>
+      makeTroop(1201 + index, "red", 200 + index * 10, 700, {
+        cardId: "skeleton-army",
+        type: "skeleton"
+      })
+    )
+  );
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "fireball",
+    lane: "left",
+    targetX: 210,
+    targetY: 700
+  });
+});
