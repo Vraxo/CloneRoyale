@@ -20,7 +20,7 @@ export abstract class UnitView {
     this.damageFlash.saturate(0.45, true);
     this.damageFlash.alpha = 0;
     this.body.filters = [this.damageFlash];
-    this.shadow.ellipse(0, unit.radius * 0.58, unit.radius * 1.3, unit.radius * 0.62)
+    this.shadow.ellipse(0, unit.collision.radius * 0.58, unit.collision.radius * 1.3, unit.collision.radius * 0.62)
       .fill(unit.movement.isAir ? 0x283b2d : 0x344338);
     if (unit.id >= 0) {
       const markerColor = unit.side === "blue" ? 0x48a5ff : 0xf06464;
@@ -59,7 +59,7 @@ export abstract class UnitView {
     const lift = Math.pow(1 - easedProgress, 2) * 76;
     this.body.y = -lift;
     this.body.alpha = hasAppeared ? 0.72 + progress * 0.28 : 0;
-    this.ownershipMarker.position.set(0, -lift - unit.radius - 13);
+    this.ownershipMarker.position.set(0, -lift - unit.collision.radius - 13);
     this.ownershipMarker.alpha = unit.id >= 0 && hasAppeared ? 1 : 0;
     this.shadow.scale.set(1 + (1 - progress) * 0.65, 1 + (1 - progress) * 0.4);
     this.shadow.alpha = hasAppeared ? 0.35 + progress * 0.65 : 0;
@@ -69,8 +69,8 @@ export abstract class UnitView {
 
     if (ratio >= 0.999) return;
 
-    const width = Math.max(12, unit.radius * 2);
-    const y = unit.radius + 7;
+    const width = Math.max(12, unit.collision.radius * 2);
+    const y = unit.collision.radius + 7;
     this.healthBar.roundRect(-width / 2, y, width, 3.5, 1.75).fill(0x26312b);
     if (ratio > 0) {
       this.healthBar.roundRect(-width / 2, y, width * ratio, 3.5, 1.75).fill(0xa8c879);
