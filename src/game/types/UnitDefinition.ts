@@ -11,7 +11,7 @@ export interface UnitHealthDefinition {
 
 export interface UnitCollisionDefinition {
   radius: number;
-  collisionMass?: number;
+  mass?: number;
 }
 
 export interface UnitMovementDefinition {
