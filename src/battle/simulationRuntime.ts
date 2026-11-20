@@ -1,5 +1,5 @@
 import { createGame, stepGame } from "../game/simulation";
-import type { GameState, Side } from "../game/types";
+import type { GameState, ReadonlyGameState, Side } from "../game/types";
 
 export class SimulationRuntime {
   private currentState: GameState;
@@ -8,7 +8,7 @@ export class SimulationRuntime {
     this.currentState = createGame(seed);
   }
 
-  public get state(): GameState {
+  public get state(): ReadonlyGameState {
     return this.currentState;
   }
 

@@ -15,3 +15,4 @@ export type { Projectile } from "./Projectile";
 export type { Effect } from "./Effect";
 export type { SideState } from "./SideState";
 export type { GameState } from "./GameState";
+export type { ReadonlyGameState } from "./GameState";
