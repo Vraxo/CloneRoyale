@@ -219,3 +219,17 @@ test("overtime timeout enters tiebreaker and clears the battlefield", () => {
   assert.equal(game.projectiles.length, 0);
   assert.equal(game.effects.length, 0);
 });
+
+
+test("overtime timeout still enters tiebreaker without a crown snapshot", () => {
+  const game = createGame();
+  game.phase = "overtime";
+  game.time = 299.9;
+  game.overtimeStartCrowns = null;
+
+  stepGame(game, 0.1, null, true);
+
+  assert.equal(game.phase, "tiebreaker");
+  assert.equal(game.gameOver, false);
+  assert.equal(game.overtimeStartCrowns, null);
+});
