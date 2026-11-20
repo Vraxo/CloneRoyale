@@ -154,6 +154,7 @@ export class BattleController {
     const replayState = this.replayPlayback.seek(tick);
     if (!replayState) return;
     this.game = replayState;
+    this.game.audioEvents = [];
     this.simulation.reset();
     this.renderer.render(this.game);
     this.updateHud();
@@ -338,6 +339,8 @@ export class BattleController {
     if (this.game.gameOver) return;
     if (this.replayPlayback.isActive) {
       this.game = this.replayPlayback.step() ?? this.game;
+      for (const event of this.game.audioEvents) this.soundEffects.play(event);
+      this.game.audioEvents = [];
       this.renderer.setDeploymentArea(this.game, "blue", null);
       if (this.replayPlayback.isFinished) this.paused = true;
       return;
