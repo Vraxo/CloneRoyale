@@ -50,6 +50,16 @@ test("deploys stationary buildings without a movement component", () => {
   assert.equal(playCard(game, "blue", "cannon", "left"), true);
   assert.equal(game.units[0].kind, "building");
   assert.equal("movement" in game.units[0], false);
+  assert.equal(game.units[0].lifetime?.duration, 32);
+});
+
+test("troops without a configured lifetime omit the lifetime component", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["giant"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "giant", "left"), true);
+  assert.equal("lifetime" in game.units[0], false);
 });
 
 test("allows deployment when elixir exactly matches the card cost", () => {
