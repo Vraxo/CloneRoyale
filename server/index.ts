@@ -48,7 +48,6 @@ const clients = new Set<ServerClient>();
 const matchmakingQueue: ServerClient[] = [];
 const reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const globalChatHistory: Array<{ id: string; name: string; text: string; timestamp: number }> = [];
-const MAX_GLOBAL_CHAT_HISTORY = 50;
 
 const replayArchive = createReplayArchive(REPLAY_DIRECTORY);
 const accountStore = createAccountStore(ACCOUNT_FILE);
