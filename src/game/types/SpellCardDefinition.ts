@@ -1,3 +1,4 @@
+import type { AudioEvent } from "./AudioEvent";
 import type { CardDefinitionBase } from "./CardDefinitionBase";
 
 export interface SpellCardDefinition extends CardDefinitionBase {
@@ -9,5 +10,8 @@ export interface SpellCardDefinition extends CardDefinitionBase {
       style: "fireball" | "arrows";
       duration: number;
     };
+  };
+  audio?: {
+    launch?: AudioEvent;
   };
 }
