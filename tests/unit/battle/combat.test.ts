@@ -429,3 +429,23 @@ test("buildings wait for their attack cooldown before firing", () => {
   assert.ok(building.combat.attackCooldown > 0);
   assert.equal(target.health.hp, 500);
 });
+
+
+test("troops advance toward the enemy tower when it is outside attack range", () => {
+  const game = createGame();
+  const tower = game.towers.find((candidate) =>
+    candidate.side === "red" && candidate.kind === "princess" && candidate.lane === "left"
+  );
+  assert.ok(tower);
+  const attacker = makeUnit(200, "blue", 135, 700, {
+    movement: { speed: 100, isAir: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  addUnit(game, attacker);
+
+  updateUnits(game, 0.1);
+
+  assert.equal(attacker.movement.isMoving, true);
+  assert.ok(attacker.transform.y < 700);
+  assert.equal(game.projectiles.length, 0);
+});
