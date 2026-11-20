@@ -50,10 +50,10 @@ export abstract class UnitView {
 
     this.container.position.set(unit.x, unit.y);
 
-    const appearanceDelay = unit.appearanceDelayRemaining ?? 0;
+    const appearanceDelay = unit.deployment.appearanceDelay ?? 0;
     const hasAppeared = appearanceDelay <= 0;
-    const remaining = unit.deploymentRemaining ?? 0;
-    const duration = unit.deploymentDuration ?? 0;
+    const remaining = unit.deployment.remaining ?? 0;
+    const duration = unit.deployment.duration ?? 0;
     const progress = duration > 0 ? Math.max(0, Math.min(1, 1 - remaining / duration)) : 1;
     const easedProgress = 1 - Math.pow(1 - progress, 3);
     const lift = Math.pow(1 - easedProgress, 2) * 76;
