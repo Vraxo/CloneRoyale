@@ -51,8 +51,64 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
   const activeMatchCount = document.getElementById("presence-matches");
   const presenceNote = document.getElementById("presence-note");
   const presenceUpdated = document.getElementById("presence-updated");
+  const chatMessages = document.getElementById("global-chat-messages");
+  const chatForm = document.getElementById("global-chat-form");
+  const chatInput = document.getElementById("global-chat-input");
+  const chatStatus = document.getElementById("global-chat-status");
+  const chatHistory: Array<{ id: string; name: string; text: string; timestamp: number }> = [];
+  const unsubscribeChat = client.subscribe(message => {
+    if (message.type === "global-chat-history") {
+      chatHistory.splice(0, chatHistory.length, ...message.messages);
+      renderChat();
+    } else if (message.type === "global-chat-message") {
+      chatHistory.push(message.message);
+      if (chatHistory.length > 50) chatHistory.shift();
+      renderChat();
+    } else if (message.type === "connection-status" && chatStatus) {
+      chatStatus.textContent = message.state === "connected" ? "CONNECTED" : message.state.toUpperCase();
+      chatStatus.dataset.state = message.state;
+    }
+  });
   let refreshTimer: ReturnType<typeof setInterval> | null = null;
   let refreshInProgress = false;
+
+  function renderChat(): void {
+    if (!chatMessages) return;
+    chatMessages.replaceChildren();
+    if (chatHistory.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "global-chat-empty";
+      empty.textContent = "No messages yet. Say hello to the players online!";
+      chatMessages.append(empty);
+      return;
+    }
+    for (const message of chatHistory) {
+      const item = document.createElement("article");
+      item.className = "global-chat-message";
+      const meta = document.createElement("div");
+      meta.className = "global-chat-meta";
+      const name = document.createElement("strong");
+      name.textContent = message.name;
+      const time = document.createElement("time");
+      time.dateTime = new Date(message.timestamp).toISOString();
+      time.textContent = new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const body = document.createElement("p");
+      body.textContent = message.text;
+      meta.append(name, time);
+      item.append(meta, body);
+      chatMessages.append(item);
+    }
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function connectChat(): Promise<boolean> {
+    const connected = await session.connect();
+    if (connected) {
+      client.requestGlobalChatHistory();
+      if (chatStatus) chatStatus.textContent = "CONNECTED";
+    } else if (chatStatus) chatStatus.textContent = "OFFLINE";
+    return connected;
+  }
 
   function stopStatusRefresh(): void {
     if (refreshTimer) clearInterval(refreshTimer);
@@ -102,14 +158,31 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
 
   function openLobby(): void {
     if (lobby instanceof HTMLDivElement) lobby.hidden = false;
-    setLobbyStatus("Connect to the game server to create or join a room.");
+    setLobbyStatus("Connecting to the multiplayer lobby…");
     startStatusRefresh();
+    void connectChat();
   }
 
   document.getElementById("online-play")?.addEventListener("click", openLobby);
 
+  chatForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const text = chatInput instanceof HTMLInputElement ? chatInput.value.trim() : "";
+    if (!text) return;
+    if (!(await connectChat())) return;
+    client.sendGlobalChat(text);
+    if (chatInput instanceof HTMLInputElement) chatInput.value = "";
+  });
+
+  chatInput?.addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      chatForm?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    }
+  });
+
   findMatchButton?.addEventListener("click", async () => {
-    if (!(await session.connect())) return;
+    if (!(await connectChat())) return;
     if (privateRoomSection instanceof HTMLElement) privateRoomSection.hidden = true;
     if (cancelMatchButton instanceof HTMLButtonElement) cancelMatchButton.hidden = false;
     if (findMatchButton instanceof HTMLButtonElement) findMatchButton.disabled = true;
@@ -142,13 +215,13 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
   });
 
   document.getElementById("create-room")?.addEventListener("click", async () => {
-    if (!(await session.connect())) return;
+    if (!(await connectChat())) return;
     client.createRoom();
     setLobbyStatus("Creating room…");
   });
 
   document.getElementById("join-room")?.addEventListener("click", async () => {
-    if (!(await session.connect())) return;
+    if (!(await connectChat())) return;
     const code = joinCode instanceof HTMLInputElement ? joinCode.value.trim().toUpperCase() : "";
     if (code.length !== 5) {
       setLobbyStatus("Enter the five-character room code.");
@@ -163,5 +236,5 @@ export function initializeLobbyScreen(options: LobbyScreenOptions) {
     if (lobby instanceof HTMLDivElement) lobby.hidden = true;
   }
 
-  return { openLobby, hideLobby };
+  return { openLobby, hideLobby, unsubscribeChat };
 }
