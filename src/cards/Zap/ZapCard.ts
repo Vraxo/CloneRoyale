@@ -9,5 +9,8 @@ export const ZAP_CARD: SpellCardDefinition = {
     damage: 100,
     radius: 92,
     stunDuration: 0.5
+  },
+  audio: {
+    launch: "zap-cast"
   }
 };
