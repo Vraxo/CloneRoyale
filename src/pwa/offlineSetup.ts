@@ -41,6 +41,7 @@ export function initializeOfflineSetup(): void {
   const closeButton = document.querySelector<HTMLButtonElement>("#offline-continue");
 
   if (!saveButton) return;
+  const offlineButton = saveButton;
 
   function show(): void {
     setup?.classList.remove("is-hidden");
@@ -51,7 +52,7 @@ export function initializeOfflineSetup(): void {
   function hide(): void {
     setup?.classList.remove("is-visible");
     setup?.classList.add("is-hidden");
-    saveButton.focus();
+    offlineButton.focus();
   }
 
   function updateProgress(completed: number, total: number): void {
@@ -67,8 +68,8 @@ export function initializeOfflineSetup(): void {
   function markReady(): void {
     if (status) status.textContent = "Saved on this device. You can now launch the game without an internet connection for solo play.";
     updateProgress(1, 1);
-    saveButton.textContent = "✓ OFFLINE READY";
-    saveButton.disabled = true;
+    offlineButton.textContent = "✓ OFFLINE READY";
+    offlineButton.disabled = true;
     window.setTimeout(hide, 1200);
   }
 
@@ -79,7 +80,7 @@ export function initializeOfflineSetup(): void {
       error.textContent = message;
       error.hidden = false;
     }
-    saveButton.disabled = false;
+    offlineButton.disabled = false;
   }
 
   closeButton?.addEventListener("click", hide);
@@ -94,7 +95,7 @@ export function initializeOfflineSetup(): void {
   });
 
   if (!("serviceWorker" in navigator)) return;
-  saveButton.hidden = false;
+  offlineButton.hidden = false;
 
   let registration: ServiceWorkerRegistration | null = null;
   let preparationStarted = false;
@@ -116,8 +117,8 @@ export function initializeOfflineSetup(): void {
         break;
       case "PRECACHE_STATUS":
         if (message.ready) {
-          saveButton.textContent = "✓ OFFLINE READY";
-          saveButton.disabled = true;
+          offlineButton.textContent = "✓ OFFLINE READY";
+          offlineButton.disabled = true;
         }
         break;
     }
@@ -132,16 +133,16 @@ export function initializeOfflineSetup(): void {
     })
     .catch(() => {
       // Registration is optional; the game itself continues to work online.
-      saveButton.hidden = true;
+      offlineButton.hidden = true;
     });
 
-  saveButton.addEventListener("click", async () => {
-    if (saveButton.disabled) return;
+  offlineButton.addEventListener("click", async () => {
+    if (offlineButton.disabled) return;
     show();
     if (error) error.hidden = true;
     if (preparationStarted) return;
     preparationStarted = true;
-    saveButton.disabled = true;
+    offlineButton.disabled = true;
     if (status) status.textContent = "Connecting to offline storage…";
 
     try {
