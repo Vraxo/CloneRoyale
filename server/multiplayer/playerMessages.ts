@@ -11,7 +11,7 @@ export function createPlayerMessageHandlers(options: MessageHandlerOptions): Rec
     "global-chat"(client, message) {
       if (client.closed || client.disconnected) return;
       const rawText = typeof message.text === "string" ? message.text : "";
-      const text = rawText.replace(/[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f]/g, "").trim().slice(0, 200);
+      const text = rawText.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim().slice(0, 200);
       if (!text) return;
       const now = Date.now();
       if (now - (client.lastGlobalChatAt ?? 0) < 1200) return;
