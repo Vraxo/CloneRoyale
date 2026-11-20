@@ -1,5 +1,5 @@
 import { Assets, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
-import type { CardId, GameState, Side } from "../../../game/types";
+import type { CardId, ReadonlyGameState, Side } from "../../../game/types";
 import { cardById } from "../../../game/cards";
 import { MATCH_RULES } from "../../../game/matchRules";
 import { calculateHudLayout } from "./hudLayout";
@@ -25,7 +25,7 @@ function formatClock(seconds: number): string {
   return minutes + ":" + rest;
 }
 
-function remainingMatchSeconds(state: GameState): number | null {
+function remainingMatchSeconds(state: ReadonlyGameState): number | null {
   if (state.phase === "regulation") {
     return MATCH_RULES.regulationSeconds - state.time;
   }
@@ -35,7 +35,7 @@ function remainingMatchSeconds(state: GameState): number | null {
   return null;
 }
 
-function matchClock(state: GameState): string {
+function matchClock(state: ReadonlyGameState): string {
   switch (state.phase) {
     case "regulation":
       return formatClock(MATCH_RULES.regulationSeconds - state.time);
@@ -119,7 +119,7 @@ export class BattleHud {
   private readonly clockModeLabel = createHudText(8, 0xf4d8ff, "Supercell Magic");
   private readonly notificationGraphics = new Graphics();
   private readonly notificationLabel = createHudText(23, 0xfff1cf, "Supercell Magic");
-  private previousPhase: GameState["phase"] | null = null;
+  private previousPhase: ReadonlyGameState["phase"] | null = null;
   private previousTime = 0;
   private notificationText = "";
   private notificationStartedAt = 0;
@@ -176,7 +176,7 @@ export class BattleHud {
   }
 
   public update(
-    state: GameState,
+    state: ReadonlyGameState,
     selectedCard: CardId | null,
     message: string,
     width: number,
@@ -285,7 +285,7 @@ export class BattleHud {
     return index >= 0 ? index : null;
   }
 
-  private updateMatchNotification(state: GameState): void {
+  private updateMatchNotification(state: ReadonlyGameState): void {
     const previousRemaining = this.previousPhase === "regulation"
       ? MATCH_RULES.regulationSeconds - this.previousTime
       : this.previousPhase === "overtime"
@@ -377,7 +377,7 @@ export class BattleHud {
     this.notificationLabel.style.lineHeight = subtitle ? 27 : 30;
   }
 
-  private drawMatchClock(state: GameState, width: number, graphics: Graphics): void {
+  private drawMatchClock(state: ReadonlyGameState, width: number, graphics: Graphics): void {
     const clockWidth = 104;
     const clockHeight = 36;
     const x = (width - clockWidth) / 2;
@@ -493,7 +493,7 @@ export class BattleHud {
   }
 
   private drawCards(
-    state: GameState,
+    state: ReadonlyGameState,
     selectedCard: CardId | null,
     cards: ReturnType<typeof calculateHudLayout>["cards"],
     graphics: Graphics,
