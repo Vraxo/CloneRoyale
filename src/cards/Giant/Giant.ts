@@ -22,5 +22,4 @@ export const GIANT: MovableUnitDefinition = {
     death: "giant-death",
     movement: { event: "giant-step", interval: 0.62 }
   },
-  lifetime: { duration: 0 }
 };
