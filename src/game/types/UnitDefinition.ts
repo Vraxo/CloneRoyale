@@ -18,6 +18,7 @@ export interface UnitCollisionDefinition {
 export interface UnitMovementDefinition {
   speed: number;
   isAir: boolean;
+  formation?: UnitFormationDefinition;
 }
 
 export interface UnitCombatDefinition {
@@ -49,7 +50,6 @@ interface UnitDefinitionBase {
   targeting: UnitTargetingDefinition;
   lifetime?: UnitLifetimeDefinition;
   audio?: UnitAudio;
-  formation?: UnitFormationDefinition;
 }
 
 export interface MovableUnitDefinition extends UnitDefinitionBase {
