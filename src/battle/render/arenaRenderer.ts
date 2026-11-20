@@ -1,5 +1,5 @@
 import { Application, Container, Graphics } from "pixi.js";
-import type { CardId, ReadonlyGameState, Side, Unit } from "../../game/types";
+import type { CardId, Lane, ReadonlyGameState, Side, Unit } from "../../game/types";
 import { cardById } from "../../game/cards";
 import { getGroundDeploymentZones } from "../../game/placement";
 import { EffectView } from "./entities/effectView";
@@ -282,7 +282,7 @@ export class ArenaRenderer {
       side,
       cardId,
       type: definition.identity.type,
-      lane: x < WORLD_WIDTH / 2 ? "left" : "right",
+      lane: (x < WORLD_WIDTH / 2 ? "left" : "right") as Lane,
       transform: { x, y, facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2 },
       health: { hp: definition.health.hp, maxHp: definition.health.hp },
       collision: { radius: definition.collision.radius, mass: definition.collision.mass ?? 1 },
