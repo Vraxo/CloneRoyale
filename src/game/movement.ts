@@ -179,7 +179,7 @@ export function moveUnitTowardTarget(
   moveToward(unit, waypoint?.x ?? target.x, waypoint?.y ?? target.y, dt);
 }
 
-function keepGroundUnitsOnBridges(units: Unit[]): void {
+export function keepGroundUnitsOnBridges(units: Unit[]): void {
   for (const unit of units) {
     if (unit.kind === "building" || unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
     if (unit.transform.y < RIVER_TOP || unit.transform.y > RIVER_BOTTOM) continue;
@@ -190,13 +190,6 @@ function keepGroundUnitsOnBridges(units: Unit[]): void {
   }
 }
 
-export function keepGroundUnitsOnBridges(units: Unit[]): void {
-  for (const unit of units) {
-    if (unit.kind === "building" || unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
-    if (unit.transform.y < RIVER_TOP || unit.transform.y > RIVER_BOTTOM) continue;
-
-    const bridgeX = LANE_X[unit.lane];
-    const halfWidth = Math.max(0, BRIDGE_HALF_WIDTH - unit.collision.radius);
-    unit.transform.x = clamp(unit.transform.x, bridgeX - halfWidth, bridgeX + halfWidth);
-  }
+function clamp(value: number, minimum: number, maximum: number): number {
+  return Math.max(minimum, Math.min(maximum, value));
 }
