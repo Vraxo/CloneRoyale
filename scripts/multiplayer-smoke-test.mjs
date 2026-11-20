@@ -60,7 +60,7 @@ try {
   for (let frame = 0; frame < 600; frame += 1) {
     stepGame(pathfindingState, 1 / 30, null, true);
     const miniPekka = pathfindingState.units.find(unit => unit.type === "mini-pekka");
-    if (miniPekka && Math.abs(miniPekka.x - 205) > 28 && miniPekka.y < 700) {
+    if (miniPekka && Math.abs(miniPekka.transform.x - 205) > 28 && miniPekka.transform.y < 700) {
       miniPekkaMovedAroundCannon = true;
       break;
     }
