@@ -427,11 +427,14 @@ export class ThreeBattleScene {
     for (const [id, model] of models) {
       if (active.has(id)) continue;
       this.scene.remove(model);
-      if (model instanceof THREE.Mesh) {
-        model.geometry.dispose();
-        if (Array.isArray(model.material)) model.material.forEach(material => material.dispose());
-        else model.material.dispose();
-      }
+      model.traverse(child => {
+        if (!(child instanceof THREE.Mesh)) return;
+        child.geometry.dispose();
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        for (const material of materials) {
+          if (!Object.values(this.materials).includes(material as never)) material.dispose();
+        }
+      });
       models.delete(id);
     }
   }
