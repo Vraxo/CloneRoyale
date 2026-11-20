@@ -247,7 +247,9 @@ function testClientMessageDispatch() {
     attachPlayer: (...args) => calls.push(["attach-player", ...args]),
     requestRematch: current => calls.push(["rematch-ready", current.id]),
     resumePlayer: (current, token) => calls.push(["resume", current.id, token]),
-    sendRoom: currentRoom => roomUpdates.push({ type: "room", code: currentRoom.code })
+    sendRoom: currentRoom => roomUpdates.push({ type: "room", code: currentRoom.code }),
+    broadcastGlobal: message => calls.push(["global-broadcast", message]),
+    getGlobalChatHistory: () => []
   });
 
   handler(client, { type: "not-a-real-message" });
@@ -265,6 +267,12 @@ function testClientMessageDispatch() {
   handler(client, { type: "find-match" });
   handler(client, { type: "rematch-ready" });
   handler(client, { type: "resume", token: "resume-token" });
+  handler(client, { type: "global-chat-history" });
+  assert.deepEqual(messages.at(-1), { type: "global-chat-history", messages: [] });
+  handler(client, { type: "global-chat", text: "hello lobby" });
+  assert.equal(calls.at(-1)[0], "global-broadcast");
+  assert.equal(calls.at(-1)[1].type, "global-chat-message");
+  assert.equal(calls.at(-1)[1].message.text, "hello lobby");
   assert.deepEqual(calls, [
     ["find-match", client.id],
     ["rematch-ready", client.id],
