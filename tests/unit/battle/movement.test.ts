@@ -24,13 +24,12 @@ function makeUnit(
     health: { hp: 500, maxHp: 500 },
     radius: 12,
     damage: 100,
-    speed: 0,
+    movement: { speed: 0, isAir: false },
     range: 55,
     attackInterval: 1,
     attackCooldown: 100,
     attack: { type: "melee" },
     splashRadius: 0,
-    isAir: false,
     canTargetAir: true,
     targetsBuildingsOnly: false,
     lifetime: 0,
@@ -48,8 +47,8 @@ function addUnit(state: GameState, unit: Unit): void {
 
 test("separates overlapping ground units without leaving them intersecting", () => {
   const game = createGame();
-  const first = makeUnit(100, "blue", 180, 700, { speed: 80 });
-  const second = makeUnit(101, "blue", 180, 700, { speed: 80 });
+  const first = makeUnit(100, "blue", 180, 700, { movement: { speed: 80, isAir: false } });
+  const second = makeUnit(101, "blue", 180, 700, { movement: { speed: 80, isAir: false } });
 
   addUnit(game, first);
   addUnit(game, second);
@@ -61,8 +60,8 @@ test("separates overlapping ground units without leaving them intersecting", () 
 
 test("does not separate air units from ground units", () => {
   const game = createGame();
-  const ground = makeUnit(100, "blue", 180, 700, { speed: 80 });
-  const air = makeUnit(101, "blue", 180, 700, { speed: 80, isAir: true });
+  const ground = makeUnit(100, "blue", 180, 700, { movement: { speed: 80, isAir: false } });
+  const air = makeUnit(101, "blue", 180, 700, { movement: { speed: 80, isAir: true } });
 
   addUnit(game, ground);
   addUnit(game, air);
@@ -79,7 +78,7 @@ test("keeps ground units inside their lane's bridge corridor while crossing the 
   const bridgeX = LANE_X.left;
   const halfBridgeWidth = 1.5 * ARENA_TILE_SIZE;
   const unit = makeUnit(100, "blue", 300, RIVER_BOTTOM + 10, {
-    speed: 90,
+    movement: { speed: 90, isAir: false },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
     lane: "left"
   });
@@ -111,7 +110,7 @@ test("keeps ground units inside their lane's bridge corridor while crossing the 
 test("routes ground troops around blocking buildings instead of moving straight through", () => {
   const game = createGame();
   const troop = makeUnit(100, "blue", 105, 800, {
-    speed: 100,
+    movement: { speed: 100, isAir: false },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
     lane: "left"
   });
@@ -120,7 +119,7 @@ test("routes ground troops around blocking buildings instead of moving straight 
     type: "cannon",
     kind: "building",
     radius: 20,
-    speed: 0,
+    movement: { speed: 0, isAir: false },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
 
@@ -140,7 +139,7 @@ test("pushes ground units out of tower collision space", () => {
   assert.ok(tower);
 
   const unit = makeUnit(100, "blue", tower.x, tower.y, {
-    speed: 100,
+    movement: { speed: 100, isAir: false },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 }
   });
   addUnit(game, unit);

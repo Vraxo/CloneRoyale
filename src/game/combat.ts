@@ -18,7 +18,7 @@ function findEnemyUnit(
     if (candidate.side === unit.side || candidate.health.hp <= 0) continue;
     if ((candidate.deployment.appearanceDelay) > 0) continue;
     if (buildingsOnly && candidate.kind !== "building") continue;
-    if (!unit.canTargetAir && candidate.isAir) continue;
+    if (!unit.canTargetAir && candidate.movement.isAir) continue;
 
     const distance = Math.hypot(candidate.x - unit.x, candidate.y - unit.y);
     const effectiveDistance = distance - (includeTargetRadius ? candidate.radius : 0);
@@ -129,7 +129,7 @@ export function updateUnits(state: GameState, dt: number): void {
       continue;
     }
 
-    unit.isMoving = false;
+    unit.movement.isMoving = false;
     unit.age += dt;
     unit.attackCooldown = Math.max(0, unit.attackCooldown - dt);
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
@@ -194,14 +194,14 @@ export function updateUnits(state: GameState, dt: number): void {
         : unit.type === "baby-dragon" ? "baby-dragon-wing"
           : unit.type === "archer" ? "archer-step" : "mini-pekka-step";
 
-    if (unit.isMoving) {
-      unit.footstepCooldown = (unit.footstepCooldown ?? 0) - dt;
-      if (unit.footstepCooldown <= 0) {
+    if (unit.movement.isMoving) {
+      unit.movement.footstepCooldown = (unit.movement.footstepCooldown ?? 0) - dt;
+      if (unit.movement.footstepCooldown <= 0) {
         state.audioEvents.push(stepEvent);
-        unit.footstepCooldown = stepInterval;
+        unit.movement.footstepCooldown = stepInterval;
       }
     } else {
-      unit.footstepCooldown = Math.min(unit.footstepCooldown ?? 0.12, 0.12);
+      unit.movement.footstepCooldown = Math.min(unit.movement.footstepCooldown ?? 0.12, 0.12);
     }
   }
 
