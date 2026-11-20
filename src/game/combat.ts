@@ -6,7 +6,10 @@ import { moveUnitTowardTarget, resolveUnitCollisions } from "./movement";
 import { updateUnitLifetime } from "./lifetime";
 import { updateUnitDeployment } from "./unitDeployment";
 
-function positionOf(target: Unit | Tower): { x: number; y: number } {
+type AttackTarget = Pick<Unit, "id" | "transform"> | Pick<Tower, "id" | "x" | "y">;
+type AttackingUnit = Pick<Unit, "side" | "transform" | "combat" | "presentation" | "audio">;
+
+function positionOf(target: AttackTarget): { x: number; y: number } {
   return "transform" in target ? target.transform : target;
 }
 
@@ -82,12 +85,12 @@ function findTowerTarget(
   return nearest;
 }
 
-type PendingMeleeAttack = { unit: Unit; target: Unit | Tower };
+type PendingMeleeAttack = { targetId: number; damage: number };
 
 function attackUnit(
   state: GameState,
-  unit: Unit,
-  target: Unit | Tower,
+  unit: AttackingUnit,
+  target: AttackTarget,
   pendingMeleeAttacks: PendingMeleeAttack[]
 ): void {
   unit.combat.attackCooldown = unit.combat.attackInterval;
@@ -95,7 +98,7 @@ function attackUnit(
   if (unit.audio?.attack) state.audioEvents.push(unit.audio?.attack);
 
   if (unit.combat.attack.type === "melee") {
-    pendingMeleeAttacks.push({ unit, target });
+    pendingMeleeAttacks.push({ targetId: target.id, damage: unit.combat.damage });
     if (unit.audio?.hit) state.audioEvents.push(unit.audio?.hit);
     return;
   }
@@ -163,7 +166,7 @@ export function updateUnits(state: GameState, dt: number): void {
   }
 
   for (const attack of pendingMeleeAttacks) {
-    damageTarget(state, attack.target.id, attack.unit.combat.damage);
+    damageTarget(state, attack.targetId, attack.damage);
   }
 
   for (const unit of state.units) {
