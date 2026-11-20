@@ -17,5 +17,10 @@ export const CANNON: UnitDefinition = {
     splashRadius: 0
   },
   targeting: { canTargetAir: false, targetsBuildingsOnly: false },
+  audio: {
+    attack: "cannon-attack",
+    deploy: "cannon-deploy",
+    death: "cannon-death"
+  },
   lifetime: { duration: 32 }
 };

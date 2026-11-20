@@ -15,5 +15,12 @@ export const SKELETON: UnitDefinition = {
     splashRadius: 0
   },
   targeting: { canTargetAir: false, targetsBuildingsOnly: false },
+  audio: {
+    attack: "skeleton-attack",
+    hit: "skeleton-hit",
+    deploy: "skeleton-deploy",
+    death: "skeleton-death",
+    movement: { event: "skeleton-step", interval: 0.5 }
+  },
   lifetime: { duration: 0 }
 };

@@ -75,6 +75,7 @@ function spawnCard(
         targetsBuildingsOnly: definition.targeting.targetsBuildingsOnly
       },
       lifetime: { duration: definition.lifetime.duration, elapsed: 0 },
+      audio: definition.audio,
       deployment: {
         appearanceDelay,
         duration: deploymentDuration,

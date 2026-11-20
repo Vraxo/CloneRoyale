@@ -22,6 +22,7 @@ function makeUnit(id: number, side: "blue" | "red", x: number, y: number): Unit 
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
+    audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 }
   };
 }

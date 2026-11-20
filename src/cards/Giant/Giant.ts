@@ -15,5 +15,12 @@ export const GIANT: UnitDefinition = {
     splashRadius: 0
   },
   targeting: { canTargetAir: false, targetsBuildingsOnly: true },
+  audio: {
+    attack: "giant-attack",
+    hit: "giant-hit",
+    deploy: "giant-deploy",
+    death: "giant-death",
+    movement: { event: "giant-step", interval: 0.62 }
+  },
   lifetime: { duration: 0 }
 };

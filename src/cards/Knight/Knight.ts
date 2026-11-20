@@ -15,5 +15,6 @@ export const KNIGHT: UnitDefinition = {
     splashRadius: 0
   },
   targeting: { canTargetAir: false, targetsBuildingsOnly: false },
+  audio: {},
   lifetime: { duration: 0 }
 };

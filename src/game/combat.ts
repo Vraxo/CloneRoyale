@@ -63,18 +63,11 @@ function attackUnit(
 ): void {
   unit.combat.attackCooldown = unit.combat.attackInterval;
   unit.presentation.attackAnim = 0.32;
-  if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-attack");
-  if (unit.type === "giant") state.audioEvents.push("giant-attack");
-  if (unit.type === "skeleton") state.audioEvents.push("skeleton-attack");
-  if (unit.type === "cannon") state.audioEvents.push("cannon-attack");
-  if (unit.type === "archer") state.audioEvents.push("archer-attack");
-  if (unit.type === "baby-dragon") state.audioEvents.push("baby-dragon-attack");
+  if (unit.audio.attack) state.audioEvents.push(unit.audio.attack);
 
   if (unit.combat.attack.type === "melee") {
     pendingMeleeAttacks.push({ unit, target });
-    if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-hit");
-    if (unit.type === "giant") state.audioEvents.push("giant-hit");
-    if (unit.type === "skeleton") state.audioEvents.push("skeleton-hit");
+    if (unit.audio.hit) state.audioEvents.push(unit.audio.hit);
     return;
   }
 
@@ -107,12 +100,7 @@ export function updateUnits(state: GameState, dt: number): void {
       unit.deployment.appearanceDelay = remaining;
       if (remaining > 0) continue;
 
-      if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-deploy");
-      if (unit.type === "giant") state.audioEvents.push("giant-deploy");
-      if (unit.type === "skeleton") state.audioEvents.push("skeleton-deploy");
-      if (unit.type === "cannon") state.audioEvents.push("cannon-deploy");
-      if (unit.type === "archer") state.audioEvents.push("archer-deploy");
-      if (unit.type === "baby-dragon") state.audioEvents.push("baby-dragon-deploy");
+      if (unit.audio.deploy) state.audioEvents.push(unit.audio.deploy);
 
       state.effects.push({
         id: state.nextId++,
@@ -181,29 +169,14 @@ export function updateUnits(state: GameState, dt: number): void {
   for (const unit of state.units) {
     if (unit.health.hp <= 0) continue;
 
-    const hasMovementSound = unit.type === "mini-pekka"
-      || unit.type === "giant"
-      || unit.type === "skeleton"
-      || unit.type === "archer"
-      || unit.type === "baby-dragon";
-    if (!hasMovementSound) continue;
-
-    const stepInterval = unit.type === "giant"
-      ? 0.62
-      : unit.type === "skeleton" ? 0.5
-        : unit.type === "baby-dragon" ? 0.58
-          : unit.type === "archer" ? 0.48 : 0.42;
-    const stepEvent = unit.type === "giant"
-      ? "giant-step"
-      : unit.type === "skeleton" ? "skeleton-step"
-        : unit.type === "baby-dragon" ? "baby-dragon-wing"
-          : unit.type === "archer" ? "archer-step" : "mini-pekka-step";
+    const movementSound = unit.audio.movement;
+    if (!movementSound) continue;
 
     if (unit.movement.isMoving) {
       unit.movement.footstepCooldown = (unit.movement.footstepCooldown ?? 0) - dt;
       if (unit.movement.footstepCooldown <= 0) {
-        state.audioEvents.push(stepEvent);
-        unit.movement.footstepCooldown = stepInterval;
+        state.audioEvents.push(movementSound.event);
+        unit.movement.footstepCooldown = movementSound.interval;
       }
     } else {
       unit.movement.footstepCooldown = Math.min(unit.movement.footstepCooldown ?? 0.12, 0.12);

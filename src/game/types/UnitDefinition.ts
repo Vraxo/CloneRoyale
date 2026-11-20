@@ -1,5 +1,6 @@
 import type { UnitType } from "./Unit";
 import type { UnitAttack } from "./UnitAttack";
+import type { UnitAudio } from "./Unit";
 
 export interface UnitIdentityDefinition {
   type: UnitType;
@@ -44,4 +45,5 @@ export interface UnitDefinition {
   combat: UnitCombatDefinition;
   targeting: UnitTargetingDefinition;
   lifetime: UnitLifetimeDefinition;
+  audio: UnitAudio;
 }

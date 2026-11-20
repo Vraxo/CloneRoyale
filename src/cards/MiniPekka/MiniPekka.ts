@@ -15,5 +15,12 @@ export const MINI_PEKKA: UnitDefinition = {
     splashRadius: 0
   },
   targeting: { canTargetAir: false, targetsBuildingsOnly: false },
+  audio: {
+    attack: "mini-pekka-attack",
+    hit: "mini-pekka-hit",
+    deploy: "mini-pekka-deploy",
+    death: "mini-pekka-death",
+    movement: { event: "mini-pekka-step", interval: 0.42 }
+  },
   lifetime: { duration: 0 }
 };

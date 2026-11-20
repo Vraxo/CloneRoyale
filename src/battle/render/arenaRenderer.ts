@@ -307,6 +307,7 @@ export class ArenaRenderer {
         targetsBuildingsOnly: definition.targeting.targetsBuildingsOnly
       },
       lifetime: { duration: definition.lifetime.duration, elapsed: 0 },
+      audio: definition.audio,
       deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
       presentation: {
         animationOffset: index * 0.37,
