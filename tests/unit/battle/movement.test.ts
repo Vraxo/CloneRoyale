@@ -311,3 +311,19 @@ test("routes a ground troop in the river interior toward the south-bank exit", (
   assert.equal(unit.transform.y, RIVER_BOTTOM + 1);
   assert.equal(unit.movement.isMoving, true);
 });
+
+
+test("routes a red ground troop from the south bank to the north-bank bridge exit", () => {
+  const game = createGame();
+  const unit = makeUnit(308, "red", 300, 700, {
+    movement: { speed: 1000, isAir: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
+    lane: "left"
+  });
+
+  moveUnitTowardTarget(game, unit, 300, 200, 1, 999);
+
+  assert.equal(unit.transform.x, LANE_X.left);
+  assert.equal(unit.transform.y, RIVER_BOTTOM);
+  assert.equal(unit.movement.isMoving, true);
+});
