@@ -33,7 +33,7 @@ function riverBank(y: number): -1 | 0 | 1 {
 }
 
 function movementTarget(unit: PathingUnit, targetX: number, targetY: number): { x: number; y: number } {
-  if (unit.isAir) return { x: targetX, y: targetY };
+  if (unit.movement.isAir) return { x: targetX, y: targetY };
 
   const currentBank = riverBank(unit.y);
   const targetBank = riverBank(targetY);
@@ -72,11 +72,11 @@ function moveToward(unit: MovingUnit, x: number, y: number, dt: number): void {
   const dx = x - unit.x;
   const dy = y - unit.y;
   const distance = Math.hypot(dx, dy);
-  if (distance < 0.001 || unit.speed <= 0) return;
+  if (distance < 0.001 || unit.movement.speed <= 0) return;
 
   unit.facing = Math.atan2(dy, dx);
-  unit.isMoving = true;
-  const amount = Math.min(distance, unit.speed * dt);
+  unit.movement.isMoving = true;
+  const amount = Math.min(distance, unit.movement.speed * dt);
   unit.x += (dx / distance) * amount;
   unit.y += (dy / distance) * amount;
 }
@@ -95,7 +95,7 @@ function findObstacleWaypoint(
   targetY: number,
   targetId: number
 ): { x: number; y: number } | null {
-  if (unit.isAir) return null;
+  if (unit.movement.isAir) return null;
 
   const dx = targetX - unit.x;
   const dy = targetY - unit.y;
@@ -109,7 +109,7 @@ function findObstacleWaypoint(
         && candidate.id !== unit.id
         && candidate.kind === "building"
         && candidate.health.hp > 0
-        && !candidate.isAir
+        && !candidate.movement.isAir
         && (candidate.deployment.appearanceDelay) <= 0
       )
       .map((candidate) => ({
@@ -182,11 +182,11 @@ export function moveUnitTowardTarget(
   dt: number,
   targetId: number
 ): void {
-  if (unit.formationSlot !== undefined) {
+  if (unit.movement.formationSlot !== undefined) {
     const dx = unit.x - x;
     const dy = unit.y - y;
     const distance = Math.hypot(dx, dy) || 1;
-    const offset = unit.formationSlot * (unit.radius + 3);
+    const offset = unit.movement.formationSlot * (unit.radius + 3);
     const perpendicularX = -dy / distance;
     const perpendicularY = dx / distance;
     x += perpendicularX * offset;
@@ -200,7 +200,7 @@ export function moveUnitTowardTarget(
 
 function keepGroundUnitsOnBridges(units: Unit[]): void {
   for (const unit of units) {
-    if (unit.health.hp <= 0 || unit.isAir || (unit.deployment.appearanceDelay) > 0) continue;
+    if (unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
     if (unit.y < RIVER_TOP || unit.y > RIVER_BOTTOM) continue;
 
     const bridgeX = LANE_X[unit.lane];
@@ -220,15 +220,15 @@ function separateUnits(units: Unit[]): void {
         if (
           second.health.hp <= 0
           || (second.deployment.appearanceDelay) > 0
-          || first.isAir !== second.isAir
+          || first.movement.isAir !== second.movement.isAir
         ) continue;
 
         const firstDeploying = (first.deployment.appearanceDelay) > 0
           || (first.deployment.remaining) > 0;
         const secondDeploying = (second.deployment.appearanceDelay) > 0
           || (second.deployment.remaining) > 0;
-        const firstCanMove = first.kind !== "building" && first.speed > 0;
-        const secondCanMove = second.kind !== "building" && second.speed > 0;
+        const firstCanMove = first.kind !== "building" && first.movement.speed > 0;
+        const secondCanMove = second.kind !== "building" && second.movement.speed > 0;
         if (!firstCanMove && !secondCanMove) continue;
 
         const dx = second.x - first.x;
@@ -280,7 +280,7 @@ function separateUnits(units: Unit[]): void {
 function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
   for (let iteration = 0; iteration < 2; iteration += 1) {
     for (const unit of units) {
-      if (unit.health.hp <= 0 || unit.isAir || (unit.deployment.appearanceDelay) > 0) continue;
+      if (unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
 
       for (const tower of towers) {
         if (tower.hp <= 0) continue;
