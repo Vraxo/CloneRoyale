@@ -82,7 +82,8 @@ export interface Unit
     UnitMovement,
     UnitCombat,
     UnitTargeting,
-    UnitLifetime {\n  health: UnitHealth;
+    UnitLifetime {
+  health: UnitHealth;
   deployment: UnitDeployment;
   presentation: UnitPresentation;
 }
