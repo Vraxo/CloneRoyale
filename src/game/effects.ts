@@ -7,7 +7,7 @@ export function damageTarget(state: GameState, targetId: number, damage: number)
     const wasAlive = unit.health.hp > 0;
     unit.health.hp -= damage;
     if (wasAlive && unit.health.hp <= 0) {
-      if (unit.audio.death) state.audioEvents.push(unit.audio.death);
+      if (unit.audio?.death) state.audioEvents.push(unit.audio?.death);
     }
     unit.presentation.attackAnim = Math.max(unit.presentation.attackAnim, 0.09);
     state.effects.push({
