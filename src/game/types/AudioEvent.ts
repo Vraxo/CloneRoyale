@@ -47,6 +47,8 @@ export type AudioEvent =
   | "arrows-impact"
   | "fireball-launch"
   | "fireball-explosion"
+  | "zap-cast"
+  | "zap-impact"
   | "projectile-impact"
   | "tower-hit"
   | "ui-click"
