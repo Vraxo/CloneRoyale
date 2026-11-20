@@ -183,9 +183,9 @@ export class BattleHud {
     const nextCard = nextCardId ? cardById(nextCardId) : null;
 
     graphics.clear();
-bottom panel    const nextX = layout.padding;
+    const nextX = layout.padding;
     const nextY = layout.cardY + 16;
-next card frame    const nextTexture = nextCard ? this.cardTextures.get(nextCard.id) : undefined;
+    const nextTexture = nextCard ? this.cardTextures.get(nextCard.id) : undefined;
     this.nextCardArt.visible = nextTexture !== undefined;
     if (nextTexture) {
       fitCardArt(
@@ -197,7 +197,7 @@ next card frame    const nextTexture = nextCard ? this.cardTextures.get(nextCard
         layout.cardHeight - 16
       );
     }
-next card name    const nextCostX = nextX + layout.nextWidth - 12;
+    const nextCostX = nextX + layout.nextWidth - 12;
     const nextCostY = nextY + 12;
     graphics.circle(nextCostX, nextCostY, 9).fill({ color: 0x76569a });
     graphics.circle(nextCostX, nextCostY, 9).stroke({ color: 0xc2a4df, width: 1 });
@@ -426,7 +426,7 @@ next card name    const nextCostX = nextX + layout.nextWidth - 12;
     this.clockModeLabel.style.fontSize = 8;
     this.clockModeLabel.alpha = lastTenSeconds ? 0.7 + urgentPulse * 0.3 : 0.92;
   }
-  drawCardBadges method  private drawCards(
+  private drawCards(
     state: ReadonlyGameState,
     selectedCard: CardId | null,
     cards: ReturnType<typeof calculateHudLayout>["cards"],
@@ -442,7 +442,7 @@ next card name    const nextCostX = nextX + layout.nextWidth - 12;
       const isSelected = cardId !== undefined && cardId === selectedCard;
       const rect = isSelected ? { ...baseRect, y: baseRect.y - 8 } : baseRect;
       const affordable = card !== null && player.elixir >= card.cost;
-card foreground      const art = this.cardArts[index];
+      const art = this.cardArts[index];
       const texture = card ? this.cardTextures.get(card.id) : undefined;
       art.visible = texture !== undefined;
       if (texture) {
@@ -500,7 +500,7 @@ card foreground      const art = this.cardArts[index];
       glyph.alpha = affordable ? 1 : 0.7;
       glyph.style.fontSize = Math.max(16, Math.min(27, rect.width * 0.2));
 
-name rendering      const badgeX = rect.x + rect.width - 13;
+      const badgeX = rect.x + rect.width - 13;
       const badgeY = rect.y + 13;
       graphics.circle(badgeX, badgeY, 12).fill({ color: 0x76569a, alpha: 0.98 });
       graphics.circle(badgeX, badgeY, 12).stroke({ color: 0xc2a4df, width: 1 });
