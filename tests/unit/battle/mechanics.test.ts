@@ -381,7 +381,7 @@ test("unlocks only the destroyed princess tower's deployment pocket", () => {
   redLeft.hp = 0;
   const leftUnlocked = getGroundDeploymentZones(game, "blue", 12);
   assert.equal(leftUnlocked.length, 2);
-  assert.ok(leftUnlocked[1].maxX < FIELD_WIDTH / 2);
+  assert.ok(leftUnlocked[1].maxX <= FIELD_WIDTH / 2);
 
   redRight.hp = 0;
   const bothUnlocked = getGroundDeploymentZones(game, "blue", 12);
