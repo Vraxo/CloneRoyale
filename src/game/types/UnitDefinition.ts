@@ -18,6 +18,7 @@ export interface UnitCollisionDefinition {
 export interface UnitMovementDefinition {
   speed: number;
   isAir: boolean;
+  formationSlots?: readonly (-1 | 1)[];
 }
 
 export interface UnitCombatDefinition {
