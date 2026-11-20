@@ -23,5 +23,6 @@ export const ARCHER: UnitDefinition = {
     death: "archer-death",
     movement: { event: "archer-step", interval: 0.48 }
   },
-  lifetime: { duration: 0 }
+  lifetime: { duration: 0 },
+  formation: { pattern: "paired" }
 };
