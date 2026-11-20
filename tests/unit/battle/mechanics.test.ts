@@ -336,3 +336,22 @@ test("deploys paired archers around a custom placement point", () => {
   assert.ok(troops[1].deployment.duration > troops[0].deployment.duration);
   assert.ok(troops.every((unit) => unit.transform.facing === -Math.PI / 2));
 });
+
+
+test("deploys a red building at its default lane position", () => {
+  const game = createGame();
+  game.sides.red.hand = ["cannon"];
+  game.sides.red.elixir = 10;
+
+  assert.equal(playCard(game, "red", "cannon", "right"), true);
+
+  assert.equal(game.units.length, 1);
+  assert.equal(game.units[0].kind, "building");
+  assert.equal(game.units[0].side, "red");
+  assert.equal(game.units[0].transform.x, 435);
+  assert.equal(game.units[0].transform.y, 270);
+  assert.equal(game.units[0].transform.facing, Math.PI / 2);
+  assert.equal("movement" in game.units[0], false);
+  assert.equal(game.sides.red.elixir, 7);
+  assert.equal(game.sides.red.cardsPlayed, 1);
+});
