@@ -91,7 +91,7 @@ interface UnitBase extends UnitIdentity {
   collision: UnitCollision;
   health: UnitHealth;
   deployment: UnitDeployment;
-  audio: UnitAudio;
+  audio?: UnitAudio;
   presentation: UnitPresentation;
 }
 
