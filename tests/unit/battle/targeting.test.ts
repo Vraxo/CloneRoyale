@@ -172,3 +172,15 @@ test("tower targeting includes the target collision radius at the range boundary
 
   assert.equal(findTowerTarget(tower, [target])?.id, target.id);
 });
+
+
+test("red troops target the blue side's living lane tower", () => {
+  const state = createGame();
+  const unit = makeTroop(200, "red", 135, 160);
+  const bluePrincess = state.towers.find((tower) =>
+    tower.side === "blue" && tower.kind === "princess" && tower.lane === "left"
+  );
+
+  assert.ok(bluePrincess);
+  assert.equal(findEnemyTower(state, unit), bluePrincess);
+});

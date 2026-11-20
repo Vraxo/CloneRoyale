@@ -321,3 +321,16 @@ test("normalizes a zero random seed to a nonzero deterministic seed", () => {
   assert.equal(game.seed, 1);
   assert.deepEqual(game, createGame(0));
 });
+
+
+test("red troop deployment uses red-side facing and spawn coordinates", () => {
+  const game = createGame();
+  game.sides.red.hand = ["giant"];
+  game.sides.red.elixir = 10;
+
+  assert.equal(playCard(game, "red", "giant", "right"), true);
+
+  assert.equal(game.units[0].transform.x, 435);
+  assert.equal(game.units[0].transform.y, 212);
+  assert.equal(game.units[0].transform.facing, Math.PI / 2);
+});
