@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Unit } from "../../../game/types";
+import type { DeepReadonly, Unit } from "../../../game/types";
 
 export type HumanoidStyle = "skeleton" | "giant" | "archer" | "mini-pekka" | "knight";
 
@@ -106,7 +106,7 @@ export class SkeletalRig {
     if (style === "archer") this.addBow();
   }
 
-  public update(unit: Unit, time: number): void {
+  public update(unit: DeepReadonly<Unit>, time: number): void {
     const phase = time * 8.2 + unit.animationOffset;
     const moving = unit.isMoving ?? false;
     const stride = moving ? Math.sin(phase) * 0.42 : 0;
