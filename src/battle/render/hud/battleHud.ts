@@ -101,16 +101,12 @@ export class BattleHud {
 
   private readonly graphics = new Graphics();
   private readonly cardProgressGraphics = new Graphics();
-  private readonly cardOverlayGraphics = new Graphics();
   private readonly cardArts = Array.from({ length: 4 }, () => new Sprite(Texture.EMPTY));
   private readonly nextCardArt = new Sprite(Texture.EMPTY);
   private readonly cardTextures = new Map<CardId, Texture>();
   private lastHandCardIds: (CardId | undefined)[] = [];
   private readonly cardGlyphs = Array.from({ length: 4 }, () => createHudText(25, 0xf0dfb6, "Supercell Magic"));
-  private readonly cardNames = Array.from({ length: 4 }, () => createHudText(11, 0xf4eedc, "Supercell Magic"));
   private readonly cardCosts = Array.from({ length: 4 }, () => createHudText(12, 0xffffff, "Supercell Magic"));
-  private readonly nextCardLabel = createHudText(7, 0xf0e4c7);
-  private readonly nextCardName = createHudText(9, 0xe7dfca, "Supercell Magic");
   private readonly nextCardCost = createHudText(10, 0xffffff, "Supercell Magic");
   private readonly elixirValue = createHudText(17, 0xf1d8ff);
   private readonly elixirMax = createHudText(8, 0xc1a5d8);
@@ -132,12 +128,8 @@ export class BattleHud {
       this.nextCardArt,
       ...this.cardArts,
       this.cardProgressGraphics,
-      this.cardOverlayGraphics,
       ...this.cardGlyphs,
-      ...this.cardNames,
       ...this.cardCosts,
-      this.nextCardLabel,
-      this.nextCardName,
       this.nextCardCost,
       this.elixirValue,
       this.elixirMax,
@@ -193,55 +185,22 @@ export class BattleHud {
     const nextCard = nextCardId ? cardById(nextCardId) : null;
 
     graphics.clear();
-    graphics
-      .roundRect(7, layout.top + 4, layout.width - 14, HUD_HEIGHT - 8, 15)
-      .fill({ color: 0x102d50, alpha: 0.99 });
-    graphics
-      .roundRect(7, layout.top + 4, layout.width - 14, HUD_HEIGHT - 8, 15)
-      .stroke({ color: 0x477eae, alpha: 0.98, width: 1.5 });
-    graphics
-      .rect(18, layout.top + 5, layout.width - 36, 2)
-      .fill({ color: 0xffcf55, alpha: 0.88 });
-
-    const nextX = layout.padding;
+bottom panel    const nextX = layout.padding;
     const nextY = layout.cardY + 16;
-    graphics
-      .roundRect(nextX, nextY, layout.nextWidth, layout.cardHeight - 16, 7)
-      .fill({ color: 0x1b4771, alpha: 1 });
-    graphics
-      .roundRect(nextX, nextY, layout.nextWidth, layout.cardHeight - 16, 7)
-      .stroke({ color: 0x6ba7d5, width: 1 });
-    graphics
-      .roundRect(nextX + 5, layout.cardY - 1, layout.nextWidth - 10, 14, 4)
-      .fill({ color: 0x285783 });
-    this.nextCardLabel.text = "NEXT";
-    this.nextCardLabel.anchor.set(0.5);
-    this.nextCardLabel.position.set(nextX + layout.nextWidth / 2, layout.cardY + 6);
-    const nextTexture = nextCard ? this.cardTextures.get(nextCard.id) : undefined;
+next card frame    const nextTexture = nextCard ? this.cardTextures.get(nextCard.id) : undefined;
     this.nextCardArt.visible = nextTexture !== undefined;
     if (nextTexture) {
       fitCardArt(
         this.nextCardArt,
         nextTexture,
         nextX + layout.nextWidth / 2,
-        nextY + (layout.cardHeight - 24) / 2 + 3,
-        layout.nextWidth - 10,
-        layout.cardHeight - 24
+        nextY + (layout.cardHeight - 16) / 2,
+        layout.nextWidth,
+        layout.cardHeight - 16
       );
     }
-    this.nextCardName.visible = false;
-    this.nextCardName.text = nextCard?.name ?? "—";
-    this.nextCardName.anchor.set(0.5);
-    this.nextCardName.position.set(
-      nextX + layout.nextWidth / 2,
-      nextY + (layout.cardHeight - 16) / 2
-    );
-    this.nextCardName.style.fontSize = Math.max(7, Math.min(9, layout.nextWidth * 0.15));
-    this.nextCardName.style.wordWrap = true;
-    this.nextCardName.style.wordWrapWidth = layout.nextWidth - 8;
-
-    const nextCostX = nextX + layout.nextWidth - 11;
-    const nextCostY = nextY + layout.cardHeight - 27;
+next card name    const nextCostX = nextX + layout.nextWidth - 12;
+    const nextCostY = nextY + 12;
     graphics.circle(nextCostX, nextCostY, 9).fill({ color: 0x76569a });
     graphics.circle(nextCostX, nextCostY, 9).stroke({ color: 0xc2a4df, width: 1 });
     this.nextCardCost.text = nextCard ? nextCard.cost.toString() : "—";
@@ -250,7 +209,6 @@ export class BattleHud {
 
     this.drawMatchClock(state, layout.width, graphics);
     this.drawCards(state, selectedCard, layout.cards, graphics, side);
-    this.drawCardBadges(layout, selectedCard);
     this.drawElixir(player.elixir, layout, graphics, state.time);
     this.drawMatchNotification(width, height);
 
@@ -470,29 +428,7 @@ export class BattleHud {
     this.clockModeLabel.style.fontSize = 8;
     this.clockModeLabel.alpha = lastTenSeconds ? 0.7 + urgentPulse * 0.3 : 0.92;
   }
-    private drawCardBadges(
-    layout: ReturnType<typeof calculateHudLayout>,
-    selectedCard: CardId | null
-  ): void {
-    const graphics = this.cardOverlayGraphics;
-    graphics.clear();
-
-    const nextX = layout.padding;
-    const nextCostX = nextX + layout.nextWidth - 11;
-    const nextCostY = layout.cardY + layout.cardHeight - 11;
-    graphics.circle(nextCostX, nextCostY, 9).fill({ color: 0x76569a });
-    graphics.circle(nextCostX, nextCostY, 9).stroke({ color: 0xc2a4df, width: 1 });
-
-    for (let index = 0; index < layout.cards.length; index += 1) {
-      const rect = layout.cards[index];
-      const badgeX = rect.x + rect.width - 14;
-      const badgeY = rect.y + (this.lastHandCardIds[index] === selectedCard ? 6 : 14);
-      graphics.circle(badgeX, badgeY, 12).fill({ color: 0x76569a, alpha: 0.98 });
-      graphics.circle(badgeX, badgeY, 12).stroke({ color: 0xc2a4df, width: 1 });
-    }
-  }
-
-  private drawCards(
+  drawCardBadges method  private drawCards(
     state: ReadonlyGameState,
     selectedCard: CardId | null,
     cards: ReturnType<typeof calculateHudLayout>["cards"],
@@ -508,33 +444,17 @@ export class BattleHud {
       const isSelected = cardId !== undefined && cardId === selectedCard;
       const rect = isSelected ? { ...baseRect, y: baseRect.y - 8 } : baseRect;
       const affordable = card !== null && player.elixir >= card.cost;
-      const fill = card?.category === "spell"
-        ? 0x403a66
-        : card?.category === "building" ? 0x62502f : 0x1e4b70;
-      const border = isSelected ? 0xffd45e : affordable ? 0x8cc9f6 : 0x34516d;
-
-      graphics
-        .roundRect(rect.x, rect.y, rect.width, rect.height, 8)
-        .fill({ color: fill, alpha: affordable ? 1 : 0.72 });
-      graphics
-        .roundRect(rect.x, rect.y, rect.width, rect.height, 8)
-        .stroke({ color: border, alpha: 1, width: isSelected ? 3 : 1.5 });
-      graphics
-        .roundRect(rect.x + 5, rect.y + 5, rect.width - 10, rect.height - 10, 5)
-        .stroke({ color: 0xe4d7ad, alpha: affordable ? 0.22 : 0.1, width: 1 });
-
-      const art = this.cardArts[index];
+card foreground      const art = this.cardArts[index];
       const texture = card ? this.cardTextures.get(card.id) : undefined;
       art.visible = texture !== undefined;
       if (texture) {
-        const artHeight = Math.min(62, rect.height - 21);
         fitCardArt(
           art,
           texture,
           rect.x + rect.width / 2,
-          rect.y + artHeight / 2 + 3,
-          rect.width - 12,
-          artHeight
+          rect.y + rect.height / 2,
+          rect.width,
+          rect.height
         );
         art.alpha = 1;
       } else {
@@ -544,9 +464,8 @@ export class BattleHud {
       if (card && !affordable) {
         const progress = Math.max(0, Math.min(1, player.elixir / card.cost));
         const centerX = rect.x + rect.width / 2;
-        const artHeight = Math.min(62, rect.height - 21);
-        const centerY = rect.y + artHeight / 2 + 3;
-        const radius = Math.max(8, Math.min(rect.width - 14, artHeight) * 0.43);
+        const centerY = rect.y + rect.height / 2;
+        const radius = Math.min(rect.width, rect.height) * 0.43;
         const startAngle = -Math.PI / 2;
         const remainingAngle = (1 - progress) * Math.PI * 2;
         const progressGraphics = this.cardProgressGraphics;
@@ -576,7 +495,6 @@ export class BattleHud {
 
       const glyph = this.cardGlyphs[index];
       glyph.visible = !art.visible;
-      const name = this.cardNames[index];
       const cost = this.cardCosts[index];
       glyph.text = card ? cardGlyph(cardId) : "";
       glyph.anchor.set(0.5);
@@ -584,16 +502,8 @@ export class BattleHud {
       glyph.alpha = affordable ? 1 : 0.7;
       glyph.style.fontSize = Math.max(16, Math.min(27, rect.width * 0.2));
 
-      name.text = card?.name ?? "";
-      name.anchor.set(0.5);
-      name.position.set(rect.x + rect.width / 2, rect.y + rect.height - 8);
-      name.style.fontSize = Math.max(7, Math.min(9, rect.width * 0.075));
-      name.style.wordWrap = true;
-      name.style.wordWrapWidth = rect.width - 12;
-      name.alpha = affordable ? 1 : 0.7;
-
-      const badgeX = rect.x + rect.width - 14;
-      const badgeY = rect.y + 14;
+name rendering      const badgeX = rect.x + rect.width - 13;
+      const badgeY = rect.y + 13;
       graphics.circle(badgeX, badgeY, 12).fill({ color: 0x76569a, alpha: 0.98 });
       graphics.circle(badgeX, badgeY, 12).stroke({ color: 0xc2a4df, width: 1 });
       cost.text = card ? card.cost.toString() : "";
