@@ -5,6 +5,7 @@ import { otherSide } from "./state";
 import { moveUnitTowardTarget, resolveUnitCollisions } from "./movement";
 import { updateUnitLifetime } from "./lifetime";
 import { updateUnitDeployment } from "./unitDeployment";
+import { updateMovementAudio } from "./unitAudio";
 
 type AttackTarget = Pick<Unit, "id" | "transform"> | Pick<Tower, "id" | "x" | "y">;
 type AttackingUnit = Pick<Unit, "side" | "transform" | "combat" | "presentation" | "audio">;
@@ -172,18 +173,7 @@ export function updateUnits(state: GameState, dt: number): void {
   for (const unit of state.units) {
     if (unit.health.hp <= 0 || unit.kind === "building") continue;
 
-    const movementSound = unit.audio?.movement;
-    if (!movementSound) continue;
-
-    if (unit.movement.isMoving) {
-      unit.movement.footstepCooldown = (unit.movement.footstepCooldown ?? 0) - dt;
-      if (unit.movement.footstepCooldown <= 0) {
-        state.audioEvents.push(movementSound.event);
-        unit.movement.footstepCooldown = movementSound.interval;
-      }
-    } else {
-      unit.movement.footstepCooldown = Math.min(unit.movement.footstepCooldown ?? 0.12, 0.12);
-    }
+    updateMovementAudio(unit, state.audioEvents, dt);
   }
 
   resolveUnitCollisions(state);
