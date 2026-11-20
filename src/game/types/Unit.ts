@@ -65,9 +65,9 @@ export interface UnitLifetime {
 }
 
 export interface UnitDeployment {
-  appearanceDelayRemaining?: number;
-  deploymentDuration?: number;
-  deploymentRemaining?: number;
+  appearanceDelay: number;
+  duration: number;
+  remaining: number;
 }
 
 export interface UnitPresentation {
@@ -83,7 +83,7 @@ export interface Unit
     UnitMovement,
     UnitCombat,
     UnitTargeting,
-    UnitLifetime,
-    UnitDeployment {
+    UnitLifetime {
+  deployment: UnitDeployment;
   presentation: UnitPresentation;
 }

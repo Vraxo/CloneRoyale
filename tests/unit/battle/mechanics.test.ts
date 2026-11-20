@@ -31,7 +31,7 @@ function makeUnit(id: number, side: "blue" | "red", x: number, y: number): Unit 
     targetsBuildingsOnly: false,
     lifetime: 0,
     age: 0,
-    deploymentRemaining: 10,
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
     facing: 0,
     presentation: { animationOffset: 0, attackAnim: 0 }
   };
