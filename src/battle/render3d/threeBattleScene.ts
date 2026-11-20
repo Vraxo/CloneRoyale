@@ -40,9 +40,19 @@ interface ArrowRainRig {
   arrows: THREE.Group[];
   dust: THREE.Mesh[];
 }
+interface ZapBoltRig {
+  segments: THREE.Mesh[];
+}
+interface ZapEffectRig {
+  ring: THREE.Mesh;
+  flash: THREE.Mesh;
+  bolts: ZapBoltRig[];
+  sparks: THREE.Mesh[];
+}
 interface EffectModel extends THREE.Group {
   fireball?: FireballEffectRig;
   arrows?: ArrowRainRig;
+  zap?: ZapEffectRig;
 }
 
 export class ThreeBattleScene {
@@ -731,6 +741,9 @@ export class ThreeBattleScene {
         } else if (effect.style === "arrows") {
           model.arrows = this.createArrowRain(effect.radius);
           model.add(model.arrows.ring, ...model.arrows.arrows, ...model.arrows.dust);
+        } else if (effect.style === "zap") {
+          model.zap = this.createZapEffect(effect.radius);
+          model.add(model.zap.ring, model.zap.flash, ...model.zap.bolts.flatMap(bolt => bolt.segments), ...model.zap.sparks);
         } else {
           const ring = new THREE.Mesh(
             new THREE.TorusGeometry(Math.max(3, effect.radius * 0.72), 1.8, 6, 32),
@@ -752,6 +765,8 @@ export class ThreeBattleScene {
         this.updateFireballExplosion(model.fireball, progress, effect.age);
       } else if (effect.style === "arrows" && model.arrows) {
         this.updateArrowRain(model.arrows, effect.age, effect.lifetime);
+      } else if (effect.style === "zap" && model.zap) {
+        this.updateZapEffect(model.zap, effect.age, effect.lifetime);
       } else {
         const ring = model.children[0] as THREE.Mesh;
         ring.scale.setScalar(0.55 + progress * 0.9);
@@ -759,6 +774,110 @@ export class ThreeBattleScene {
       }
     }
     this.removeMissing(this.effectModels, active);
+  }
+
+  private createZapEffect(radius: number): ZapEffectRig {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 0.72, Math.max(1.2, radius * 0.018), 7, 48),
+      new THREE.MeshBasicMaterial({ color: "#77dfff", transparent: true, opacity: 0.72, depthWrite: false })
+    );
+    ring.rotation.x = -Math.PI / 2;
+
+    const flash = new THREE.Mesh(
+      new THREE.SphereGeometry(Math.max(12, radius * 0.24), 16, 12),
+      new THREE.MeshBasicMaterial({ color: "#d9f8ff", transparent: true, opacity: 0.92, depthWrite: false })
+    );
+    flash.position.y = 17;
+
+    const bolts: ZapBoltRig[] = [];
+    const makeBolt = (points: THREE.Vector3[], width: number): void => {
+      const segments: THREE.Mesh[] = [];
+      for (let index = 0; index < points.length - 1; index += 1) {
+        const segment = new THREE.Mesh(
+          new THREE.CylinderGeometry(1, 1, 1, 5),
+          new THREE.MeshBasicMaterial({
+            color: index % 2 === 0 ? "#e8fcff" : "#69dfff",
+            transparent: true,
+            opacity: 0.98,
+            depthWrite: false
+          })
+        );
+        const start = points[index];
+        const end = points[index + 1];
+        const direction = end.clone().sub(start);
+        segment.position.copy(start).add(end).multiplyScalar(0.5);
+        segment.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
+        segment.scale.set(width, direction.length(), width);
+        segments.push(segment);
+      }
+      bolts.push({ segments });
+    };
+
+    const mainPoints: THREE.Vector3[] = [];
+    for (let index = 0; index <= 6; index += 1) {
+      const t = index / 6;
+      mainPoints.push(new THREE.Vector3(
+        (Math.sin(index * 8.17) * 0.5 + Math.cos(index * 3.1) * 0.5) * radius * 0.11,
+        164 - t * 145,
+        (Math.cos(index * 5.73) * 0.5 + Math.sin(index * 2.7) * 0.5) * radius * 0.11
+      ));
+    }
+    makeBolt(mainPoints, 2.8);
+
+    for (let branch = 0; branch < 5; branch += 1) {
+      const angle = branch / 5 * Math.PI * 2 + 0.32;
+      const start = mainPoints[2 + branch % 3].clone();
+      const distance = radius * (0.34 + (branch % 2) * 0.12);
+      const end = new THREE.Vector3(Math.cos(angle) * distance, 5, Math.sin(angle) * distance);
+      const middle = start.clone().lerp(end, 0.52);
+      middle.x += Math.cos(angle + 1.1) * radius * 0.1;
+      middle.z += Math.sin(angle + 1.1) * radius * 0.1;
+      makeBolt([start, middle, end], 1.65);
+    }
+
+    const sparks: THREE.Mesh[] = [];
+    for (let index = 0; index < 14; index += 1) {
+      const spark = new THREE.Mesh(
+        new THREE.SphereGeometry(1.8 + (index % 3) * 0.65, 7, 6),
+        new THREE.MeshBasicMaterial({
+          color: index % 3 === 0 ? "#ffffff" : "#74dcff",
+          transparent: true,
+          opacity: 0.95,
+          depthWrite: false
+        })
+      );
+      const angle = index * 2.399963;
+      const distance = radius * (0.16 + (index % 4) * 0.09);
+      spark.position.set(Math.cos(angle) * distance, 5 + (index % 3) * 4, Math.sin(angle) * distance);
+      sparks.push(spark);
+    }
+
+    return { ring, flash, bolts, sparks };
+  }
+
+  private updateZapEffect(rig: ZapEffectRig, age: number, lifetime: number): void {
+    const fade = Math.max(0, 1 - age / lifetime);
+    const strike = Math.min(1, age / 0.075);
+    const flicker = 0.68 + Math.abs(Math.sin(age * 83)) * 0.32;
+    rig.ring.scale.setScalar(0.62 + Math.min(1, age / 0.22) * 0.62);
+    (rig.ring.material as THREE.MeshBasicMaterial).opacity = 0.68 * fade * flicker;
+    rig.flash.scale.setScalar((0.18 + strike * 0.82) * (0.82 + Math.sin(age * 54) * 0.18));
+    (rig.flash.material as THREE.MeshBasicMaterial).opacity = 0.88 * fade * (age < 0.16 ? 1 : 0.35);
+    rig.bolts.forEach((bolt, boltIndex) => {
+      bolt.segments.forEach((segment, segmentIndex) => {
+        const material = segment.material as THREE.MeshBasicMaterial;
+        const pulse = 0.55 + Math.abs(Math.sin(age * 91 + boltIndex * 2.7 + segmentIndex * 1.9)) * 0.45;
+        material.opacity = 0.96 * fade * pulse;
+        segment.visible = age < 0.28 || pulse > 0.76;
+      });
+    });
+    rig.sparks.forEach((spark, index) => {
+      const phase = age * 24 + index * 1.73;
+      const material = spark.material as THREE.MeshBasicMaterial;
+      material.opacity = 0.9 * fade * Math.max(0, Math.sin(phase) * 0.5 + 0.5);
+      spark.scale.setScalar((0.55 + Math.abs(Math.sin(phase * 1.4)) * 1.25) * fade);
+      spark.position.y = 5 + Math.max(0, age - 0.08) * (18 + index % 4 * 4);
+    });
   }
 
   private createArrowRain(radius: number): ArrowRainRig {
