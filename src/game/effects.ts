@@ -7,12 +7,7 @@ export function damageTarget(state: GameState, targetId: number, damage: number)
     const wasAlive = unit.health.hp > 0;
     unit.health.hp -= damage;
     if (wasAlive && unit.health.hp <= 0) {
-      if (unit.type === "giant") state.audioEvents.push("giant-death");
-      if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-death");
-      if (unit.type === "baby-dragon") state.audioEvents.push("baby-dragon-death");
-      if (unit.type === "cannon") state.audioEvents.push("cannon-death");
-      if (unit.type === "skeleton") state.audioEvents.push("skeleton-death");
-      if (unit.type === "archer") state.audioEvents.push("archer-death");
+      if (unit.audio.death) state.audioEvents.push(unit.audio.death);
     }
     unit.presentation.attackAnim = Math.max(unit.presentation.attackAnim, 0.09);
     state.effects.push({
