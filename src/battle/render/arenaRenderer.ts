@@ -301,8 +301,10 @@ export class ArenaRenderer {
       attackCooldown: 0,
       attack: definition.attack,
       splashRadius: definition.splashRadius,
-      canTargetAir: definition.canTargetAir,
-      targetsBuildingsOnly: definition.targetsBuildingsOnly,
+      targeting: {
+        canTargetAir: definition.canTargetAir,
+        targetsBuildingsOnly: definition.targetsBuildingsOnly
+      },
       lifetime: definition.lifetime,
       age: 0,
       deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
