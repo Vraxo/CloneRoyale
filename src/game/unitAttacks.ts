@@ -8,7 +8,7 @@ function positionOf(target: AttackTarget): { x: number; y: number } {
   return "transform" in target ? target.transform : target;
 }
 
-type PendingMeleeAttack = { targetId: number; damage: number };
+export type PendingMeleeAttack = { targetId: number; damage: number };
 
 export function attackUnit(
   state: GameState,
