@@ -8,7 +8,7 @@ await writeFile(
 
 const result = spawnSync(
   process.execPath,
-  [...(process.argv.includes("--coverage") ? ["--experimental-test-coverage"] : []), "--test", "dist-tests/tests/unit/battle/game.test.js", "dist-tests/tests/unit/battle/combat.test.js", "dist-tests/tests/unit/battle/movement.test.js", "dist-tests/tests/unit/battle/mechanics.test.js", "dist-tests/tests/unit/battle/targeting.test.js", "dist-tests/tests/unit/battle/projectiles.test.js", "dist-tests/tests/unit/battle/collision.test.js", "dist-tests/tests/unit/battle/bot.test.js", "dist-tests/tests/unit/battle/effects.test.js", "dist-tests/tests/unit/battle/health.test.js"],
+  [...(process.argv.includes("--coverage") ? ["--experimental-test-coverage"] : []), "--test", "dist-tests/tests/unit/battle/game.test.js", "dist-tests/tests/unit/battle/combat.test.js", "dist-tests/tests/unit/battle/movement.test.js", "dist-tests/tests/unit/battle/mechanics.test.js", "dist-tests/tests/unit/battle/targeting.test.js", "dist-tests/tests/unit/battle/projectiles.test.js", "dist-tests/tests/unit/battle/collision.test.js", "dist-tests/tests/unit/battle/bot.test.js", "dist-tests/tests/unit/battle/effects.test.js", "dist-tests/tests/unit/battle/health.test.js", "dist-tests/tests/unit/battle/lifetime.test.js"],
   { stdio: "inherit" }
 );
 
