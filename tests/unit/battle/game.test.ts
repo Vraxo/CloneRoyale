@@ -313,3 +313,11 @@ test("deploys a troop at explicitly supplied placement coordinates", () => {
   assert.equal(game.units[0].transform.x, 210);
   assert.equal(game.units[0].transform.y, 640);
 });
+
+
+test("normalizes a zero random seed to a nonzero deterministic seed", () => {
+  const game = createGame(0);
+
+  assert.equal(game.seed, 1);
+  assert.deepEqual(game, createGame(0));
+});
