@@ -227,3 +227,19 @@ test("formation slots offset troop movement perpendicular to its target", () => 
   assert.equal(unit.transform.y, 650);
   assert.equal(unit.movement.isMoving, true);
 });
+
+
+test("does not alter facing or moving state when already at the target", () => {
+  const game = createGame();
+  const unit = makeUnit(302, "blue", 200, 700, {
+    movement: { speed: 100, isAir: false, isMoving: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+
+  moveUnitTowardTarget(game, unit, 200, 700, 1, 999);
+
+  assert.equal(unit.transform.x, 200);
+  assert.equal(unit.transform.y, 700);
+  assert.equal(unit.transform.facing, 0);
+  assert.equal(unit.movement.isMoving, false);
+});
