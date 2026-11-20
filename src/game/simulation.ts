@@ -1,6 +1,7 @@
 import { STARTER_DECK } from "./cards";
 import { chooseBotAction } from "./bot";
-import { updateUnits, updateTowers } from "./combat";
+import { updateUnits } from "./combat";
+import { updateTowers } from "./towerCombat";
 import { playCard } from "./deployment";
 import { updateEffects } from "./effects";
 import { updateProjectiles } from "./projectiles";
