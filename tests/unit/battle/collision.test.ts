@@ -109,3 +109,19 @@ test("moves a troop away from a stationary building when the building is first",
   assert.equal(building.transform.x, 110);
   assert.ok(troop.transform.x < 100);
 });
+
+
+test("moves an active troop away from a deploying troop when the active troop is first", () => {
+  const game = createGame();
+  const active = makeTroop(100, 100);
+  const deploying = makeTroop(101, 110, {
+    movement: { speed: 0, isAir: false },
+    deployment: { appearanceDelay: 0, duration: 1, remaining: 1 }
+  });
+  game.units.push(active, deploying);
+
+  resolveUnitCollisions(game);
+
+  assert.ok(active.transform.x < 100);
+  assert.equal(deploying.transform.x, 110);
+});
