@@ -169,7 +169,7 @@ export class ArenaRenderer {
       this.clearUnitPreview();
       this.spellPreview.clear();
       const radius = card.effect.radius;
-      if (cardId === "arrows") {
+      if (card.preview?.style === "arrows") {
         const accent = side === "red" ? 0xd17a70 : 0x78a8d2;
         this.spellPreview
           .circle(point.x, point.y, radius)
