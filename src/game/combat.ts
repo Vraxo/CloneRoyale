@@ -21,7 +21,7 @@ function findEnemyUnit(
     if (!unit.canTargetAir && candidate.movement.isAir) continue;
 
     const distance = Math.hypot(candidate.x - unit.x, candidate.y - unit.y);
-    const effectiveDistance = distance - (includeTargetRadius ? candidate.radius : 0);
+    const effectiveDistance = distance - (includeTargetRadius ? candidate.collision.radius : 0);
     if (effectiveDistance < nearestDistance) {
       nearest = candidate;
       nearestDistance = effectiveDistance;
@@ -115,7 +115,7 @@ export function updateUnits(state: GameState, dt: number): void {
         y: unit.y,
         age: 0,
         lifetime: 0.62,
-        radius: Math.max(22, unit.radius * 2.2),
+        radius: Math.max(22, unit.collision.radius * 2.2),
         style: "deployment",
         side: unit.side
       });
@@ -150,7 +150,7 @@ export function updateUnits(state: GameState, dt: number): void {
 
     if (enemy) {
       const distance = Math.hypot(enemy.x - unit.x, enemy.y - unit.y);
-      if (distance <= unit.range + enemy.radius) {
+      if (distance <= unit.range + enemy.collision.radius) {
         if (unit.attackCooldown <= 0) attackUnit(state, unit, enemy, pendingMeleeAttacks);
       } else {
         moveUnitTowardTarget(state, unit, enemy.x, enemy.y, dt, enemy.id);
@@ -233,7 +233,7 @@ export function updateTowers(state: GameState, dt: number): void {
       if (unit.side === tower.side || unit.health.hp <= 0) continue;
       if ((unit.deployment.appearanceDelay) > 0) continue;
 
-      const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y) - unit.radius;
+      const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y) - unit.collision.radius;
       if (distance < nearestDistance) {
         nearestDistance = distance;
         target = unit;
