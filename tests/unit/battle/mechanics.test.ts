@@ -20,7 +20,6 @@ function makeUnit(id: number, side: "blue" | "red", x: number, y: number): Troop
     combat: { damage: 100, range: 55, attackInterval: 1, attackCooldown: 0, attack: { type: "melee" }, splashRadius: 0 },
     movement: { speed: 0, isAir: false },
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
-    lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
     audio: {},
     presentation: { animationOffset: 0, attackAnim: 0 }
