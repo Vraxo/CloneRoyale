@@ -15,7 +15,7 @@ export abstract class UnitView {
 
   protected constructor(unit: DeepReadonly<Unit>) {
     this.id = unit.id;
-    this.previousHp = unit.hp;
+    this.previousHp = unit.health.hp;
     this.damageFlash.brightness(2.1, false);
     this.damageFlash.saturate(0.45, true);
     this.damageFlash.alpha = 0;
@@ -40,10 +40,10 @@ export abstract class UnitView {
   }
 
   protected updateCommon(unit: DeepReadonly<Unit>, time: number): void {
-    if (unit.hp < this.previousHp) {
+    if (unit.health.hp < this.previousHp) {
       this.damageFlashUntil = time + 0.12;
     }
-    this.previousHp = unit.hp;
+    this.previousHp = unit.health.hp;
 
     const flashRemaining = Math.max(0, this.damageFlashUntil - time);
     this.damageFlash.alpha = flashRemaining / 0.12 * 0.9;
@@ -64,7 +64,7 @@ export abstract class UnitView {
     this.shadow.scale.set(1 + (1 - progress) * 0.65, 1 + (1 - progress) * 0.4);
     this.shadow.alpha = hasAppeared ? 0.35 + progress * 0.65 : 0;
 
-    const ratio = Math.max(0, Math.min(1, unit.hp / unit.maxHp));
+    const ratio = Math.max(0, Math.min(1, unit.health.hp / unit.health.maxHp));
     this.healthBar.clear();
 
     if (ratio >= 0.999) return;
