@@ -35,8 +35,14 @@ interface FireballEffectRig {
   embers: THREE.Mesh[];
   smoke: THREE.Mesh[];
 }
+interface ArrowRainRig {
+  ring: THREE.Mesh;
+  arrows: THREE.Group[];
+  dust: THREE.Mesh[];
+}
 interface EffectModel extends THREE.Group {
   fireball?: FireballEffectRig;
+  arrows?: ArrowRainRig;
 }
 
 export class ThreeBattleScene {
@@ -722,6 +728,9 @@ export class ThreeBattleScene {
           model.fireball = this.createFireballExplosion(effect.radius);
           const rig = model.fireball;
           model.add(rig.shockwave, rig.innerRing, rig.glow, ...rig.flames, ...rig.embers, ...rig.smoke);
+        } else if (effect.style === "arrows") {
+          model.arrows = this.createArrowRain(effect.radius);
+          model.add(model.arrows.ring, ...model.arrows.arrows, ...model.arrows.dust);
         } else {
           const ring = new THREE.Mesh(
             new THREE.TorusGeometry(Math.max(3, effect.radius * 0.72), 1.8, 6, 32),
@@ -741,6 +750,8 @@ export class ThreeBattleScene {
       const progress = Math.min(1, effect.age / effect.lifetime);
       if (effect.style === "fireball" && model.fireball) {
         this.updateFireballExplosion(model.fireball, progress, effect.age);
+      } else if (effect.style === "arrows" && model.arrows) {
+        this.updateArrowRain(model.arrows, effect.age, effect.lifetime);
       } else {
         const ring = model.children[0] as THREE.Mesh;
         ring.scale.setScalar(0.55 + progress * 0.9);
@@ -748,6 +759,86 @@ export class ThreeBattleScene {
       }
     }
     this.removeMissing(this.effectModels, active);
+  }
+
+  private createArrowRain(radius: number): ArrowRainRig {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 0.72, 1.35, 6, 48),
+      new THREE.MeshBasicMaterial({ color: "#e9d8aa", transparent: true, opacity: 0.55, depthWrite: false })
+    );
+    ring.rotation.x = -Math.PI / 2;
+
+    const shaftMaterial = new THREE.MeshStandardMaterial({ color: "#8d6238", roughness: 0.78 });
+    const metalMaterial = new THREE.MeshStandardMaterial({ color: "#c6d0d4", metalness: 0.72, roughness: 0.3 });
+    const featherMaterial = new THREE.MeshStandardMaterial({ color: "#d8c9a8", roughness: 0.85 });
+    const arrows: THREE.Group[] = [];
+    const dust: THREE.Mesh[] = [];
+    const count = 18;
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
+    for (let index = 0; index < count; index += 1) {
+      const angle = index * goldenAngle;
+      const distance = radius * 0.82 * Math.sqrt((index + 0.5) / count);
+      const x = Math.cos(angle) * distance;
+      const z = Math.sin(angle) * distance;
+      const arrow = new THREE.Group();
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 31, 6), shaftMaterial);
+      shaft.castShadow = true;
+      arrow.add(shaft);
+
+      const head = new THREE.Mesh(new THREE.ConeGeometry(4.1, 9, 6), metalMaterial);
+      head.rotation.z = Math.PI;
+      head.position.y = -19;
+      head.castShadow = true;
+      arrow.add(head);
+
+      for (let featherIndex = 0; featherIndex < 3; featherIndex += 1) {
+        const feather = new THREE.Mesh(new THREE.BoxGeometry(1.2, 8, 4.2), featherMaterial);
+        feather.position.set(0, 13, 0);
+        feather.rotation.y = featherIndex * Math.PI / 3;
+        arrow.add(feather);
+      }
+      arrow.position.set(x, 120, z);
+      arrow.rotation.z = ((index % 5) - 2) * 0.035;
+      arrows.push(arrow);
+
+      const puff = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 8, 6),
+        new THREE.MeshBasicMaterial({ color: "#c9bda8", transparent: true, opacity: 0, depthWrite: false })
+      );
+      puff.position.set(x, 3, z);
+      dust.push(puff);
+    }
+
+    return { ring, arrows, dust };
+  }
+
+  private updateArrowRain(rig: ArrowRainRig, age: number, lifetime: number): void {
+    const fade = Math.max(0, 1 - age / lifetime);
+    rig.ring.scale.setScalar(0.72 + Math.min(1, age / 0.32) * 0.42);
+    (rig.ring.material as THREE.MeshBasicMaterial).opacity = 0.52 * fade;
+
+    rig.arrows.forEach((arrow, index) => {
+      const start = index / rig.arrows.length * 0.36;
+      const flight = Math.max(0, Math.min(1, (age - start) / 0.2));
+      const eased = 1 - Math.pow(1 - flight, 2);
+      arrow.position.y = flight < 1 ? 120 - eased * 108 : 11;
+      arrow.rotation.x = flight < 1 ? Math.sin(age * 28 + index) * 0.035 : 0;
+      arrow.rotation.z = flight < 1 ? ((index % 5) - 2) * 0.035 : ((index % 3) - 1) * 0.025;
+      arrow.visible = age >= start;
+      arrow.scale.setScalar(flight < 1 ? 1 : Math.max(0.78, 1 - Math.max(0, age - start - 0.2) * 0.12));
+
+      const impactAge = age - start - 0.2;
+      const puff = rig.dust[index];
+      if (impactAge >= 0) {
+        const puffProgress = Math.min(1, impactAge / 0.24);
+        puff.scale.set(3 + puffProgress * 8, 1.5 + puffProgress * 2.5, 3 + puffProgress * 8);
+        (puff.material as THREE.MeshBasicMaterial).opacity = 0.34 * (1 - puffProgress) * fade;
+      } else {
+        puff.scale.setScalar(0.001);
+        (puff.material as THREE.MeshBasicMaterial).opacity = 0;
+      }
+    });
   }
 
   private createFireballExplosion(radius: number): FireballEffectRig {
