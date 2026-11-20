@@ -58,8 +58,7 @@ function spawnCard(
           ? (index === 0 ? -1 : 1)
           : undefined
       },
-      radius: definition.radius,
-      collisionMass: definition.collisionMass ?? 1,
+      collision: { radius: definition.radius, mass: definition.collisionMass ?? 1 },
       damage: definition.damage,
       range: definition.range,
       attackInterval: definition.attackInterval,
