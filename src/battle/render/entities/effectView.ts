@@ -17,6 +17,7 @@ export class EffectView {
   private readonly arrowShaft = new Graphics();
   private readonly arrowHead = new Graphics();
   private readonly arrowDetails = new Graphics();
+  private readonly zapGraphics = new Graphics();
 
   public constructor(effect: DeepReadonly<Effect>) {
     this.id = effect.id;
@@ -31,7 +32,8 @@ export class EffectView {
       this.arrowFeathers,
       this.arrowShaft,
       this.arrowHead,
-      this.arrowDetails
+      this.arrowDetails,
+      this.zapGraphics
     );
     this.update(effect);
   }
@@ -50,6 +52,7 @@ export class EffectView {
     this.arrowShaft.clear();
     this.arrowHead.clear();
     this.arrowDetails.clear();
+    this.zapGraphics.clear();
 
     if (effect.style === "deployment") {
       this.drawDeployment(effect, progress);
@@ -63,6 +66,11 @@ export class EffectView {
 
     if (effect.style === "arrows") {
       this.drawArrowVolley(effect, progress);
+      return;
+    }
+
+    if (effect.style === "zap") {
+      this.drawZap(effect, progress);
       return;
     }
 
@@ -327,6 +335,67 @@ export class EffectView {
     }
 
     void progress;
+  }
+
+  private drawZap(effect: DeepReadonly<Effect>, progress: number): void {
+    const radius = effect.radius;
+    const fade = 1 - progress;
+    const flash = Math.max(0, 1 - effect.age / 0.11);
+    const ringRadius = radius * (0.42 + Math.min(1, effect.age / 0.2) * 0.7);
+    this.zapGraphics.circle(0, 0, radius * 0.28).fill({ color: 0xc8f6ff, alpha: 0.22 * flash });
+    this.zapGraphics.circle(0, 0, ringRadius).stroke({ color: 0x6bdfff, width: 3.5 * fade + 0.5, alpha: 0.72 * fade });
+    this.zapGraphics.circle(0, 0, ringRadius * 0.88).stroke({ color: 0xe7fbff, width: 1.4, alpha: 0.62 * fade });
+
+    const drawBolt = (points: { x: number; y: number }[], width: number): void => {
+      for (let index = 0; index < points.length; index += 1) {
+        const point = points[index];
+        if (index === 0) this.zapGraphics.moveTo(point.x, point.y);
+        else this.zapGraphics.lineTo(point.x, point.y);
+      }
+      this.zapGraphics.stroke({ color: 0x5bcfff, width: width + 3, alpha: 0.32 * fade, cap: "round", join: "round" });
+      for (let index = 0; index < points.length; index += 1) {
+        const point = points[index];
+        if (index === 0) this.zapGraphics.moveTo(point.x, point.y);
+        else this.zapGraphics.lineTo(point.x, point.y);
+      }
+      this.zapGraphics.stroke({ color: 0xeafcff, width, alpha: 0.98 * fade, cap: "round", join: "round" });
+    };
+
+    drawBolt([
+      { x: -radius * 0.06, y: -radius * 1.12 },
+      { x: radius * 0.11, y: -radius * 0.68 },
+      { x: -radius * 0.08, y: -radius * 0.31 },
+      { x: radius * 0.13, y: radius * 0.05 },
+      { x: -radius * 0.04, y: radius * 0.42 },
+      { x: radius * 0.02, y: radius * 0.78 }
+    ], Math.max(2, radius * 0.045));
+
+    for (let branch = 0; branch < 5; branch += 1) {
+      const angle = branch / 5 * Math.PI * 2 + 0.2;
+      const startRadius = radius * (0.12 + (branch % 3) * 0.12);
+      const endRadius = radius * (0.72 + (branch % 2) * 0.12);
+      const startX = Math.cos(angle + 0.7) * startRadius;
+      const startY = Math.sin(angle + 0.7) * startRadius;
+      const endX = Math.cos(angle) * endRadius;
+      const endY = Math.sin(angle) * endRadius;
+      drawBolt([
+        { x: startX, y: startY },
+        { x: (startX + endX) * 0.5 + Math.sin(angle * 3) * radius * 0.12, y: (startY + endY) * 0.5 },
+        { x: endX, y: endY }
+      ], Math.max(1.2, radius * 0.018));
+    }
+
+    for (let index = 0; index < 12; index += 1) {
+      const angle = index * 2.399963;
+      const distance = radius * (0.22 + (index % 4) * 0.13);
+      const x = Math.cos(angle) * distance;
+      const y = Math.sin(angle) * distance;
+      const size = 1.5 + (index % 3);
+      this.zapGraphics.circle(x, y, size).fill({
+        color: index % 3 === 0 ? 0xffffff : 0x77dcff,
+        alpha: (0.5 + Math.abs(Math.sin(effect.age * 35 + index)) * 0.5) * fade
+      });
+    }
   }
 
   private drawDeployment(effect: DeepReadonly<Effect>, progress: number): void {
