@@ -37,10 +37,10 @@ export function initializeOfflineSetup(): void {
   const progressPercent = document.querySelector<HTMLElement>("#offline-progress-percent");
   const progressCount = document.querySelector<HTMLElement>("#offline-progress-count");
   const error = document.querySelector<HTMLElement>("#offline-setup-error");
-  const openButton = document.querySelector<HTMLButtonElement>("#offline-save");
+  const saveButton = document.querySelector<HTMLButtonElement>("#offline-save");
   const closeButton = document.querySelector<HTMLButtonElement>("#offline-continue");
 
-  if (!openButton) return;
+  if (!saveButton) return;
 
   function show(): void {
     setup?.classList.remove("is-hidden");
@@ -51,7 +51,7 @@ export function initializeOfflineSetup(): void {
   function hide(): void {
     setup?.classList.remove("is-visible");
     setup?.classList.add("is-hidden");
-    openButton.focus();
+    saveButton.focus();
   }
 
   function updateProgress(completed: number, total: number): void {
@@ -67,8 +67,8 @@ export function initializeOfflineSetup(): void {
   function markReady(): void {
     if (status) status.textContent = "Saved on this device. You can now launch the game without an internet connection for solo play.";
     updateProgress(1, 1);
-    openButton.textContent = "✓ OFFLINE READY";
-    openButton.disabled = true;
+    saveButton.textContent = "✓ OFFLINE READY";
+    saveButton.disabled = true;
     window.setTimeout(hide, 1200);
   }
 
@@ -94,7 +94,7 @@ export function initializeOfflineSetup(): void {
   });
 
   if (!("serviceWorker" in navigator)) return;
-  openButton.hidden = false;
+  saveButton.hidden = false;
 
   let registration: ServiceWorkerRegistration | null = null;
   let preparationStarted = false;
@@ -135,7 +135,7 @@ export function initializeOfflineSetup(): void {
       openButton.hidden = true;
     });
 
-  openButton.addEventListener("click", async () => {
+  saveButton.addEventListener("click", async () => {
     if (openButton.disabled) return;
     show();
     if (error) error.hidden = true;
