@@ -149,7 +149,7 @@ export class ThreeBattleScene {
         this.addBox(this.scene, 82, 2, 390, m.earth, laneX, 9, centerZ);
       }
       const bridge = new THREE.Group();
-      bridge.position.set(laneX - HALF_WIDTH, 0, 0);
+      bridge.position.set(laneX, 0, 0);
       this.scene.add(bridge);
       this.addBox(bridge, 100, 12, 142, m.wood, 0, 13, 0);
       this.addBox(bridge, 92, 4, 132, m.gold, 0, 21, 0);
