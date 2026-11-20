@@ -1,6 +1,6 @@
-import type { UnitDefinition } from "../../game/types";
+import type { MovableUnitDefinition } from "../../game/types";
 
-export const GIANT: UnitDefinition = {
+export const GIANT: MovableUnitDefinition = {
   identity: { type: "giant" },
   health: { hp: 1850 },
   collision: { radius: 22, mass: 100 },

@@ -1,6 +1,6 @@
-import type { UnitDefinition } from "../../game/types";
+import type { MovableUnitDefinition } from "../../game/types";
 
-export const KNIGHT: UnitDefinition = {
+export const KNIGHT: MovableUnitDefinition = {
   identity: { type: "knight" },
   health: { hp: 1120 },
   collision: { radius: 14, mass: 38 },

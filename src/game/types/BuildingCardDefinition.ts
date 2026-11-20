@@ -1,8 +1,8 @@
-import type { UnitDefinition } from "./UnitDefinition";
+import type { StationaryUnitDefinition } from "./UnitDefinition";
 import type { CardDefinitionBase } from "./CardDefinitionBase";
 
 export interface BuildingCardDefinition extends CardDefinitionBase {
   category: "building";
   count: number;
-  unit: UnitDefinition;
+  unit: StationaryUnitDefinition;
 }

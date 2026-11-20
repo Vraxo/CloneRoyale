@@ -1,10 +1,9 @@
-import type { UnitDefinition } from "../../game/types";
+import type { StationaryUnitDefinition } from "../../game/types";
 
-export const CANNON: UnitDefinition = {
+export const CANNON: StationaryUnitDefinition = {
   identity: { type: "cannon" },
   health: { hp: 1050 },
   collision: { radius: 15 },
-  movement: { speed: 0, isAir: false },
   combat: {
     damage: 78,
     range: 185,

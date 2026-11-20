@@ -1,6 +1,6 @@
-import type { UnitDefinition } from "../../game/types";
+import type { MovableUnitDefinition } from "../../game/types";
 
-export const ARCHER: UnitDefinition = {
+export const ARCHER: MovableUnitDefinition = {
   identity: { type: "archer" },
   health: { hp: 285 },
   collision: { radius: 10 },

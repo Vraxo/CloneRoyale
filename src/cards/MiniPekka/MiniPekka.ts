@@ -1,6 +1,6 @@
-import type { UnitDefinition } from "../../game/types";
+import type { MovableUnitDefinition } from "../../game/types";
 
-export const MINI_PEKKA: UnitDefinition = {
+export const MINI_PEKKA: MovableUnitDefinition = {
   identity: { type: "mini-pekka" },
   health: { hp: 900 },
   collision: { radius: 14 },

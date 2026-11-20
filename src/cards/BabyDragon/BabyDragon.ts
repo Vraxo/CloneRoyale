@@ -1,6 +1,6 @@
-import type { UnitDefinition } from "../../game/types";
+import type { MovableUnitDefinition } from "../../game/types";
 
-export const BABY_DRAGON: UnitDefinition = {
+export const BABY_DRAGON: MovableUnitDefinition = {
   identity: { type: "baby-dragon" },
   health: { hp: 850 },
   collision: { radius: 17 },

@@ -41,14 +41,23 @@ export interface UnitFormationDefinition {
   pattern: "paired";
 }
 
-export interface UnitDefinition {
+interface UnitDefinitionBase {
   identity: UnitIdentityDefinition;
   health: UnitHealthDefinition;
   collision: UnitCollisionDefinition;
-  movement: UnitMovementDefinition;
   combat: UnitCombatDefinition;
   targeting: UnitTargetingDefinition;
   lifetime: UnitLifetimeDefinition;
   audio: UnitAudio;
   formation?: UnitFormationDefinition;
 }
+
+export interface MovableUnitDefinition extends UnitDefinitionBase {
+  movement: UnitMovementDefinition;
+}
+
+export interface StationaryUnitDefinition extends UnitDefinitionBase {
+  movement?: never;
+}
+
+export type UnitDefinition = MovableUnitDefinition | StationaryUnitDefinition;

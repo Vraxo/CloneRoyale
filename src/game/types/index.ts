@@ -9,7 +9,7 @@ export type { SpellCardDefinition } from "./SpellCardDefinition";
 export type { UnitCardDefinition } from "./UnitCardDefinition";
 export type { UnitType, Unit, TroopUnit, BuildingUnit, UnitCollision, UnitCombat, UnitDeployment, UnitHealth, UnitLifetime, UnitMovement, UnitPresentation, UnitTargeting, UnitTransform, UnitAudio } from "./Unit";
 export type { UnitAttack, ProjectileAttackStyle } from "./UnitAttack";
-export type { UnitDefinition } from "./UnitDefinition";
+export type { UnitDefinition, MovableUnitDefinition, StationaryUnitDefinition } from "./UnitDefinition";
 export type { Tower } from "./Tower";
 export type { Projectile } from "./Projectile";
 export type { Effect } from "./Effect";
