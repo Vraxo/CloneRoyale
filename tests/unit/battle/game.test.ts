@@ -276,3 +276,14 @@ test("deploys buildings without troop movement state", () => {
   assert.equal(game.units[0].transform.x, 435);
   assert.equal(game.units[0].transform.y, 690);
 });
+
+
+test("rejects a card that is not in hand without mutating the game", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["archers"];
+  game.sides.blue.elixir = 10;
+  const before = structuredClone(game);
+
+  assert.equal(playCard(game, "blue", "giant", "left"), false);
+  assert.deepEqual(game, before);
+});
