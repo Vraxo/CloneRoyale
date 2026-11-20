@@ -79,10 +79,10 @@ export interface Unit
   extends UnitIdentity,
     UnitTransform,
     UnitCollision,
-    UnitMovement,
     UnitCombat,
     UnitTargeting,
     UnitLifetime {
+  movement: UnitMovement;
   health: UnitHealth;
   deployment: UnitDeployment;
   presentation: UnitPresentation;
