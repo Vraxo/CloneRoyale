@@ -113,3 +113,20 @@ test("non-spell splash projectiles deal full damage to enemy towers", () => {
 
   assert.equal(tower.hp, originalHp - 100);
 });
+
+
+test("direct projectiles emit tower-hit audio when a tower survives the impact", () => {
+  const game = createGame();
+  const tower = game.towers.find((candidate) =>
+    candidate.side === "red" && candidate.kind === "princess" && candidate.lane === "left"
+  );
+  assert.ok(tower);
+  const originalHp = tower.hp;
+
+  addProjectile(game, "blue", 100, tower.y, tower.id, tower.x, tower.y, 100, 0, "arrow", 0.12);
+  updateProjectiles(game, 0.12);
+
+  assert.equal(tower.hp, originalHp - 100);
+  assert.ok(game.audioEvents.includes("tower-hit"));
+  assert.equal(game.audioEvents.includes("projectile-impact"), false);
+});
