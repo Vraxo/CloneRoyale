@@ -111,6 +111,25 @@ test("moves a troop away from a stationary building when the building is first",
 });
 
 
+test("keeps air troops outside the full King Tower collision radius", () => {
+  const game = createGame();
+  const tower = game.towers.find((candidate) =>
+    candidate.side === "red" && candidate.kind === "king"
+  );
+  assert.ok(tower);
+
+  const dragon = makeTroop(900, tower.x, {
+    transform: { x: tower.x, y: tower.y, facing: 0 },
+    movement: { speed: 80, isAir: true }
+  });
+  game.units.push(dragon);
+
+  resolveUnitCollisions(game);
+
+  const distance = Math.hypot(dragon.transform.x - tower.x, dragon.transform.y - tower.y);
+  assert.ok(distance >= dragon.collision.radius + tower.radius + 2 - 0.01);
+});
+
 test("moves an active troop away from a deploying troop when the active troop is first", () => {
   const game = createGame();
   const active = makeTroop(100, 100);

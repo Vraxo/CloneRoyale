@@ -62,13 +62,19 @@ test("troops without a configured lifetime omit the lifetime component", () => {
   assert.equal("lifetime" in game.units[0], false);
 });
 
-test("units without sound profiles omit the audio component", () => {
+test("Knight deployments include the configured sound profile", () => {
   const game = createGame();
   game.sides.blue.hand = ["knight"];
   game.sides.blue.elixir = 10;
 
   assert.equal(playCard(game, "blue", "knight", "left"), true);
-  assert.equal("audio" in game.units[0], false);
+  assert.deepEqual(game.units[0].audio, {
+    attack: "knight-attack",
+    hit: "knight-hit",
+    deploy: "knight-deploy",
+    death: "knight-death",
+    movement: { event: "knight-step", interval: 0.56 }
+  });
 });
 
 test("allows deployment when elixir exactly matches the card cost", () => {

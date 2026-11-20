@@ -72,7 +72,7 @@ function separateUnits(units: Unit[]): void {
 function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
   for (let iteration = 0; iteration < 2; iteration += 1) {
     for (const unit of units) {
-      if (unit.kind === "building" || unit.health.hp <= 0 || unit.movement.isAir || (unit.deployment.appearanceDelay) > 0) continue;
+      if (unit.kind === "building" || unit.health.hp <= 0 || (unit.deployment.appearanceDelay) > 0) continue;
 
       for (const tower of towers) {
         if (tower.hp <= 0) continue;

@@ -9,7 +9,10 @@ initializeNetworkStatus();
 const parameters = new URLSearchParams(window.location.search);
 const mode = parameters.get("mode") ?? "player";
 
-if (mode === "simulation") {
+if (mode === "3d-prototype") {
+  await import("./battle/render3d/threeArenaPrototype.css");
+  await import("./battle/render3d/threeArenaPrototype");
+} else if (mode === "simulation") {
   await import("./simulationMain");
 } else {
   await import("./app/styles.css");
