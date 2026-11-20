@@ -33,7 +33,7 @@ export interface UnitTargetingDefinition {
 }
 
 export interface UnitLifetimeDefinition {
-  lifetime: number;
+  duration: number;
 }
 
 export interface UnitDefinition {
