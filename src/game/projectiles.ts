@@ -38,7 +38,7 @@ function applySplash(state: GameState, projectile: Projectile, x: number, y: num
   for (const unit of state.units) {
     if (unit.side === projectile.side || unit.health.hp <= 0) continue;
     if ((unit.deployment.appearanceDelay) > 0) continue;
-    if (Math.hypot(unit.x - x, unit.y - y) <= projectile.splashRadius + unit.radius) {
+    if (Math.hypot(unit.x - x, unit.y - y) <= projectile.splashRadius + unit.collision.radius) {
       damageTarget(state, unit.id, projectile.damage);
     }
   }
