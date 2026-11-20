@@ -7,7 +7,7 @@ const BRIDGE_HALF_WIDTH = 1.5 * ARENA_TILE_SIZE;
 type PathingUnit =
   & Pick<UnitTransform, "x" | "y">
   & { movement: Pick<UnitMovement, "isAir"> }
-  & Pick<UnitCollision, "radius">
+  & { collision: Pick<UnitCollision, "radius"> }
   & Pick<UnitIdentity, "lane">;
 
 type MovingUnit =
@@ -18,7 +18,7 @@ type ObstacleAvoidanceUnit =
   & Pick<UnitIdentity, "id">
   & Pick<UnitTransform, "x" | "y">
   & { movement: Pick<UnitMovement, "isAir"> }
-  & Pick<UnitCollision, "radius">;
+  & { collision: Pick<UnitCollision, "radius"> };
 
 type MovementUnit =
   & PathingUnit
@@ -45,7 +45,7 @@ function movementTarget(unit: PathingUnit, targetX: number, targetY: number): { 
 
   if (currentBank === 0) {
     if (targetBank === 0) {
-      const targetFitsBridge = Math.abs(targetX - bridgeX) <= BRIDGE_HALF_WIDTH - unit.radius;
+      const targetFitsBridge = Math.abs(targetX - bridgeX) <= BRIDGE_HALF_WIDTH - unit.collision.radius;
       return {
         x: targetFitsBridge ? targetX : bridgeX,
         y: targetY
@@ -116,7 +116,7 @@ function findObstacleWaypoint(
         id: candidate.id,
         x: candidate.x,
         y: candidate.y,
-        radius: candidate.radius
+        radius: candidate.collision.radius
       })),
     ...state.towers
       .filter((tower) => tower.id !== targetId && tower.hp > 0)
@@ -139,7 +139,7 @@ function findObstacleWaypoint(
 
     const closestX = unit.x + dx * projection;
     const closestY = unit.y + dy * projection;
-    const clearance = unit.radius + obstacle.radius + 7;
+    const clearance = unit.collision.radius + obstacle.radius + 7;
     const offsetX = obstacle.x - closestX;
     const offsetY = obstacle.y - closestY;
     if (offsetX * offsetX + offsetY * offsetY >= clearance * clearance) continue;
@@ -153,7 +153,7 @@ function findObstacleWaypoint(
   const pathLength = Math.sqrt(pathLengthSquared);
   const perpendicularX = -dy / pathLength;
   const perpendicularY = dx / pathLength;
-  const clearance = unit.radius + firstObstacle.radius + 9;
+  const clearance = unit.collision.radius + firstObstacle.radius + 9;
   const left = {
     x: firstObstacle.x + perpendicularX * clearance,
     y: firstObstacle.y + perpendicularY * clearance
@@ -186,7 +186,7 @@ export function moveUnitTowardTarget(
     const dx = unit.x - x;
     const dy = unit.y - y;
     const distance = Math.hypot(dx, dy) || 1;
-    const offset = unit.movement.formationSlot * (unit.radius + 3);
+    const offset = unit.movement.formationSlot * (unit.collision.radius + 3);
     const perpendicularX = -dy / distance;
     const perpendicularY = dx / distance;
     x += perpendicularX * offset;
@@ -204,7 +204,7 @@ function keepGroundUnitsOnBridges(units: Unit[]): void {
     if (unit.y < RIVER_TOP || unit.y > RIVER_BOTTOM) continue;
 
     const bridgeX = LANE_X[unit.lane];
-    const halfWidth = Math.max(0, BRIDGE_HALF_WIDTH - unit.radius);
+    const halfWidth = Math.max(0, BRIDGE_HALF_WIDTH - unit.collision.radius);
     unit.x = clamp(unit.x, bridgeX - halfWidth, bridgeX + halfWidth);
   }
 }
@@ -234,7 +234,7 @@ function separateUnits(units: Unit[]): void {
         const dx = second.x - first.x;
         const dy = second.y - first.y;
         const distanceSquared = dx * dx + dy * dy;
-        const minimumDistance = first.radius + second.radius + 2;
+        const minimumDistance = first.collision.radius + second.collision.radius + 2;
         if (distanceSquared >= minimumDistance * minimumDistance) continue;
 
         const distance = Math.sqrt(distanceSquared);
@@ -252,8 +252,8 @@ function separateUnits(units: Unit[]): void {
         } else if (secondDeploying && !firstDeploying) {
           firstDisplacement = firstCanMove ? overlap : 0;
         } else if (firstCanMove && secondCanMove) {
-          const firstMass = first.collisionMass ?? 1;
-          const secondMass = second.collisionMass ?? 1;
+          const firstMass = first.collision.mass ?? 1;
+          const secondMass = second.collision.mass ?? 1;
           const totalMass = firstMass + secondMass;
           firstDisplacement = overlap * secondMass / totalMass;
           secondDisplacement = overlap * firstMass / totalMass;
@@ -264,13 +264,13 @@ function separateUnits(units: Unit[]): void {
         }
 
         if (firstDisplacement > 0) {
-          first.x = clamp(first.x - directionX * firstDisplacement, first.radius, FIELD_WIDTH - first.radius);
-          first.y = clamp(first.y - directionY * firstDisplacement, first.radius, FIELD_HEIGHT - first.radius);
+          first.x = clamp(first.x - directionX * firstDisplacement, first.collision.radius, FIELD_WIDTH - first.collision.radius);
+          first.y = clamp(first.y - directionY * firstDisplacement, first.collision.radius, FIELD_HEIGHT - first.collision.radius);
         }
 
         if (secondDisplacement > 0) {
-          second.x = clamp(second.x + directionX * secondDisplacement, second.radius, FIELD_WIDTH - second.radius);
-          second.y = clamp(second.y + directionY * secondDisplacement, second.radius, FIELD_HEIGHT - second.radius);
+          second.x = clamp(second.x + directionX * secondDisplacement, second.collision.radius, FIELD_WIDTH - second.collision.radius);
+          second.y = clamp(second.y + directionY * secondDisplacement, second.collision.radius, FIELD_HEIGHT - second.collision.radius);
         }
       }
     }
@@ -288,7 +288,7 @@ function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
         const dx = unit.x - tower.x;
         const dy = unit.y - tower.y;
         const distanceSquared = dx * dx + dy * dy;
-        const minimumDistance = unit.radius + tower.radius + 2;
+        const minimumDistance = unit.collision.radius + tower.radius + 2;
         if (distanceSquared >= minimumDistance * minimumDistance) continue;
 
         const distance = Math.sqrt(distanceSquared);
@@ -302,13 +302,13 @@ function separateUnitsFromTowers(units: Unit[], towers: Tower[]): void {
 
         unit.x = clamp(
           unit.x + directionX * overlap,
-          unit.radius,
-          FIELD_WIDTH - unit.radius
+          unit.collision.radius,
+          FIELD_WIDTH - unit.collision.radius
         );
         unit.y = clamp(
           unit.y + directionY * overlap,
-          unit.radius,
-          FIELD_HEIGHT - unit.radius
+          unit.collision.radius,
+          FIELD_HEIGHT - unit.collision.radius
         );
       }
     }
