@@ -37,6 +37,10 @@ export interface UnitLifetimeDefinition {
   duration: number;
 }
 
+export interface UnitFormationDefinition {
+  pattern: "paired";
+}
+
 export interface UnitDefinition {
   identity: UnitIdentityDefinition;
   health: UnitHealthDefinition;
@@ -46,4 +50,5 @@ export interface UnitDefinition {
   targeting: UnitTargetingDefinition;
   lifetime: UnitLifetimeDefinition;
   audio: UnitAudio;
+  formation?: UnitFormationDefinition;
 }

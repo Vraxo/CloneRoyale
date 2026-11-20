@@ -57,7 +57,7 @@ function spawnCard(
       movement: {
         speed: definition.movement.speed,
         isAir: definition.movement.isAir,
-        formationSlot: definition.identity.type === "archer" && card.count === 2
+        formationSlot: definition.formation?.pattern === "paired" && card.count === 2
           ? (index === 0 ? -1 : 1)
           : undefined
       },
@@ -86,10 +86,7 @@ function spawnCard(
         attackAnim: 0
       }
     });
-
-
   }
-
 }
 
 export function playCard(

@@ -27,7 +27,7 @@ test("creates deterministic initial state for a given seed", () => {
 
 test("keeps the starter deck at eight unique cards", () => {
   assert.equal(STARTER_DECK.length, 8);
-  assert.equal(new Set(STARTER_DECK).size, STARTER_DECK.length);
+  assert.equal(new Set(STARTER_DECK).size, 8);
   assert.equal(cardById("giant").cost, 5);
 });
 
@@ -89,6 +89,14 @@ test("deploys a troop, spends elixir, and rotates the hand", () => {
     "skeleton-army"
   ]);
   assert.match(game.events[0], /Blue played Giant/);
+});
+
+test("deploys archers using their configured paired formation", () => {
+  const game = createGame();
+
+  assert.equal(playCard(game, "blue", "archers", "left"), true);
+  assert.equal(game.units.length, 2);
+  assert.deepEqual(game.units.map((unit) => unit.movement.formationSlot), [-1, 1]);
 });
 
 test("regenerates elixir and advances the match clock without bot actions", () => {
