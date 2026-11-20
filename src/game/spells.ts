@@ -30,6 +30,7 @@ export function resolveZap(
     }
   }
 
+  state.audioEvents.push("zap-impact");
   state.effects.push({
     id: state.nextId++,
     x,
