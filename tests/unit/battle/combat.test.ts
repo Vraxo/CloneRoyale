@@ -22,8 +22,7 @@ function makeUnit(
     lane: "left",
     x,
     y,
-    hp: 500,
-    maxHp: 500,
+    health: { hp: 500, maxHp: 500 },
     radius: 12,
     damage: 100,
     speed: 0,
@@ -54,13 +53,13 @@ test("melee units damage an enemy in range and start their attack cooldown", () 
   const target = makeUnit(101, "red", 145, 700);
 
   attacker.deployment.remaining = 0;
-  target.hp = 250;
+  target.health.hp = 250;
   addUnit(game, attacker);
   addUnit(game, target);
 
   updateUnits(game, 1 / 30);
 
-  assert.equal(target.hp, 150);
+  assert.equal(target.health.hp, 150);
   assert.equal(attacker.attackCooldown, attacker.attackInterval);
   assert.ok(attacker.presentation.attackAnim > 0);
 });
@@ -78,8 +77,8 @@ test("units choose the nearest valid enemy rather than the first in the array", 
 
   updateUnits(game, 1 / 30);
 
-  assert.equal(nearer.hp, 400);
-  assert.equal(farther.hp, 500);
+  assert.equal(nearer.health.hp, 400);
+  assert.equal(farther.health.hp, 500);
 });
 
 test("ground units cannot target air units unless their definition allows it", () => {
@@ -93,7 +92,7 @@ test("ground units cannot target air units unless their definition allows it", (
 
   updateUnits(game, 1 / 30);
 
-  assert.equal(airTarget.hp, 500);
+  assert.equal(airTarget.health.hp, 500);
   assert.equal(attacker.attackCooldown, 0);
 });
 
@@ -111,7 +110,7 @@ test("ranged units launch a projectile instead of applying immediate damage", ()
 
   updateUnits(game, 1 / 30);
 
-  assert.equal(target.hp, 500);
+  assert.equal(target.health.hp, 500);
   assert.equal(game.projectiles.length, 1);
   assert.equal(game.projectiles[0].targetId, target.id);
   assert.equal(game.projectiles[0].damage, attacker.damage);
@@ -172,7 +171,7 @@ test("projectile impacts apply damage when they reach their target", () => {
   addProjectile(game, "blue", 100, 700, target.id, target.x, target.y, 125, 0, "arrow", 0.2);
   updateProjectiles(game, 0.2);
 
-  assert.equal(target.hp, 375);
+  assert.equal(target.health.hp, 375);
   assert.equal(game.projectiles.length, 0);
   assert.ok(game.audioEvents.includes("projectile-impact"));
 });
@@ -193,8 +192,8 @@ test("fireball splash damages enemy troops fully, towers partially, and spares a
   addProjectile(game, "blue", 135, 100, null, 135, 180, 100, 55, "fireball", 0.12);
   updateProjectiles(game, 0.12);
 
-  assert.equal(enemy.hp, 400);
-  assert.equal(ally.hp, 500);
+  assert.equal(enemy.health.hp, 400);
+  assert.equal(ally.health.hp, 500);
   assert.equal(enemyPrincess.hp, originalTowerHp - 28);
   assert.equal(game.projectiles.length, 0);
   assert.ok(game.audioEvents.includes("fireball-explosion"));
@@ -270,13 +269,11 @@ test("towers include target radius when checking attack range", () => {
 test("simultaneous lethal melee attacks resolve regardless of unit order", () => {
   const game = createGame();
   const blue = makeUnit(100, "blue", 120, 700, {
-    hp: 100,
-    maxHp: 100,
+    health: { hp: 100, maxHp: 100 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
   const red = makeUnit(101, "red", 145, 700, {
-    hp: 100,
-    maxHp: 100,
+    health: { hp: 100, maxHp: 100 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
   });
 
@@ -284,6 +281,6 @@ test("simultaneous lethal melee attacks resolve regardless of unit order", () =>
   addUnit(game, red);
   updateUnits(game, 1 / 30);
 
-  assert.equal(blue.hp, 0);
-  assert.equal(red.hp, 0);
+  assert.equal(blue.health.hp, 0);
+  assert.equal(red.health.hp, 0);
 });
