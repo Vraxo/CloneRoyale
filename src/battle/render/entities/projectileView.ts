@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Projectile } from "../../../game/types";
+import type { DeepReadonly, Projectile } from "../../../game/types";
 import { drawArrow } from "./arrowArt";
 
 export class ProjectileView {
@@ -18,7 +18,7 @@ export class ProjectileView {
   private readonly fireballCore = new Graphics();
   private readonly fireballSparks = new Graphics();
 
-  public constructor(projectile: Projectile) {
+  public constructor(projectile: DeepReadonly<Projectile>) {
     this.id = projectile.id;
     this.container.addChild(
       this.arrowTrail,
@@ -35,7 +35,7 @@ export class ProjectileView {
     );
   }
 
-  public update(projectile: Projectile): void {
+  public update(projectile: DeepReadonly<Projectile>): void {
     this.container.position.set(projectile.x, projectile.y);
     this.container.rotation = Math.atan2(
       projectile.targetY - projectile.startY,
@@ -83,7 +83,7 @@ export class ProjectileView {
     this.arrowDetails.clear();
   }
 
-  private drawArrowProjectile(projectile: Projectile): void {
+  private drawArrowProjectile(projectile: DeepReadonly<Projectile>): void {
     const teamFletching = projectile.side === "red" ? 0xc56e65 : 0x659bc8;
     const arrowLayers = {
       trail: this.arrowTrail,
@@ -150,7 +150,7 @@ export class ProjectileView {
     });
   }
 
-  private drawFireball(projectile: Projectile): void {
+  private drawFireball(projectile: DeepReadonly<Projectile>): void {
     const time = projectile.age;
     const pulse = 1 + Math.sin(time * 25) * 0.045;
     const flicker = 0.88 + Math.sin(time * 34) * 0.08;
