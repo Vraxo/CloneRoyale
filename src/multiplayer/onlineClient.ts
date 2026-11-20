@@ -107,6 +107,8 @@ export class OnlineClient {
   public playCard(cardId: CardId, x: number, y: number): void { this.send({ type: "play-card", cardId, x, y }); }
   public requestRematch(): void { this.send({ type: "rematch-ready" }); }
   public sendEmote(emoteId: number): void { this.send({ type: "emote", emoteId }); }
+  public requestGlobalChatHistory(): void { this.send({ type: "global-chat-history" }); }
+  public sendGlobalChat(text: string): void { this.send({ type: "global-chat", text }); }
 
   public leave(): void {
     this.reconnectEnabled = false;

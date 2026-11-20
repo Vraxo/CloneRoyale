@@ -47,6 +47,7 @@ const rooms = new Map<string, ServerRoom>();
 const clients = new Set<ServerClient>();
 const matchmakingQueue: ServerClient[] = [];
 const reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const globalChatHistory: Array<{ id: string; name: string; text: string; timestamp: number }> = [];
 
 const replayArchive = createReplayArchive(REPLAY_DIRECTORY);
 const accountStore = createAccountStore(ACCOUNT_FILE);
@@ -58,6 +59,12 @@ function send(client: ServerClient, payload: Record<string, unknown>): void {
 function broadcast(room: ServerRoom, payload: Record<string, unknown>): void {
   for (const player of room.players.values()) {
     send(player, payload);
+  }
+}
+
+function broadcastGlobal(payload: Record<string, unknown>): void {
+  for (const client of clients) {
+    if (isSocketUsable(client)) send(client, payload);
   }
 }
 
@@ -191,7 +198,9 @@ handleClientMessage = createClientMessageHandler({
   attachPlayer,
   requestRematch,
   resumePlayer,
-  sendRoom
+  sendRoom,
+  broadcastGlobal,
+  getGlobalChatHistory: () => globalChatHistory
 });
 
 websocketTransport.attach(server, clients);

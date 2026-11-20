@@ -1,9 +1,28 @@
 import type { ClientMessage, MessageHandlerOptions, ServerClient } from "../core/types.js";
 
 export function createPlayerMessageHandlers(options: MessageHandlerOptions): Record<string, (client: ServerClient, message: ClientMessage) => void> {
-  const { broadcast, playerSummaries, resumePlayer } = options;
+  const { broadcast, playerSummaries, resumePlayer, send, broadcastGlobal, getGlobalChatHistory } = options;
 
   return {
+    "global-chat-history"(client) {
+      send(client, { type: "global-chat-history", messages: getGlobalChatHistory() });
+    },
+
+    "global-chat"(client, message) {
+      if (client.closed || client.disconnected) return;
+      const rawText = typeof message.text === "string" ? message.text : "";
+      const text = rawText.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim().slice(0, 200);
+      if (!text) return;
+      const now = Date.now();
+      if (now - (client.lastGlobalChatAt ?? 0) < 1200) return;
+      client.lastGlobalChatAt = now;
+      const entry = { id: client.id, name: client.name, text, timestamp: now };
+      const history = getGlobalChatHistory();
+      history.push(entry);
+      if (history.length > 50) history.splice(0, history.length - 50);
+      broadcastGlobal({ type: "global-chat-message", message: entry });
+    },
+
     emote(client, message) {
       const room = client.room;
       const emoteId = message.emoteId;

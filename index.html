@@ -345,6 +345,15 @@
         <div class="join-room-row"><input id="join-code" maxlength="5" autocomplete="off" spellcheck="false" placeholder="ENTER CODE" /><button id="join-room" class="secondary-button" type="button">Join</button></div>
         </div>
         <p id="online-status" class="online-status" aria-live="polite">Ready to find an opponent.</p>
+        <section class="global-chat" aria-label="Global chat">
+          <div class="global-chat-heading"><div><span class="eyebrow">COMMUNITY</span><h3>Global chat</h3></div><span id="global-chat-status" data-state="disconnected">OFFLINE</span></div>
+          <div id="global-chat-messages" class="global-chat-messages" role="log" aria-live="polite" aria-relevant="additions text"><p class="global-chat-empty">Connect to chat with everyone online.</p></div>
+          <form id="global-chat-form" class="global-chat-form">
+            <input id="global-chat-input" maxlength="200" autocomplete="off" placeholder="Say something…" aria-label="Chat message" />
+            <button class="secondary-button" type="submit">Send</button>
+          </form>
+          <p class="global-chat-hint">Visible to everyone connected · 200 characters max</p>
+        </section>
       </section>
     </div>
     <div id="install-help" class="install-help" hidden>
