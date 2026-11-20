@@ -287,19 +287,21 @@ export class ArenaRenderer {
       x,
       y,
       health: { hp: definition.hp, maxHp: definition.hp },
+      movement: {
+        speed: definition.speed,
+        isAir: definition.isAir,
+        formationSlot: definition.type === "archer" && index < 2
+          ? (index === 0 ? -1 : 1)
+          : undefined
+      },
       radius: definition.radius,
       collisionMass: definition.collisionMass ?? 1,
-      formationSlot: definition.type === "archer" && index < 2
-        ? (index === 0 ? -1 : 1)
-        : undefined,
       damage: definition.damage,
-      speed: definition.speed,
       range: definition.range,
       attackInterval: definition.attackInterval,
       attackCooldown: 0,
       attack: definition.attack,
       splashRadius: definition.splashRadius,
-      isAir: definition.isAir,
       canTargetAir: definition.canTargetAir,
       targetsBuildingsOnly: definition.targetsBuildingsOnly,
       lifetime: definition.lifetime,
