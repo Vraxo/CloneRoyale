@@ -822,7 +822,7 @@ export class ThreeBattleScene {
       const start = index / rig.arrows.length * 0.36;
       const flight = Math.max(0, Math.min(1, (age - start) / 0.2));
       const eased = 1 - Math.pow(1 - flight, 2);
-      arrow.position.y = flight < 1 ? 120 - eased * 108 : 11;
+      arrow.position.y = flight < 1 ? 120 - eased * 97 : 23;
       arrow.rotation.x = flight < 1 ? Math.sin(age * 28 + index) * 0.035 : 0;
       arrow.rotation.z = flight < 1 ? ((index % 5) - 2) * 0.035 : ((index % 3) - 1) * 0.025;
       arrow.visible = age >= start;
