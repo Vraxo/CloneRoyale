@@ -1,5 +1,5 @@
 import { Application, Container, Graphics } from "pixi.js";
-import type { CardId, Lane, ReadonlyGameState, Side, Unit } from "../../game/types";
+import type { CardId, Lane, ReadonlyGameState, Side, Unit, UnitCardDefinition } from "../../game/types";
 import { cardById } from "../../game/cards";
 import { getGroundDeploymentZones } from "../../game/placement";
 import { EffectView } from "./entities/effectView";
@@ -225,9 +225,7 @@ export class ArenaRenderer {
       for (let index = 0; index < card.count; index += 1) {
         const offset = getOffset(index);
         const unit = this.createPreviewUnit(
-          cardId,
-          card.category,
-          card.unit,
+          card,
           index,
           point.x + offset.x,
           point.y + offset.y,
@@ -269,18 +267,17 @@ export class ArenaRenderer {
   }
 
   private createPreviewUnit(
-    cardId: CardId,
-    category: "troop" | "building",
-    definition: import("../../game/types").UnitDefinition,
+    card: UnitCardDefinition,
     index: number,
     x: number,
     y: number,
     side: Side
   ): Unit {
+    const definition = card.unit;
     const unit = {
       id: -1000 - index,
       side,
-      cardId,
+      cardId: card.id,
       type: definition.identity.type,
       lane: (x < WORLD_WIDTH / 2 ? "left" : "right") as Lane,
       transform: { x, y, facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2 },
@@ -307,7 +304,7 @@ export class ArenaRenderer {
       }
     };
 
-    if (category === "building") return { ...unit, kind: "building" };
+    if (card.category === "building") return { ...unit, kind: "building" };
     return {
       ...unit,
       kind: "troop",
