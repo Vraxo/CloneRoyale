@@ -295,3 +295,19 @@ test("ground troops in the river pursue targets directly only within the bridge 
   assert.equal(outsideTarget.transform.x, LANE_X.left);
   assert.equal(outsideTarget.transform.y, 500);
 });
+
+
+test("routes a ground troop in the river interior toward the south-bank exit", () => {
+  const game = createGame();
+  const unit = makeUnit(307, "blue", 300, 500, {
+    movement: { speed: 1000, isAir: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
+    lane: "left"
+  });
+
+  moveUnitTowardTarget(game, unit, 300, 700, 1, 999);
+
+  assert.equal(unit.transform.x, LANE_X.left);
+  assert.equal(unit.transform.y, RIVER_BOTTOM + 1);
+  assert.equal(unit.movement.isMoving, true);
+});
