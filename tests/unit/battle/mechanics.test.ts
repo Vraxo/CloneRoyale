@@ -281,3 +281,18 @@ test("launches arrows without emitting an optional spell launch sound", () => {
   assert.equal(game.projectiles[0].style, "arrows");
   assert.deepEqual(game.audioEvents, []);
 });
+
+
+test("awards the regulation win to red when blue has more destroyed princess towers", () => {
+  const game = createGame();
+  const bluePrincess = tower(game, "blue", "princess", "left");
+  assert.ok(bluePrincess);
+  bluePrincess.hp = 0;
+
+  stepGame(game, 180, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.winner, "red");
+  assert.equal(game.phase, "finished");
+  assert.ok(game.audioEvents.includes("match-defeat"));
+});
