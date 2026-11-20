@@ -87,16 +87,16 @@ export class CannonView extends UnitView {
     // A fast initial kick followed by a softer spring return sells the weight.
     const attackProgress = Math.max(
       0,
-      Math.min(1, unit.attackAnim / ATTACK_ANIMATION_DURATION)
+      Math.min(1, unit.presentation.attackAnim / ATTACK_ANIMATION_DURATION)
     );
     const recoil = Math.pow(attackProgress, 1.7);
     this.barrel.position.set(0, recoil * 8.5);
-    this.barrel.rotation = Math.sin(time * 0.7 + unit.animationOffset) * 0.012
+    this.barrel.rotation = Math.sin(time * 0.7 + unit.presentation.animationOffset) * 0.012
       + recoil * 0.035;
 
     // A brief, directional muzzle flash at the start of each shot.
-    const elapsedSinceShot = ATTACK_ANIMATION_DURATION - unit.attackAnim;
-    const flash = unit.attackAnim > 0
+    const elapsedSinceShot = ATTACK_ANIMATION_DURATION - unit.presentation.attackAnim;
+    const flash = unit.presentation.attackAnim > 0
       ? Math.max(0, 1 - elapsedSinceShot / 0.075)
       : 0;
 
@@ -117,10 +117,10 @@ export class CannonView extends UnitView {
     }
 
     // A tiny puff lingers after the flash, then dissipates quickly.
-    const smokeProgress = unit.attackAnim > 0
+    const smokeProgress = unit.presentation.attackAnim > 0
       ? Math.max(0, Math.min(1, (elapsedSinceShot - 0.025) / 0.19))
       : 1;
-    const smokeAlpha = unit.attackAnim > 0
+    const smokeAlpha = unit.presentation.attackAnim > 0
       ? (1 - smokeProgress) * 0.3
       : 0;
 
