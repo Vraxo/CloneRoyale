@@ -1,6 +1,8 @@
 import type { GameState, TroopUnit, Unit } from "./types";
 import { ARENA_TILE_SIZE, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "./state";
 
+type MovementState = Pick<GameState, "units" | "towers">;
+
 const BRIDGE_HALF_WIDTH = 1.5 * ARENA_TILE_SIZE;
 
 type PathingUnit = Pick<TroopUnit, "lane" | "transform" | "movement" | "collision">;
@@ -71,7 +73,7 @@ interface MovementObstacle {
 }
 
 function findObstacleWaypoint(
-  state: GameState,
+  state: MovementState,
   unit: ObstacleAvoidanceUnit,
   targetX: number,
   targetY: number,
@@ -156,7 +158,7 @@ function findObstacleWaypoint(
 }
 
 export function moveUnitTowardTarget(
-  state: GameState,
+  state: MovementState,
   unit: MovementUnit,
   x: number,
   y: number,
