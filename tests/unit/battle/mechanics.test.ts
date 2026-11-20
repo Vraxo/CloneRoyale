@@ -43,6 +43,16 @@ test("rejects a card that is not in the player's hand without changing state", (
   assert.deepEqual(game, before);
 });
 
+test("deploys stationary buildings without a movement component", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["cannon"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "cannon", "left"), true);
+  assert.equal(game.units[0].kind, "building");
+  assert.equal("movement" in game.units[0], false);
+});
+
 test("allows deployment when elixir exactly matches the card cost", () => {
   const game = createGame();
   game.sides.blue.elixir = 5;
