@@ -22,5 +22,4 @@ export const SKELETON: MovableUnitDefinition = {
     death: "skeleton-death",
     movement: { event: "skeleton-step", interval: 0.5 }
   },
-  lifetime: { duration: 0 }
 };
