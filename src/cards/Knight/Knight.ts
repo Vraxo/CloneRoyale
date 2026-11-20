@@ -16,5 +16,4 @@ export const KNIGHT: MovableUnitDefinition = {
   },
   targeting: { canTargetAir: false, targetsBuildingsOnly: false },
   audio: {},
-  lifetime: { duration: 0 }
 };
