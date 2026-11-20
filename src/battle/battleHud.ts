@@ -1,4 +1,4 @@
-import type { CardId, GameState, Side } from "../game/types";
+import type { CardId, ReadonlyGameState, Side } from "../game/types";
 import type { ArenaRenderer } from "./render/arenaRenderer";
 
 interface HudElements {
@@ -21,8 +21,8 @@ interface HudElements {
 }
 
 export interface BattleHud {
-  update(game: GameState, selectedCard: CardId | null, paused: boolean, placementMessage: string, canStepBack: boolean, playerSide?: Side, replayTick?: number, replayDuration?: number): void;
-  setPaused(paused: boolean, game: GameState): void;
+  update(game: ReadonlyGameState, selectedCard: CardId | null, paused: boolean, placementMessage: string, canStepBack: boolean, playerSide?: Side, replayTick?: number, replayDuration?: number): void;
+  setPaused(paused: boolean, game: ReadonlyGameState): void;
 }
 
 function element<T extends HTMLElement>(id: string): T {
@@ -52,7 +52,7 @@ function findElements(): HudElements {
   };
 }
 
-export function phaseLabel(state: GameState): string {
+export function phaseLabel(state: ReadonlyGameState): string {
   switch (state.phase) {
     case "regulation": return "Regulation";
     case "overtime": return "Overtime";
@@ -61,11 +61,11 @@ export function phaseLabel(state: GameState): string {
   }
 }
 
-function towerHealth(game: GameState, side: Side): number {
+function towerHealth(game: ReadonlyGameState, side: Side): number {
   return game.towers.filter((tower) => tower.side === side && tower.hp > 0).length;
 }
 
-function crownCount(game: GameState, side: Side): number {
+function crownCount(game: ReadonlyGameState, side: Side): number {
   const enemyKing = game.towers.find((tower) => tower.side !== side && tower.kind === "king");
   if (enemyKing && enemyKing.hp <= 0) return 3;
 
@@ -74,7 +74,7 @@ function crownCount(game: GameState, side: Side): number {
   ).length;
 }
 
-function updateStatistics(elements: HudElements, game: GameState, playerSide: Side): void {
+function updateStatistics(elements: HudElements, game: ReadonlyGameState, playerSide: Side): void {
   const opponentSide = playerSide === "blue" ? "red" : "blue";
   elements.blueUnitsLabel.textContent = game.units.filter((unit) => unit.side === playerSide).length.toString();
   elements.redUnitsLabel.textContent = game.units.filter((unit) => unit.side === opponentSide).length.toString();
@@ -96,7 +96,7 @@ function updateStatistics(elements: HudElements, game: GameState, playerSide: Si
   }
 }
 
-function updateEventFeed(elements: HudElements, game: GameState): void {
+function updateEventFeed(elements: HudElements, game: ReadonlyGameState): void {
   elements.eventFeed.replaceChildren(...game.events.map((message) => {
     const item = document.createElement("li");
     item.textContent = message;
@@ -104,7 +104,7 @@ function updateEventFeed(elements: HudElements, game: GameState): void {
   }));
 }
 
-function updateMatchResult(elements: HudElements, game: GameState, paused: boolean, playerSide: Side): void {
+function updateMatchResult(elements: HudElements, game: ReadonlyGameState, paused: boolean, playerSide: Side): void {
   elements.watchReplayButton.hidden = document.body.dataset.replayAvailable !== "true" || document.body.dataset.replaying === "true";
   if (!game.gameOver || document.body.dataset.replaying === "true") {
     if (!paused) elements.statusLabel.textContent = phaseLabel(game);
@@ -140,7 +140,7 @@ function updateReplayControls(replayTick: number, replayDuration: number, paused
   }
 }
 
-function placementStatus(game: GameState, paused: boolean, placementMessage: string): string {
+function placementStatus(game: ReadonlyGameState, paused: boolean, placementMessage: string): string {
   if (game.gameOver) return "Match complete.";
   if (paused) return "Resume to continue playing.";
   return placementMessage;
