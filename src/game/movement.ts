@@ -20,6 +20,12 @@ type ObstacleAvoidanceUnit =
   & Pick<UnitMovement, "isAir">
   & Pick<UnitCollision, "radius">;
 
+type MovementUnit =
+  & PathingUnit
+  & Pick<UnitIdentity, "id">
+  & Pick<UnitTransform, "facing">
+  & Pick<UnitMovement, "formationSlot" | "speed" | "isMoving">;
+
 function riverBank(y: number): -1 | 0 | 1 {
   if (y < RIVER_TOP) return -1;
   if (y > RIVER_BOTTOM) return 1;
@@ -170,7 +176,7 @@ function findObstacleWaypoint(
 
 export function moveUnitTowardTarget(
   state: GameState,
-  unit: Unit,
+  unit: MovementUnit,
   x: number,
   y: number,
   dt: number,
