@@ -1,4 +1,4 @@
-import type { CardId, GameState, Side } from "./types";
+import type { CardId, ReadonlyGameState, Side } from "./types";
 import { cardById } from "./cards";
 import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, RIVER_BOTTOM, RIVER_TOP } from "./state";
 const DESTROYED_TOWER_LANE_DEPTH = 9 * ARENA_TILE_SIZE;
@@ -25,7 +25,7 @@ export function snapToArenaTile(point: { x: number; y: number }): { x: number; y
 }
 
 export function getGroundDeploymentZones(
-  state: GameState,
+  state: ReadonlyGameState,
   side: Side,
   radius: number
 ): DeploymentZone[] {
@@ -73,7 +73,7 @@ export function getGroundDeploymentZones(
 }
 
 export function canPlaceCard(
-  state: GameState,
+  state: ReadonlyGameState,
   side: Side,
   cardId: CardId,
   x: number,
