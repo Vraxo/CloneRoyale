@@ -122,13 +122,15 @@ export function updateUnits(state: GameState, dt: number): void {
       continue;
     }
 
-    unit.lifetime.elapsed += dt;
     unit.combat.attackCooldown = Math.max(0, unit.combat.attackCooldown - dt);
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
 
-    if (unit.lifetime.duration > 0 && unit.lifetime.elapsed >= unit.lifetime.duration) {
-      unit.health.hp = 0;
-      continue;
+    if (unit.lifetime) {
+      unit.lifetime.elapsed += dt;
+      if (unit.lifetime.duration > 0 && unit.lifetime.elapsed >= unit.lifetime.duration) {
+        unit.health.hp = 0;
+        continue;
+      }
     }
 
     if (unit.kind === "building") {
