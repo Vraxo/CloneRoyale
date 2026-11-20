@@ -17,6 +17,12 @@ export function updateUnits(state: GameState, dt: number): void {
 
     if (updateUnitDeployment(state, unit, dt)) continue;
 
+    if ((unit.stunRemaining ?? 0) > 0) {
+      unit.stunRemaining = Math.max(0, unit.stunRemaining - dt);
+      if (unit.kind === "troop") unit.movement.isMoving = false;
+      continue;
+    }
+
     unit.combat.attackCooldown = Math.max(0, unit.combat.attackCooldown - dt);
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
 
