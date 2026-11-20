@@ -104,7 +104,9 @@ test("deployment appearance completes before a unit can attack", () => {
 
 test("melee units damage an enemy in range and start their attack cooldown", () => {
   const game = createGame();
-  const attacker = makeUnit(100, "blue", 120, 700);
+  const attacker = makeUnit(100, "blue", 120, 700, {
+    audio: { attack: "giant-attack", hit: "giant-hit" }
+  });
   const target = makeUnit(101, "red", 145, 700);
 
   attacker.deployment.remaining = 0;
@@ -117,6 +119,8 @@ test("melee units damage an enemy in range and start their attack cooldown", () 
   assert.equal(target.health.hp, 150);
   assert.equal(attacker.combat.attackCooldown, attacker.combat.attackInterval);
   assert.ok(attacker.presentation.attackAnim > 0);
+  assert.ok(game.audioEvents.includes("giant-attack"));
+  assert.ok(game.audioEvents.includes("giant-hit"));
 });
 
 test("units choose the nearest valid enemy rather than the first in the array", () => {
@@ -154,7 +158,8 @@ test("ground units cannot target air units unless their definition allows it", (
 test("ranged units launch a projectile instead of applying immediate damage", () => {
   const game = createGame();
   const attacker = makeUnit(100, "blue", 120, 700, {
-    combat: { damage: 100, range: 100, attackInterval: 1, attackCooldown: 0, attack: { type: "projectile", style: "arrow", speed: 300 }, splashRadius: 0 }
+    combat: { damage: 100, range: 100, attackInterval: 1, attackCooldown: 0, attack: { type: "projectile", style: "arrow", speed: 300 }, splashRadius: 0 },
+    audio: { attack: "giant-attack" }
   });
   const target = makeUnit(101, "red", 170, 700);
 
@@ -168,6 +173,7 @@ test("ranged units launch a projectile instead of applying immediate damage", ()
   assert.equal(game.projectiles.length, 1);
   assert.equal(game.projectiles[0].targetId, target.id);
   assert.equal(game.projectiles[0].damage, attacker.combat.damage);
+  assert.ok(game.audioEvents.includes("giant-attack"));
 });
 
 test("moving troops emit their configured footstep sound", () => {
@@ -355,4 +361,34 @@ test("simultaneous lethal melee attacks resolve regardless of unit order", () =>
 
   assert.equal(blue.health.hp, 0);
   assert.equal(red.health.hp, 0);
+});
+
+test("ranged troops can target towers when no enemy troops are available", () => {
+  const game = createGame();
+  const tower = game.towers.find((candidate) =>
+    candidate.side === "red" && candidate.kind === "princess" && candidate.lane === "left"
+  );
+  assert.ok(tower);
+
+  const attacker = makeUnit(100, "blue", tower.x, tower.y, {
+    combat: {
+      damage: 100,
+      range: 100,
+      attackInterval: 1,
+      attackCooldown: 0,
+      attack: { type: "projectile", style: "arrow", speed: 300 },
+      splashRadius: 0
+    },
+    audio: { attack: "giant-attack" },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  addUnit(game, attacker);
+
+  updateUnits(game, 1 / 30);
+
+  assert.equal(game.projectiles.length, 1);
+  assert.equal(game.projectiles[0].targetId, tower.id);
+  assert.equal(game.projectiles[0].targetX, tower.x);
+  assert.equal(game.projectiles[0].targetY, tower.y);
+  assert.ok(game.audioEvents.includes("giant-attack"));
 });
