@@ -1,5 +1,5 @@
-import type { GameState, Tower, Unit } from "./types";
-import type { TroopUnit } from "./types";
+import type { GameState, Tower, TroopUnit, Unit } from "./types";
+import { ARENA_TILE_SIZE, FIELD_HEIGHT, FIELD_WIDTH, LANE_X, RIVER_BOTTOM, RIVER_TOP } from "./state";
 
 const BRIDGE_HALF_WIDTH = 1.5 * ARENA_TILE_SIZE;
 
