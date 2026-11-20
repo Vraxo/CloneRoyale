@@ -23,7 +23,7 @@ function makeUnit(
     x,
     y,
     health: { hp: 500, maxHp: 500 },
-    radius: 12,
+    collision: { radius: 12 },
     damage: 100,
     movement: { speed: 0, isAir: false },
     range: 55,
