@@ -57,7 +57,7 @@ function attackUnit(
   target: Unit | Tower,
   pendingMeleeAttacks: PendingMeleeAttack[]
 ): void {
-  unit.attackCooldown = unit.attackInterval;
+  unit.combat.attackCooldown = unit.combat.attackInterval;
   unit.presentation.attackAnim = 0.32;
   if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-attack");
   if (unit.type === "giant") state.audioEvents.push("giant-attack");
@@ -66,7 +66,7 @@ function attackUnit(
   if (unit.type === "archer") state.audioEvents.push("archer-attack");
   if (unit.type === "baby-dragon") state.audioEvents.push("baby-dragon-attack");
 
-  if (unit.attack.type === "melee") {
+  if (unit.combat.attack.type === "melee") {
     pendingMeleeAttacks.push({ unit, target });
     if (unit.type === "mini-pekka") state.audioEvents.push("mini-pekka-hit");
     if (unit.type === "giant") state.audioEvents.push("giant-hit");
@@ -83,10 +83,10 @@ function attackUnit(
     target.id,
     target.x,
     target.y,
-    unit.damage,
-    unit.splashRadius,
-    unit.attack.style,
-    distance / unit.attack.speed
+    unit.combat.damage,
+    unit.combat.splashRadius,
+    unit.combat.attack.style,
+    distance / unit.combat.attack.speed
   );
 }
 
@@ -131,7 +131,7 @@ export function updateUnits(state: GameState, dt: number): void {
 
     unit.movement.isMoving = false;
     unit.lifetime.elapsed += dt;
-    unit.attackCooldown = Math.max(0, unit.attackCooldown - dt);
+    unit.combat.attackCooldown = Math.max(0, unit.combat.attackCooldown - dt);
     unit.presentation.attackAnim = Math.max(0, unit.presentation.attackAnim - dt);
 
     if (unit.lifetime.duration > 0 && unit.lifetime.elapsed >= unit.lifetime.duration) {
@@ -140,18 +140,18 @@ export function updateUnits(state: GameState, dt: number): void {
     }
 
     if (unit.kind === "building") {
-      const target = findEnemyUnit(state, unit, unit.range, false, true);
-      if (target && unit.attackCooldown <= 0) attackUnit(state, unit, target, pendingMeleeAttacks);
+      const target = findEnemyUnit(state, unit, unit.combat.range, false, true);
+      if (target && unit.combat.attackCooldown <= 0) attackUnit(state, unit, target, pendingMeleeAttacks);
       continue;
     }
 
-    const detectionRange = Math.max(105, unit.range + 65);
+    const detectionRange = Math.max(105, unit.combat.range + 65);
     const enemy = findEnemyUnit(state, unit, detectionRange, unit.targeting.targetsBuildingsOnly);
 
     if (enemy) {
       const distance = Math.hypot(enemy.x - unit.x, enemy.y - unit.y);
-      if (distance <= unit.range + enemy.collision.radius) {
-        if (unit.attackCooldown <= 0) attackUnit(state, unit, enemy, pendingMeleeAttacks);
+      if (distance <= unit.combat.range + enemy.collision.radius) {
+        if (unit.combat.attackCooldown <= 0) attackUnit(state, unit, enemy, pendingMeleeAttacks);
       } else {
         moveUnitTowardTarget(state, unit, enemy.x, enemy.y, dt, enemy.id);
       }
@@ -162,15 +162,15 @@ export function updateUnits(state: GameState, dt: number): void {
     if (!tower) continue;
 
     const towerDistance = Math.hypot(tower.x - unit.x, tower.y - unit.y);
-    if (towerDistance <= unit.range + tower.radius) {
-      if (unit.attackCooldown <= 0) attackUnit(state, unit, tower, pendingMeleeAttacks);
+    if (towerDistance <= unit.combat.range + tower.radius) {
+      if (unit.combat.attackCooldown <= 0) attackUnit(state, unit, tower, pendingMeleeAttacks);
     } else {
       moveUnitTowardTarget(state, unit, tower.x, tower.y, dt, tower.id);
     }
   }
 
   for (const attack of pendingMeleeAttacks) {
-    damageTarget(state, attack.target.id, attack.unit.damage);
+    damageTarget(state, attack.target.id, attack.unit.combat.damage);
   }
 
   for (const unit of state.units) {
