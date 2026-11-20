@@ -57,6 +57,7 @@ export class ArenaRenderer {
     this.app.canvas.style.background = "transparent";
     host.replaceChildren(...(this.threeScene ? [this.threeScene.canvas, this.app.canvas] : [this.app.canvas]));
     this.entities.sortableChildren = true;
+    this.entities.visible = !this.threeScene;
     this.world.addChild(
       this.arena,
       this.invalidDeploymentOverlay,
@@ -350,6 +351,7 @@ export class ArenaRenderer {
 
     if (this.threeScene) {
       this.threeScene.render(state);
+      return;
     } else {
       synchronizeViews(
       state.towers,
