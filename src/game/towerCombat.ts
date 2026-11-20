@@ -6,6 +6,11 @@ export function updateTowers(state: GameState, dt: number): void {
   for (const tower of state.towers) {
     if (tower.hp <= 0) continue;
 
+    if ((tower.stunRemaining ?? 0) > 0) {
+      tower.stunRemaining = Math.max(0, (tower.stunRemaining ?? 0) - dt);
+      continue;
+    }
+
     if (tower.kind === "king") {
       const princessDestroyed = state.towers.some((candidate) =>
         candidate.side === tower.side

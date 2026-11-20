@@ -7,4 +7,5 @@ export type CardId =
   | "cannon"
   | "fireball"
   | "arrows"
-  | "knight";
+  | "knight"
+  | "zap";

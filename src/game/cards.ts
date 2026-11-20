@@ -8,6 +8,7 @@ import { GIANT_CARD } from "../cards/Giant/GiantCard";
 import { KNIGHT_CARD } from "../cards/Knight/KnightCard";
 import { MINI_PEKKA_CARD } from "../cards/MiniPekka/MiniPekkaCard";
 import { SKELETON_ARMY_CARD } from "../cards/Skeleton/SkeletonArmyCard";
+import { ZAP_CARD } from "../cards/Zap/ZapCard";
 
 export const STARTER_DECK: CardId[] = [
   "giant",
@@ -29,7 +30,8 @@ export const CARDS: Record<CardId, CardDefinition> = {
   cannon: CANNON_CARD,
   fireball: FIREBALL_CARD,
   arrows: ARROWS_CARD,
-  knight: KNIGHT_CARD
+  knight: KNIGHT_CARD,
+  zap: ZAP_CARD
 };
 
 export function cardById(id: CardId): CardDefinition {
