@@ -20,8 +20,7 @@ function makeUnit(
     type: "giant",
     kind: "troop",
     lane: "left",
-    x,
-    y,
+    transform: { x, y, facing: 0 },
     health: { hp: 500, maxHp: 500 },
     collision: { radius: 12 },
     combat: { damage: 100, range: 55, attackInterval: 1, attackCooldown: 0, attack: { type: "melee" }, splashRadius: 0 },
@@ -29,7 +28,6 @@ function makeUnit(
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
-    facing: 0,
     presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
   };
@@ -173,7 +171,7 @@ test("projectile impacts apply damage when they reach their target", () => {
   const target = makeUnit(100, "red", 160, 700);
   addUnit(game, target);
 
-  addProjectile(game, "blue", 100, 700, target.id, target.x, target.y, 125, 0, "arrow", 0.2);
+  addProjectile(game, "blue", 100, 700, target.id, target.transform.x, target.transform.y, 125, 0, "arrow", 0.2);
   updateProjectiles(game, 0.2);
 
   assert.equal(target.health.hp, 375);

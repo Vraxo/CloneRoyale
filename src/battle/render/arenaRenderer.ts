@@ -284,8 +284,7 @@ export class ArenaRenderer {
       type: definition.type,
       kind: category,
       lane: x < WORLD_WIDTH / 2 ? "left" : "right",
-      x,
-      y,
+      transform: { x, y, facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2 },
       health: { hp: definition.hp, maxHp: definition.hp },
       movement: {
         speed: definition.speed,
@@ -309,7 +308,6 @@ export class ArenaRenderer {
       },
       lifetime: { duration: definition.lifetime, elapsed: 0 },
       deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
-      facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
       presentation: {
         animationOffset: index * 0.37,
         attackAnim: 0
@@ -353,7 +351,7 @@ export class ArenaRenderer {
       this.entities,
       createUnitView,
       (view, unit) => view.update(unit, state.time),
-      (unit) => unit.y + unit.collision.radius
+      (unit) => unit.transform.y + unit.collision.radius
     );
 
     synchronizeViews(

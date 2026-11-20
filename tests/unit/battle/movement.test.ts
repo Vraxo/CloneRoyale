@@ -19,8 +19,7 @@ function makeUnit(
     type: "giant",
     kind: "troop",
     lane: "left",
-    x,
-    y,
+    transform: { x, y, facing: 0 },
     health: { hp: 500, maxHp: 500 },
     collision: { radius: 12 },
     combat: { damage: 100, range: 55, attackInterval: 1, attackCooldown: 100, attack: { type: "melee" }, splashRadius: 0 },
@@ -28,7 +27,6 @@ function makeUnit(
     targeting: { canTargetAir: true, targetsBuildingsOnly: false },
     lifetime: { duration: 0, elapsed: 0 },
     deployment: { appearanceDelay: 0, duration: 0, remaining: 10 },
-    facing: 0,
     presentation: { animationOffset: 0, attackAnim: 0 },
     ...overrides
   };
@@ -47,7 +45,7 @@ test("separates overlapping ground units without leaving them intersecting", () 
   addUnit(game, second);
   updateUnits(game, 1 / 30);
 
-  const distance = Math.hypot(second.x - first.x, second.y - first.y);
+  const distance = Math.hypot(second.transform.x - first.transform.x, second.transform.y - first.transform.y);
   assert.ok(distance >= first.collision.radius + second.collision.radius + 2 - 0.01);
 });
 
@@ -60,10 +58,10 @@ test("does not separate air units from ground units", () => {
   addUnit(game, air);
   updateUnits(game, 1 / 30);
 
-  assert.equal(ground.x, 180);
-  assert.equal(ground.y, 700);
-  assert.equal(air.x, 180);
-  assert.equal(air.y, 700);
+  assert.equal(ground.transform.x, 180);
+  assert.equal(ground.transform.y, 700);
+  assert.equal(air.transform.x, 180);
+  assert.equal(air.transform.y, 700);
 });
 
 test("keeps ground units inside their lane's bridge corridor while crossing the river", () => {
@@ -81,17 +79,17 @@ test("keeps ground units inside their lane's bridge corridor while crossing the 
   let crossedRiver = false;
 
   for (let step = 0; step < 80; step += 1) {
-    const previousY = unit.y;
+    const previousY = unit.transform.y;
     updateUnits(game, 0.1);
 
-    if (unit.y <= RIVER_BOTTOM && unit.y >= RIVER_TOP) {
+    if (unit.transform.y <= RIVER_BOTTOM && unit.transform.y >= RIVER_TOP) {
       enteredRiver = true;
-      assert.ok(Math.abs(unit.x - bridgeX) <= halfBridgeWidth - unit.collision.radius + 0.01);
+      assert.ok(Math.abs(unit.transform.x - bridgeX) <= halfBridgeWidth - unit.collision.radius + 0.01);
     }
 
-    if (previousY > RIVER_TOP && unit.y <= RIVER_TOP) {
+    if (previousY > RIVER_TOP && unit.transform.y <= RIVER_TOP) {
       crossedRiver = true;
-      assert.ok(Math.abs(unit.x - bridgeX) <= halfBridgeWidth - unit.collision.radius + 0.01);
+      assert.ok(Math.abs(unit.transform.x - bridgeX) <= halfBridgeWidth - unit.collision.radius + 0.01);
       break;
     }
   }
@@ -120,8 +118,8 @@ test("routes ground troops around blocking buildings instead of moving straight 
   addUnit(game, blocker);
   updateUnits(game, 0.1);
 
-  assert.ok(troop.x > 105, "the troop should take a lateral waypoint around the building");
-  assert.ok(Math.hypot(troop.x - blocker.x, troop.y - blocker.y) > troop.collision.radius + blocker.collision.radius);
+  assert.ok(troop.transform.x > 105, "the troop should take a lateral waypoint around the building");
+  assert.ok(Math.hypot(troop.transform.x - blocker.transform.x, troop.transform.y - blocker.transform.y) > troop.collision.radius + blocker.collision.radius);
 });
 
 test("pushes ground units out of tower collision space", () => {
@@ -138,6 +136,6 @@ test("pushes ground units out of tower collision space", () => {
   addUnit(game, unit);
   updateUnits(game, 1 / 30);
 
-  const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y);
+  const distance = Math.hypot(unit.transform.x - tower.x, unit.transform.y - tower.y);
   assert.ok(distance >= unit.collision.radius + tower.radius + 2 - 0.01);
 });

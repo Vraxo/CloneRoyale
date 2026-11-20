@@ -17,8 +17,8 @@ export function damageTarget(state: GameState, targetId: number, damage: number)
     unit.presentation.attackAnim = Math.max(unit.presentation.attackAnim, 0.09);
     state.effects.push({
       id: state.nextId++,
-      x: unit.x,
-      y: unit.y,
+      x: unit.transform.x,
+      y: unit.transform.y,
       age: 0,
       lifetime: 0.22,
       radius: 9,

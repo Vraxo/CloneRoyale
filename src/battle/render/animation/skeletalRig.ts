@@ -115,7 +115,7 @@ export class SkeletalRig {
 
     const idleBob = moving ? Math.abs(Math.sin(phase * 2)) * -0.65 : Math.sin(time * 2 + unit.presentation.animationOffset) * -0.2;
     this.container.position.set(0, idleBob);
-    this.container.rotation = unit.facing + Math.PI / 2;
+    this.container.rotation = unit.transform.facing + Math.PI / 2;
 
     this.leftLeg.root.rotation = -0.92 + stride;
     this.rightLeg.root.rotation = 0.92 - stride;

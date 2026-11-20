@@ -81,7 +81,7 @@ export class CannonView extends UnitView {
   public update(unit: DeepReadonly<Unit>, time: number): void {
     this.updateCommon(unit, time);
 
-    this.body.rotation = unit.facing + Math.PI / 2;
+    this.body.rotation = unit.transform.facing + Math.PI / 2;
 
     // attackAnim is a short countdown started by the combat simulation.
     // A fast initial kick followed by a softer spring return sells the weight.

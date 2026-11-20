@@ -7,7 +7,7 @@ export type { TroopCardDefinition } from "./TroopCardDefinition";
 export type { BuildingCardDefinition } from "./BuildingCardDefinition";
 export type { SpellCardDefinition } from "./SpellCardDefinition";
 export type { UnitCardDefinition } from "./UnitCardDefinition";
-export type { UnitType, Unit, UnitCollision, UnitCombat, UnitDeployment, UnitHealth, UnitLifetime, UnitMovement, UnitPresentation, UnitTargeting } from "./Unit";
+export type { UnitType, Unit, UnitCollision, UnitCombat, UnitDeployment, UnitHealth, UnitLifetime, UnitMovement, UnitPresentation, UnitTargeting, UnitTransform } from "./Unit";
 export type { UnitAttack, ProjectileAttackStyle } from "./UnitAttack";
 export type { UnitDefinition } from "./UnitDefinition";
 export type { Tower } from "./Tower";
