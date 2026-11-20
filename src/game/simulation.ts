@@ -45,7 +45,7 @@ function addTower(
     y,
     hp: king ? 2800 : 1650,
     maxHp: king ? 2800 : 1650,
-    radius: king ? 27 : 23,
+    radius: king ? 60 : 45,
     damage: king ? 92 : 76,
     range: king ? 275 : 245,
     attackInterval: king ? 0.95 : 1.05,
