@@ -419,3 +419,41 @@ test("continues overtime when no starting crown snapshot is available", () => {
   assert.equal(game.phase, "overtime");
   assert.equal(game.winner, null);
 });
+
+test("awards regulation to blue when blue has more crowns", () => {
+  const game = createGame();
+  game.time = 179.9;
+
+  const redPrincess = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  assert.ok(redPrincess);
+  redPrincess.hp = 0;
+
+  stepGame(game, 0.2, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.phase, "finished");
+  assert.equal(game.winner, "blue");
+  assert.ok(game.events.some((event) => event.includes("Blue wins on crowns!")));
+  assert.ok(game.audioEvents.includes("match-victory"));
+});
+
+test("awards regulation to red when red has more crowns", () => {
+  const game = createGame();
+  game.time = 179.9;
+
+  const bluePrincess = game.towers.find((tower) =>
+    tower.side === "blue" && tower.kind === "princess" && tower.lane === "right"
+  );
+  assert.ok(bluePrincess);
+  bluePrincess.hp = 0;
+
+  stepGame(game, 0.2, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.phase, "finished");
+  assert.equal(game.winner, "red");
+  assert.ok(game.events.some((event) => event.includes("Red wins on crowns!")));
+  assert.ok(game.audioEvents.includes("match-defeat"));
+});
