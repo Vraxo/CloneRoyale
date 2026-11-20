@@ -209,3 +209,19 @@ test("red bot recognizes threats on its own half and uses its side's lane timing
     lane: "right"
   });
 });
+
+
+test("bot stops prioritizing more archers once two are already deployed", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["archers", "knight"];
+  game.sides.blue.elixir = 10;
+  game.units.push(
+    makeTroop(900, "blue", 120, 800, { cardId: "archers", type: "archer" }),
+    makeTroop(901, "blue", 140, 800, { cardId: "archers", type: "archer" })
+  );
+
+  assert.deepEqual(chooseBotAction(game, "blue"), {
+    cardId: "knight",
+    lane: "left"
+  });
+});
