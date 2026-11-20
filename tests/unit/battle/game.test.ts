@@ -172,3 +172,44 @@ test("runs bot decisions deterministically for the same seed", () => {
 
   assert.deepEqual(first, second);
 });
+
+
+test("tiebreaker awards the match to the side whose opponent loses a tower first", () => {
+  const game = createGame();
+  game.phase = "tiebreaker";
+
+  const bluePrincess = game.towers.find((tower) =>
+    tower.side === "blue" && tower.kind === "princess" && tower.lane === "left"
+  );
+  assert.ok(bluePrincess);
+  bluePrincess.hp = 100;
+
+  stepGame(game, 0.1, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.phase, "finished");
+  assert.equal(game.winner, "red");
+});
+
+test("tiebreaker ends in a draw when both sides lose a tower in the same step", () => {
+  const game = createGame();
+  game.phase = "tiebreaker";
+
+  const bluePrincess = game.towers.find((tower) =>
+    tower.side === "blue" && tower.kind === "princess" && tower.lane === "left"
+  );
+  const redPrincess = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  assert.ok(bluePrincess);
+  assert.ok(redPrincess);
+  bluePrincess.hp = 100;
+  redPrincess.hp = 100;
+
+  stepGame(game, 0.1, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.phase, "finished");
+  assert.equal(game.winner, "draw");
+  assert.ok(game.audioEvents.includes("match-draw"));
+});
