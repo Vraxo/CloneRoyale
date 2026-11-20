@@ -6,25 +6,25 @@ const BRIDGE_HALF_WIDTH = 1.5 * ARENA_TILE_SIZE;
 
 type PathingUnit =
   & Pick<UnitTransform, "x" | "y">
-  & Pick<UnitMovement, "isAir">
+  & { movement: Pick<UnitMovement, "isAir"> }
   & Pick<UnitCollision, "radius">
   & Pick<UnitIdentity, "lane">;
 
 type MovingUnit =
   & Pick<UnitTransform, "x" | "y" | "facing">
-  & Pick<UnitMovement, "speed" | "isMoving">;
+  & { movement: Pick<UnitMovement, "speed" | "isMoving"> };
 
 type ObstacleAvoidanceUnit =
   & Pick<UnitIdentity, "id">
   & Pick<UnitTransform, "x" | "y">
-  & Pick<UnitMovement, "isAir">
+  & { movement: Pick<UnitMovement, "isAir"> }
   & Pick<UnitCollision, "radius">;
 
 type MovementUnit =
   & PathingUnit
   & Pick<UnitIdentity, "id">
   & Pick<UnitTransform, "facing">
-  & Pick<UnitMovement, "formationSlot" | "speed" | "isMoving">;
+  & { movement: Pick<UnitMovement, "formationSlot" | "speed" | "isMoving" | "isAir"> };
 
 function riverBank(y: number): -1 | 0 | 1 {
   if (y < RIVER_TOP) return -1;
