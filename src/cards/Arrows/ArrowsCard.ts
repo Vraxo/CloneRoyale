@@ -12,5 +12,6 @@ export const ARROWS_CARD: SpellCardDefinition = {
       style: "arrows",
       duration: 0.36
     }
-  }
+  },
+  preview: { style: "arrows" }
 };

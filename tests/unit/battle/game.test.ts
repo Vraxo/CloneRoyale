@@ -99,6 +99,13 @@ test("deploys archers using their configured paired formation", () => {
   assert.deepEqual(game.units.map((unit) => unit.movement.formationSlot), [-1, 1]);
 });
 
+test("configures the arrows spell preview style", () => {
+  const card = cardById("arrows");
+  assert.equal(card.category, "spell");
+  if (card.category !== "spell") assert.fail("Arrows must be a spell card");
+  assert.deepEqual(card.preview, { style: "arrows" });
+});
+
 test("plays fireball with its configured launch sound", () => {
   const game = createGame();
   game.sides.blue.hand.push("fireball");

@@ -14,4 +14,7 @@ export interface SpellCardDefinition extends CardDefinitionBase {
   audio?: {
     launch?: AudioEvent;
   };
+  preview?: {
+    style: "arrows";
+  };
 }
