@@ -334,3 +334,18 @@ test("red troop deployment uses red-side facing and spawn coordinates", () => {
   assert.equal(game.units[0].transform.y, 212);
   assert.equal(game.units[0].transform.facing, Math.PI / 2);
 });
+
+
+test("emits a regulation countdown event exactly when its threshold is crossed", () => {
+  const game = createGame();
+  game.time = 169.8;
+
+  stepGame(game, 0.3, null, true);
+
+  assert.ok(game.audioEvents.includes("countdown-10"));
+  assert.equal(game.audioEvents.includes("countdown-9"), false);
+
+  stepGame(game, 0.3, null, true);
+
+  assert.equal(game.audioEvents.includes("countdown-10"), false);
+});
