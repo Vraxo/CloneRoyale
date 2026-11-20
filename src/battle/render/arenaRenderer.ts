@@ -295,12 +295,14 @@ export class ArenaRenderer {
           : undefined
       },
       collision: { radius: definition.radius, mass: definition.collisionMass ?? 1 },
-      damage: definition.damage,
-      range: definition.range,
-      attackInterval: definition.attackInterval,
-      attackCooldown: 0,
-      attack: definition.attack,
-      splashRadius: definition.splashRadius,
+      combat: {
+        damage: definition.damage,
+        range: definition.range,
+        attackInterval: definition.attackInterval,
+        attackCooldown: 0,
+        attack: definition.attack,
+        splashRadius: definition.splashRadius
+      },
       targeting: {
         canTargetAir: definition.canTargetAir,
         targetsBuildingsOnly: definition.targetsBuildingsOnly
