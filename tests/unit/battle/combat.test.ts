@@ -493,3 +493,22 @@ test("troops wait for their melee attack cooldown before damaging an in-range en
   assert.ok(attacker.combat.attackCooldown > 0);
   assert.equal(attacker.presentation.attackAnim, 0);
 });
+
+test("troops move toward detected enemy units that are outside attack range", () => {
+  const game = createGame();
+  const attacker = makeUnit(100, "blue", 120, 700, {
+    movement: { speed: 100, isAir: false },
+    deployment: { appearanceDelay: 0, duration: 0, remaining: 0 }
+  });
+  const enemy = makeUnit(101, "red", 220, 700, {
+    movement: { speed: 0, isAir: false }
+  });
+
+  addUnit(game, attacker);
+  addUnit(game, enemy);
+  updateUnits(game, 0.1);
+
+  assert.equal(attacker.movement.isMoving, true);
+  assert.ok(attacker.transform.x > 120);
+  assert.equal(enemy.health.hp, 500);
+});
