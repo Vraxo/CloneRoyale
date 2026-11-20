@@ -5,6 +5,7 @@ import { playCard } from "../../../src/game/deployment.js";
 import { canPlaceCard, snapToArenaTile } from "../../../src/game/placement.js";
 import { createGame, stepGame } from "../../../src/game/simulation.js";
 import { FIELD_HEIGHT, FIELD_WIDTH } from "../../../src/game/state.js";
+import { MATCH_RULES } from "../../../src/game/matchRules.js";
 
 test("creates a complete initial arena with two matching sides", () => {
   const game = createGame();
@@ -456,4 +457,23 @@ test("awards regulation to red when red has more crowns", () => {
   assert.equal(game.winner, "red");
   assert.ok(game.events.some((event) => event.includes("Red wins on crowns!")));
   assert.ok(game.audioEvents.includes("match-defeat"));
+});
+
+test("transitions to tiebreaker when overtime expires without a tower winner", () => {
+  const game = createGame();
+  game.phase = "overtime";
+  game.time = MATCH_RULES.regulationSeconds + MATCH_RULES.overtimeSeconds - 0.1;
+  game.overtimeStartCrowns = { blue: 0, red: 0 };
+  game.units.push({
+    ...structuredClone(game.units[0] ?? {}),
+  } as never);
+
+  stepGame(game, 0.2, null, true);
+
+  assert.equal(game.gameOver, false);
+  assert.equal(game.phase, "tiebreaker");
+  assert.deepEqual(game.units, []);
+  assert.deepEqual(game.projectiles, []);
+  assert.deepEqual(game.effects, []);
+  assert.ok(game.events.some((event) => event.includes("Tiebreaker!")));
 });
