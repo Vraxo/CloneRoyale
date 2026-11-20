@@ -316,3 +316,23 @@ test("deploys every Skeleton Army troop in staggered rows on the red side", () =
   assert.equal(game.sides.red.cardsPlayed, 1);
   assert.equal(game.sides.red.elixir, 7);
 });
+
+
+test("deploys paired archers around a custom placement point", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["archers"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(playCard(game, "blue", "archers", "right", undefined, undefined, { x: 210, y: 600 }), true);
+
+  const troops = game.units.filter((unit) => unit.kind === "troop");
+  assert.equal(troops.length, 2);
+  assert.equal(troops[0].transform.x, 193);
+  assert.equal(troops[1].transform.x, 201.5);
+  assert.equal(troops[0].transform.y, 600);
+  assert.equal(troops[1].transform.y, 600);
+  assert.equal(troops[0].movement.formationSlot, -1);
+  assert.equal(troops[1].movement.formationSlot, 1);
+  assert.ok(troops[1].deployment.duration > troops[0].deployment.duration);
+  assert.ok(troops.every((unit) => unit.transform.facing === -Math.PI / 2));
+});
