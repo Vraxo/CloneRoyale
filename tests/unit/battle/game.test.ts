@@ -470,3 +470,21 @@ test("transitions to tiebreaker when overtime expires without a tower winner", (
   assert.equal(game.phase, "tiebreaker");
   assert.ok(game.events.some((event) => event.includes("Tiebreaker!")));
 });
+
+test("tiebreaker awards the match to blue when red loses a tower first", () => {
+  const game = createGame();
+  game.phase = "tiebreaker";
+
+  const redPrincess = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "right"
+  );
+  assert.ok(redPrincess);
+  redPrincess.hp = 100;
+
+  stepGame(game, 0.1, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.phase, "finished");
+  assert.equal(game.winner, "blue");
+  assert.ok(game.events.some((event) => event.includes("Blue wins the tiebreaker!")));
+});
