@@ -1,20 +1,19 @@
 import type { UnitDefinition } from "../../game/types";
 
 export const SKELETON: UnitDefinition = {
-  type: "skeleton",
-  hp: 115,
-  damage: 54,
-  speed: 67,
-  range: 21,
-  attackInterval: 1.05,
-  attack: {
-    type: "melee"
+  identity: { type: "skeleton" },
+  health: { hp: 115 },
+  collision: { radius: 7, mass: 0.5 },
+  movement: { speed: 67, isAir: false },
+  combat: {
+    damage: 54,
+    range: 21,
+    attackInterval: 1.05,
+    attack: {
+      type: "melee"
+    },
+    splashRadius: 0
   },
-  radius: 7,
-  collisionMass: 0.5,
-  splashRadius: 0,
-  isAir: false,
-  canTargetAir: false,
-  targetsBuildingsOnly: false,
-  lifetime: 0
+  targeting: { canTargetAir: false, targetsBuildingsOnly: false },
+  lifetime: { duration: 0 }
 };
