@@ -48,7 +48,7 @@ interface UnitDefinitionBase {
   combat: UnitCombatDefinition;
   targeting: UnitTargetingDefinition;
   lifetime?: UnitLifetimeDefinition;
-  audio: UnitAudio;
+  audio?: UnitAudio;
   formation?: UnitFormationDefinition;
 }
 
