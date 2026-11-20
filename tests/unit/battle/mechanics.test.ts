@@ -4,9 +4,9 @@ import { playCard } from "../../../src/game/deployment.js";
 import { damageTarget } from "../../../src/game/effects.js";
 import { canPlaceCard } from "../../../src/game/placement.js";
 import { createGame, stepGame } from "../../../src/game/simulation.js";
-import type { BuildingUnit, GameState, TroopUnit, Unit } from "../../../src/game/types/index.js";
+import type { GameState, TroopUnit } from "../../../src/game/types/index.js";
 
-function makeUnit(id: number, side: "blue" | "red", x: number, y: number): Unit {
+function makeUnit(id: number, side: "blue" | "red", x: number, y: number): TroopUnit {
   return {
     id,
     side,
