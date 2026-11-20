@@ -213,3 +213,27 @@ test("tiebreaker ends in a draw when both sides lose a tower in the same step", 
   assert.equal(game.winner, "draw");
   assert.ok(game.audioEvents.includes("match-draw"));
 });
+
+test("unlocks only the left deployment pocket after the enemy left tower falls", () => {
+  const game = createGame();
+  const leftTower = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  assert.ok(leftTower);
+  leftTower.hp = 0;
+
+  assert.equal(canPlaceCard(game, "blue", "giant", 105, 220), true);
+  assert.equal(canPlaceCard(game, "blue", "giant", 435, 220), false);
+});
+
+test("unlocks only the right deployment pocket after the enemy right tower falls", () => {
+  const game = createGame();
+  const rightTower = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "right"
+  );
+  assert.ok(rightTower);
+  rightTower.hp = 0;
+
+  assert.equal(canPlaceCard(game, "blue", "giant", 105, 220), false);
+  assert.equal(canPlaceCard(game, "blue", "giant", 435, 220), true);
+});
