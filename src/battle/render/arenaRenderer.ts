@@ -242,9 +242,7 @@ export class ArenaRenderer {
     for (let index = 0; index < this.unitPreviewViews.length; index += 1) {
       const offset = getOffset(index);
       const unit = this.createPreviewUnit(
-        cardId,
-        card.category,
-        card.unit,
+        card,
         index,
         point.x + offset.x,
         point.y + offset.y,
@@ -309,8 +307,8 @@ export class ArenaRenderer {
       ...unit,
       kind: "troop",
       movement: {
-        speed: definition.movement.speed,
-        isAir: definition.movement.isAir,
+        speed: card.unit.movement.speed,
+        isAir: card.unit.movement.isAir,
         formationSlot: definition.formation?.pattern === "paired" && index < 2
           ? (index === 0 ? -1 : 1)
           : undefined
