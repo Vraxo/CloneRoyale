@@ -24,3 +24,11 @@ export interface GameState {
   events: string[];
   audioEvents: AudioEvent[];
 }
+
+export type DeepReadonly<T> = T extends readonly (infer Item)[]
+  ? readonly DeepReadonly<Item>[]
+  : T extends object
+    ? { readonly [Key in keyof T]: DeepReadonly<T[Key]> }
+    : T;
+
+export type ReadonlyGameState = DeepReadonly<GameState>;
