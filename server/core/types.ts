@@ -20,6 +20,7 @@ export interface ServerClient {
   disconnected: boolean;
   closed: boolean;
   lastEmoteAt?: number;
+  lastGlobalChatAt?: number;
   lastSeen?: number;
   resumeToken: string;
   queued: boolean;
@@ -65,6 +66,8 @@ export interface MessageHandlerOptions {
   requestRematch: (client: ServerClient) => void;
   resumePlayer: (client: ServerClient, token: unknown) => void;
   sendRoom: (room: ServerRoom) => void;
+  broadcastGlobal: (payload: Record<string, unknown>) => void;
+  getGlobalChatHistory: () => Array<{ id: string; name: string; text: string; timestamp: number }>;
 }
 
 export type MessageHandler = (client: ServerClient, message: ClientMessage) => void;
