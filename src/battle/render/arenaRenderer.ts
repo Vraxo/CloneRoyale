@@ -305,8 +305,7 @@ export class ArenaRenderer {
         canTargetAir: definition.canTargetAir,
         targetsBuildingsOnly: definition.targetsBuildingsOnly
       },
-      lifetime: definition.lifetime,
-      age: 0,
+      lifetime: { duration: definition.lifetime, elapsed: 0 },
       deployment: { appearanceDelay: 0, duration: 0, remaining: 0 },
       facing: side === "blue" ? -Math.PI / 2 : Math.PI / 2,
       presentation: {
