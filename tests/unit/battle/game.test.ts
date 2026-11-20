@@ -287,3 +287,18 @@ test("rejects a card that is not in hand without mutating the game", () => {
   assert.equal(playCard(game, "blue", "giant", "left"), false);
   assert.deepEqual(game, before);
 });
+
+
+test("ends the game when the blue king tower is destroyed", () => {
+  const game = createGame();
+  const blueKing = game.towers.find((tower) => tower.side === "blue" && tower.kind === "king");
+  assert.ok(blueKing);
+  blueKing.hp = 0;
+
+  stepGame(game, 1 / 30, null, true);
+
+  assert.equal(game.gameOver, true);
+  assert.equal(game.phase, "finished");
+  assert.equal(game.winner, "red");
+  assert.ok(game.audioEvents.includes("match-defeat"));
+});
