@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { playCard } from "../../../src/game/deployment.js";
 import { damageTarget } from "../../../src/game/health.js";
-import { canPlaceCard } from "../../../src/game/placement.js";
+import { canPlaceCard, getGroundDeploymentZones, snapToArenaTile } from "../../../src/game/placement.js";
 import { createGame, stepGame } from "../../../src/game/simulation.js";
 import type { GameState, TroopUnit } from "../../../src/game/types/index.js";
 
@@ -354,4 +354,81 @@ test("deploys a red building at its default lane position", () => {
   assert.equal("movement" in game.units[0], false);
   assert.equal(game.sides.red.elixir, 7);
   assert.equal(game.sides.red.cardsPlayed, 1);
+});
+
+test("snaps coordinates to tile centers and clamps every arena edge", () => {
+  const game = createGame();
+  const halfTile = 15;
+
+  assert.deepEqual(snapToArenaTile({ x: -100, y: -100 }), { x: halfTile, y: halfTile });
+  assert.deepEqual(snapToArenaTile({ x: 10000, y: 10000 }), {
+    x: 810 - halfTile,
+    y: 900 - halfTile
+  });
+  assert.deepEqual(snapToArenaTile({ x: 31, y: 61 }), { x: 45, y: 75 });
+  assert.ok(game);
+});
+
+test("unlocks only the destroyed princess tower's deployment pocket", () => {
+  const game = createGame();
+  const initial = getGroundDeploymentZones(game, "blue", 12);
+  const redLeft = tower(game, "red", "princess", "left");
+  const redRight = tower(game, "red", "princess", "right");
+
+  assert.ok(redLeft);
+  assert.ok(redRight);
+  assert.equal(initial.length, 1);
+
+  redLeft.hp = 0;
+  const leftUnlocked = getGroundDeploymentZones(game, "blue", 12);
+  assert.equal(leftUnlocked.length, 2);
+  assert.ok(leftUnlocked[1].maxX < 405);
+
+  redRight.hp = 0;
+  const bothUnlocked = getGroundDeploymentZones(game, "blue", 12);
+  assert.equal(bothUnlocked.length, 3);
+  assert.ok(bothUnlocked[2].minX >= 405);
+});
+
+test("red deployment pockets extend toward the river only in destroyed-tower lanes", () => {
+  const game = createGame();
+  const blueRight = tower(game, "blue", "princess", "right");
+  assert.ok(blueRight);
+
+  const baseZones = getGroundDeploymentZones(game, "red", 12);
+  assert.equal(baseZones.length, 1);
+
+  blueRight.hp = 0;
+  const unlockedZones = getGroundDeploymentZones(game, "red", 12);
+  assert.equal(unlockedZones.length, 2);
+  assert.ok(unlockedZones[1].maxY > baseZones[0].maxY);
+  assert.ok(unlockedZones[1].minX >= 405);
+});
+
+test("rejects deployment zones that cannot fit the requested unit radius", () => {
+  const game = createGame();
+
+  assert.deepEqual(getGroundDeploymentZones(game, "blue", 1000), []);
+});
+
+test("allows spells on the field boundary but rejects non-finite and out-of-field coordinates", () => {
+  const game = createGame();
+  game.sides.blue.hand = ["fireball"];
+  game.sides.blue.elixir = 10;
+
+  assert.equal(canPlaceCard(game, "blue", "fireball", 12, 12), true);
+  assert.equal(canPlaceCard(game, "blue", "fireball", 798, 888), true);
+  assert.equal(canPlaceCard(game, "blue", "fireball", 11.99, 12), false);
+  assert.equal(canPlaceCard(game, "blue", "fireball", 12, 888.01), false);
+  assert.equal(canPlaceCard(game, "blue", "fireball", Number.NaN, 100), false);
+  assert.equal(canPlaceCard(game, "blue", "fireball", 100, Number.POSITIVE_INFINITY), false);
+});
+
+test("red troop placement uses the red-side deployment half", () => {
+  const game = createGame();
+  game.sides.red.hand = ["giant"];
+  game.sides.red.elixir = 10;
+
+  assert.equal(canPlaceCard(game, "red", "giant", 135, 100), true);
+  assert.equal(canPlaceCard(game, "red", "giant", 135, 800), false);
 });
