@@ -78,13 +78,18 @@ test("bot counters an enemy giant with Mini P.E.K.K.A.", () => {
   });
 });
 
-test("bot ignores enemies that are still deploying", () => {
+test("bot does not target enemies that are still deploying with a spell", () => {
   const game = createGame();
-  game.sides.blue.hand = ["mini-pekka"];
-  game.sides.blue.elixir = 4;
+  game.sides.blue.hand = ["arrows"];
+  game.sides.blue.elixir = 10;
   game.units.push(makeTroop(100, "red", 135, 700, {
+    cardId: "skeleton-army",
+    type: "skeleton",
     deployment: { appearanceDelay: 0, duration: 0, remaining: 1 }
   }));
 
-  assert.notEqual(chooseBotAction(game, "blue")?.cardId, "mini-pekka");
+  const decision = chooseBotAction(game, "blue");
+
+  assert.equal(decision?.cardId, "arrows");
+  assert.equal(decision?.targetY, undefined);
 });
