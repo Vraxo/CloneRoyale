@@ -18,6 +18,26 @@ interface UnitRig {
   weapon: THREE.Group | null;
   isBuilding: boolean;
 }
+interface FireballProjectileRig {
+  aura: THREE.Mesh;
+  core: THREE.Mesh;
+  flames: THREE.Mesh[];
+  trail: THREE.Mesh[];
+}
+interface ProjectileModel extends THREE.Group {
+  fireball?: FireballProjectileRig;
+}
+interface FireballEffectRig {
+  shockwave: THREE.Mesh;
+  innerRing: THREE.Mesh;
+  glow: THREE.Mesh;
+  flames: THREE.Mesh[];
+  embers: THREE.Mesh[];
+  smoke: THREE.Mesh[];
+}
+interface EffectModel extends THREE.Group {
+  fireball?: FireballEffectRig;
+}
 
 export class ThreeBattleScene {
   public readonly canvas = document.createElement("canvas");
@@ -31,8 +51,8 @@ export class ThreeBattleScene {
   });
   private readonly towerModels = new Map<number, Model>();
   private readonly unitModels = new Map<number, UnitRig>();
-  private readonly projectileModels = new Map<number, THREE.Mesh>();
-  private readonly effectModels = new Map<number, THREE.Mesh>();
+  private readonly projectileModels = new Map<number, ProjectileModel>();
+  private readonly effectModels = new Map<number, EffectModel>();
   private readonly preview = new THREE.Group();
   private readonly raycaster = new THREE.Raycaster();
   private readonly groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -8);
@@ -601,46 +621,228 @@ export class ThreeBattleScene {
     const active = new Set<number>();
     for (const projectile of state.projectiles) {
       active.add(projectile.id);
-      let mesh = this.projectileModels.get(projectile.id);
-      if (!mesh) {
-        const geometry = projectile.style === "cannon"
-          ? new THREE.SphereGeometry(7, 10, 8)
-          : new THREE.SphereGeometry(projectile.style === "fireball" ? 12 : 4, 10, 8);
-        mesh = new THREE.Mesh(geometry, this.materials.projectile);
-        mesh.castShadow = true;
-        this.scene.add(mesh);
-        this.projectileModels.set(projectile.id, mesh);
+      let model = this.projectileModels.get(projectile.id);
+      if (!model) {
+        model = new THREE.Group() as ProjectileModel;
+        if (projectile.style === "fireball") {
+          model.fireball = this.createFireballProjectile();
+        } else {
+          const radius = projectile.style === "cannon" ? 7 : 4;
+          const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 12, 10), this.materials.projectile);
+          mesh.castShadow = true;
+          model.add(mesh);
+        }
+        if (model.fireball) {
+          const rig = model.fireball;
+          model.add(rig.aura, rig.core, ...rig.flames, ...rig.trail);
+        }
+        this.scene.add(model);
+        this.projectileModels.set(projectile.id, model);
       }
-      mesh.position.set(projectile.x - HALF_WIDTH, projectile.style === "fireball" ? 48 : 27,
+      model.position.set(projectile.x - HALF_WIDTH, projectile.style === "fireball" ? 43 : 27,
         projectile.y - HALF_HEIGHT);
+      if (projectile.style === "fireball" && model.fireball) {
+        const rig = model.fireball;
+        const angle = Math.atan2(projectile.targetX - projectile.startX, projectile.targetY - projectile.startY);
+        model.rotation.y = angle;
+        const pulse = 1 + Math.sin(projectile.age * 27) * 0.055;
+        rig.core.scale.setScalar(pulse);
+        rig.aura.scale.setScalar(0.92 + Math.sin(projectile.age * 19) * 0.1);
+        rig.flames.forEach((flame, index) => {
+          flame.rotation.y = projectile.age * (index % 2 ? -1.8 : 1.5) + index * 2.1;
+          flame.scale.y = 0.82 + Math.sin(projectile.age * 31 + index * 1.7) * 0.22;
+        });
+        rig.trail.forEach((particle, index) => {
+          const phase = projectile.age * 15 + index * 2.4;
+          particle.position.set(
+            -10 - index * 5,
+            Math.sin(phase) * (2.5 + index * 0.45),
+            Math.cos(phase * 0.8) * (2 + index * 0.35)
+          );
+          const life = 1 - index / rig.trail.length;
+          particle.scale.setScalar(life * (0.8 + Math.sin(phase) * 0.16));
+        });
+      }
     }
     this.removeMissing(this.projectileModels, active);
+  }
+
+  private createFireballProjectile(): FireballProjectileRig {
+    const aura = new THREE.Mesh(
+      new THREE.SphereGeometry(17, 16, 12),
+      new THREE.MeshBasicMaterial({ color: "#f04417", transparent: true, opacity: 0.2, depthWrite: false })
+    );
+    const core = new THREE.Mesh(
+      new THREE.SphereGeometry(9, 18, 14),
+      new THREE.MeshStandardMaterial({ color: "#ff9a25", emissive: "#ff4b12", emissiveIntensity: 2.8, roughness: 0.35 })
+    );
+    core.castShadow = true;
+    const flameMaterial = new THREE.MeshBasicMaterial({
+      color: "#ff5a16", transparent: true, opacity: 0.94, side: THREE.DoubleSide, depthWrite: false
+    });
+    const hotFlameMaterial = new THREE.MeshBasicMaterial({
+      color: "#ffd15a", transparent: true, opacity: 0.92, side: THREE.DoubleSide, depthWrite: false
+    });
+    const flames: THREE.Mesh[] = [];
+    for (let index = 0; index < 7; index += 1) {
+      const flame = new THREE.Mesh(
+        new THREE.ConeGeometry(index % 3 === 0 ? 4.4 : 3.2, 17 + (index % 3) * 3, 7),
+        index % 3 === 0 ? hotFlameMaterial : flameMaterial
+      );
+      flame.position.set(-3, 0, 0);
+      flame.rotation.z = Math.PI / 2;
+      flame.rotation.y = index * 2.399;
+      flame.castShadow = false;
+      flames.push(flame);
+    }
+    const trail: THREE.Mesh[] = [];
+    for (let index = 0; index < 8; index += 1) {
+      const particle = new THREE.Mesh(
+        new THREE.SphereGeometry(1.8 + (index % 3) * 0.65, 7, 6),
+        new THREE.MeshBasicMaterial({
+          color: index % 2 ? "#ff6a1c" : "#ffd36a",
+          transparent: true,
+          opacity: 0.82,
+          depthWrite: false
+        })
+      );
+      trail.push(particle);
+    }
+    return { aura, core, flames, trail };
   }
 
   private syncEffects(state: ReadonlyGameState): void {
     const active = new Set<number>();
     for (const effect of state.effects) {
       active.add(effect.id);
-      let mesh = this.effectModels.get(effect.id);
-      if (!mesh) {
-        const geometry = new THREE.TorusGeometry(Math.max(3, effect.radius * 0.72), 1.8, 6, 32);
-        const material = new THREE.MeshBasicMaterial({
-          color: effect.style === "fireball" ? "#ff8a27" : effect.side === "red" ? "#e58a70" : "#79b8df",
-          transparent: true,
-          opacity: 0.7
-        });
-        mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.x = -Math.PI / 2;
-        this.scene.add(mesh);
-        this.effectModels.set(effect.id, mesh);
+      let model = this.effectModels.get(effect.id);
+      if (!model) {
+        model = new THREE.Group() as EffectModel;
+        if (effect.style === "fireball") {
+          model.fireball = this.createFireballExplosion(effect.radius);
+          const rig = model.fireball;
+          model.add(rig.shockwave, rig.innerRing, rig.glow, ...rig.flames, ...rig.embers, ...rig.smoke);
+        } else {
+          const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(Math.max(3, effect.radius * 0.72), 1.8, 6, 32),
+            new THREE.MeshBasicMaterial({
+              color: effect.side === "red" ? "#e58a70" : "#79b8df",
+              transparent: true,
+              opacity: 0.7
+            })
+          );
+          ring.rotation.x = -Math.PI / 2;
+          model.add(ring);
+        }
+        this.scene.add(model);
+        this.effectModels.set(effect.id, model);
       }
+      model.position.set(effect.x - HALF_WIDTH, 9, effect.y - HALF_HEIGHT);
       const progress = Math.min(1, effect.age / effect.lifetime);
-      const expansion = 0.55 + progress * 0.9;
-      mesh.position.set(effect.x - HALF_WIDTH, 12 + progress * 0.3, effect.y - HALF_HEIGHT);
-      mesh.scale.setScalar(expansion);
-      (mesh.material as THREE.MeshBasicMaterial).opacity = 0.72 * (1 - progress);
+      if (effect.style === "fireball" && model.fireball) {
+        this.updateFireballExplosion(model.fireball, progress, effect.age);
+      } else {
+        const ring = model.children[0] as THREE.Mesh;
+        ring.scale.setScalar(0.55 + progress * 0.9);
+        (ring.material as THREE.MeshBasicMaterial).opacity = 0.72 * (1 - progress);
+      }
     }
     this.removeMissing(this.effectModels, active);
+  }
+
+  private createFireballExplosion(radius: number): FireballEffectRig {
+    const shockwave = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 0.58, Math.max(2, radius * 0.035), 8, 64),
+      new THREE.MeshBasicMaterial({ color: "#ffd16a", transparent: true, opacity: 0.9, depthWrite: false })
+    );
+    shockwave.rotation.x = -Math.PI / 2;
+    const innerRing = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 0.42, Math.max(1.5, radius * 0.018), 6, 64),
+      new THREE.MeshBasicMaterial({ color: "#ff641e", transparent: true, opacity: 0.78, depthWrite: false })
+    );
+    innerRing.rotation.x = -Math.PI / 2;
+    const glow = new THREE.Mesh(
+      new THREE.SphereGeometry(radius * 0.42, 20, 14),
+      new THREE.MeshBasicMaterial({ color: "#ff6a1b", transparent: true, opacity: 0.72, depthWrite: false })
+    );
+    glow.position.y = 16;
+    const flames: THREE.Mesh[] = [];
+    for (let index = 0; index < 16; index += 1) {
+      const flame = new THREE.Mesh(
+        new THREE.ConeGeometry(radius * (index % 4 === 0 ? 0.105 : 0.075), radius * (0.58 + (index % 3) * 0.12), 7),
+        new THREE.MeshBasicMaterial({
+          color: index % 4 === 0 ? "#ffd05a" : index % 2 === 0 ? "#ff8a20" : "#e83d18",
+          transparent: true,
+          opacity: 0.94,
+          depthWrite: false
+        })
+      );
+      const angle = index / 16 * Math.PI * 2;
+      const direction = new THREE.Vector3(Math.cos(angle), 0.12, Math.sin(angle)).normalize();
+      flame.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+      flame.position.set(Math.cos(angle) * radius * 0.16, 11, Math.sin(angle) * radius * 0.16);
+      flames.push(flame);
+    }
+    const embers: THREE.Mesh[] = [];
+    for (let index = 0; index < 24; index += 1) {
+      const ember = new THREE.Mesh(
+        new THREE.SphereGeometry(1.7 + (index % 3) * 0.7, 7, 6),
+        new THREE.MeshBasicMaterial({
+          color: index % 3 === 0 ? "#fff0a3" : "#ff7a22",
+          transparent: true,
+          opacity: 0.95,
+          depthWrite: false
+        })
+      );
+      embers.push(ember);
+    }
+    const smoke: THREE.Mesh[] = [];
+    for (let index = 0; index < 9; index += 1) {
+      const cloud = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 9, 7),
+        new THREE.MeshStandardMaterial({ color: "#4d4038", transparent: true, opacity: 0.26, roughness: 1, depthWrite: false })
+      );
+      smoke.push(cloud);
+    }
+    return { shockwave, innerRing, glow, flames, embers, smoke };
+  }
+
+  private updateFireballExplosion(rig: FireballEffectRig, progress: number, age: number): void {
+    const expansion = 1 - Math.pow(1 - progress, 3);
+    const fade = Math.pow(1 - progress, 1.15);
+    rig.shockwave.scale.setScalar(0.35 + expansion * 1.42);
+    rig.innerRing.scale.setScalar(0.25 + expansion * 1.08);
+    (rig.shockwave.material as THREE.MeshBasicMaterial).opacity = 0.88 * fade;
+    (rig.innerRing.material as THREE.MeshBasicMaterial).opacity = 0.7 * fade;
+    rig.glow.scale.setScalar(0.55 + expansion * 0.82);
+    (rig.glow.material as THREE.MeshBasicMaterial).opacity = 0.62 * fade;
+    rig.flames.forEach((flame, index) => {
+      const pulse = 0.86 + Math.sin(age * 25 + index * 1.9) * 0.14;
+      flame.scale.set(0.72 + expansion * 0.28, (0.5 + (1 - progress) * 0.75) * pulse, 0.72 + expansion * 0.28);
+      (flame.material as THREE.MeshBasicMaterial).opacity = 0.94 * fade;
+    });
+    rig.embers.forEach((ember, index) => {
+      const angle = index * 2.399963;
+      const distance = (18 + (index % 6) * 7) * expansion;
+      ember.position.set(
+        Math.cos(angle) * distance,
+        8 + progress * (34 + (index % 5) * 8),
+        Math.sin(angle) * distance
+      );
+      ember.scale.setScalar((1 - progress) * (0.72 + (index % 3) * 0.22));
+      (ember.material as THREE.MeshBasicMaterial).opacity = 0.95 * fade;
+    });
+    rig.smoke.forEach((cloud, index) => {
+      const angle = index * 2.399963 + 0.4;
+      const distance = (12 + (index % 4) * 8) * expansion;
+      cloud.position.set(
+        Math.cos(angle) * distance,
+        15 + progress * (28 + (index % 3) * 9),
+        Math.sin(angle) * distance
+      );
+      cloud.scale.set(9 + progress * 15, 7 + progress * 13, 9 + progress * 15);
+      (cloud.material as THREE.MeshStandardMaterial).opacity = 0.24 * fade;
+    });
   }
 
   private removeMissing<T extends THREE.Object3D>(models: Map<number, T>, active: Set<number>): void {
