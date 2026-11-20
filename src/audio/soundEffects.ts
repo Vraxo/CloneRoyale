@@ -10,6 +10,22 @@ export interface SoundEffects {
 }
 
 const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
+  "knight-deploy": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_deploy_31111.ogg"],
+  "knight-attack": [
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_attack_start_01.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_attack_start_02.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_attack_start_03.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_attack_start_04.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_attack_start_05.ogg"
+  ],
+  "knight-hit": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_hit_01.ogg"],
+  "knight-death": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_death_01.ogg"],
+  "knight-step": [
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_footstep_01.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_footstep_02.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_footstep_03.ogg",
+    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Knight/knight_footstep_04.ogg"
+  ],
   "mini-pekka-deploy": ["/audio/sfx/mini-pekka/mini-pekka-deployment.ogg"],
   "mini-pekka-attack": ["/audio/sfx/mini-pekka/mini-pekka-attack-swing.ogg"],
   "mini-pekka-hit": ["/audio/sfx/mini-pekka/mini-pekka-hit-impact.ogg"],
@@ -86,6 +102,11 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
 };
 
 const SOUND_VOLUMES: Record<AudioEvent, number> = {
+  "knight-deploy": 0.78,
+  "knight-attack": 0.64,
+  "knight-hit": 0.62,
+  "knight-death": 0.72,
+  "knight-step": 0.28,
   "mini-pekka-deploy": 0.8,
   "mini-pekka-attack": 0.8,
   "mini-pekka-hit": 0.65,
@@ -218,6 +239,8 @@ export function createSoundEffects(): SoundEffects {
       const now = Date.now();
       if (
         event === "skeleton-attack"
+        || event === "knight-hit"
+        || event === "knight-step"
         || event === "skeleton-hit"
         || event === "skeleton-step"
         || event === "skeleton-death"
@@ -229,7 +252,7 @@ export function createSoundEffects(): SoundEffects {
         || event === "tower-hit"
       ) {
         const previous = lastUnitSoundAt.get(event) ?? Number.NEGATIVE_INFINITY;
-        const minimumInterval = event === "skeleton-step"
+        const minimumInterval = event === "knight-step" ? 125 : event === "skeleton-step"
           || event === "archer-step"
           || event === "baby-dragon-wing" ? 115
           : event === "tower-hit" ? 150 : 90;
@@ -249,6 +272,8 @@ export function createSoundEffects(): SoundEffects {
       const voiceLimit = event === "mini-pekka-hit"
         || event === "giant-hit"
         || event === "skeleton-hit"
+        || event === "knight-step"
+        || event === "knight-hit"
         || event === "skeleton-attack"
         || event === "skeleton-death"
         || event === "skeleton-step"
