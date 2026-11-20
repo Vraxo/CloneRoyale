@@ -4,6 +4,10 @@ import { damageTarget } from "./effects";
 import { otherSide } from "./state";
 import { moveUnitTowardTarget, resolveUnitCollisions } from "./movement";
 
+function positionOf(target: Unit | Tower): { x: number; y: number } {
+  return "transform" in target ? target.transform : target;
+}
+
 function findEnemyUnit(
   state: GameState,
   unit: Unit,
@@ -20,7 +24,7 @@ function findEnemyUnit(
     if (buildingsOnly && candidate.kind !== "building") continue;
     if (!unit.targeting.canTargetAir && candidate.movement.isAir) continue;
 
-    const distance = Math.hypot(candidate.x - unit.x, candidate.y - unit.y);
+    const distance = Math.hypot(candidate.transform.x - unit.transform.x, candidate.transform.y - unit.transform.y);
     const effectiveDistance = distance - (includeTargetRadius ? candidate.collision.radius : 0);
     if (effectiveDistance < nearestDistance) {
       nearest = candidate;
@@ -43,8 +47,8 @@ function enemyTowerFor(state: GameState, unit: Unit): Tower | null {
   if (!king) return princess ?? null;
   if (!princess) return king;
 
-  const princessDistance = Math.hypot(princess.x - unit.x, princess.y - unit.y);
-  const kingDistance = Math.hypot(king.x - unit.x, king.y - unit.y);
+  const princessDistance = Math.hypot(princess.x - unit.transform.x, princess.y - unit.transform.y);
+  const kingDistance = Math.hypot(king.x - unit.transform.x, king.y - unit.transform.y);
 
   return kingDistance < princessDistance ? king : princess;
 }
@@ -74,15 +78,16 @@ function attackUnit(
     return;
   }
 
-  const distance = Math.hypot(target.x - unit.x, target.y - unit.y);
+  const targetPosition = positionOf(target);
+  const distance = Math.hypot(targetPosition.x - unit.transform.x, targetPosition.y - unit.transform.y);
   addProjectile(
     state,
     unit.side,
-    unit.x,
-    unit.y,
+    unit.transform.x,
+    unit.transform.y,
     target.id,
-    target.x,
-    target.y,
+    targetPosition.x,
+    targetPosition.y,
     unit.combat.damage,
     unit.combat.splashRadius,
     unit.combat.attack.style,
@@ -111,8 +116,8 @@ export function updateUnits(state: GameState, dt: number): void {
 
       state.effects.push({
         id: state.nextId++,
-        x: unit.x,
-        y: unit.y,
+        x: unit.transform.x,
+        y: unit.transform.y,
         age: 0,
         lifetime: 0.62,
         radius: Math.max(22, unit.collision.radius * 2.2),
@@ -149,11 +154,11 @@ export function updateUnits(state: GameState, dt: number): void {
     const enemy = findEnemyUnit(state, unit, detectionRange, unit.targeting.targetsBuildingsOnly);
 
     if (enemy) {
-      const distance = Math.hypot(enemy.x - unit.x, enemy.y - unit.y);
+      const distance = Math.hypot(enemy.transform.x - unit.transform.x, enemy.transform.y - unit.transform.y);
       if (distance <= unit.combat.range + enemy.collision.radius) {
         if (unit.combat.attackCooldown <= 0) attackUnit(state, unit, enemy, pendingMeleeAttacks);
       } else {
-        moveUnitTowardTarget(state, unit, enemy.x, enemy.y, dt, enemy.id);
+        moveUnitTowardTarget(state, unit, enemy.transform.x, enemy.transform.y, dt, enemy.id);
       }
       continue;
     }
@@ -161,7 +166,7 @@ export function updateUnits(state: GameState, dt: number): void {
     const tower = enemyTowerFor(state, unit);
     if (!tower) continue;
 
-    const towerDistance = Math.hypot(tower.x - unit.x, tower.y - unit.y);
+    const towerDistance = Math.hypot(tower.x - unit.transform.x, tower.y - unit.transform.y);
     if (towerDistance <= unit.combat.range + tower.radius) {
       if (unit.combat.attackCooldown <= 0) attackUnit(state, unit, tower, pendingMeleeAttacks);
     } else {
@@ -233,7 +238,7 @@ export function updateTowers(state: GameState, dt: number): void {
       if (unit.side === tower.side || unit.health.hp <= 0) continue;
       if ((unit.deployment.appearanceDelay) > 0) continue;
 
-      const distance = Math.hypot(unit.x - tower.x, unit.y - tower.y) - unit.collision.radius;
+      const distance = Math.hypot(unit.transform.x - tower.x, unit.transform.y - tower.y) - unit.collision.radius;
       if (distance < nearestDistance) {
         nearestDistance = distance;
         target = unit;
@@ -252,8 +257,8 @@ export function updateTowers(state: GameState, dt: number): void {
       tower.x,
       tower.y,
       target.id,
-      target.x,
-      target.y,
+      positionOf(target).x,
+      positionOf(target).y,
       tower.damage,
       0,
       "arrow",
