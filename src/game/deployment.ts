@@ -88,7 +88,7 @@ function spawnCard(
         movement: {
           speed: card.unit.movement.speed,
           isAir: card.unit.movement.isAir,
-          formationSlot: definition.formation?.pattern === "paired" && card.count === 2
+          formationSlot: card.unit.movement.formation?.pattern === "paired" && card.count === 2
             ? (index === 0 ? -1 : 1)
             : undefined
         }

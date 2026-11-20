@@ -4,7 +4,7 @@ export const ARCHER: MovableUnitDefinition = {
   identity: { type: "archer" },
   health: { hp: 285 },
   collision: { radius: 10 },
-  movement: { speed: 48, isAir: false },
+  movement: { speed: 48, isAir: false, formation: { pattern: "paired" } },
   combat: {
     damage: 48,
     range: 155,
@@ -23,5 +23,4 @@ export const ARCHER: MovableUnitDefinition = {
     death: "archer-death",
     movement: { event: "archer-step", interval: 0.48 }
   },
-  formation: { pattern: "paired" }
 };
