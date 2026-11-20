@@ -81,10 +81,10 @@ const SOUND_SOURCES: Record<AudioEvent, readonly string[]> = {
   "cannon-attack": ["/audio/sfx/cannon/cannon-fire.ogg"],
   "cannon-death": ["/audio/sfx/cannon/cannon-destruction.ogg"],
   "arrows-impact": ["/audio/sfx/spells/arrows-impact.ogg"],
-  "zap-cast": ["https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/0_Special/spellcast01.ogg"],
+  "zap-cast": ["/audio/sfx/spells/zap-cast.ogg"],
   "zap-impact": [
-    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Zap/zap_02.ogg",
-    "https://raw.githubusercontent.com/Henrylq/Clash-Royale-SFX/master/Cards/Zap/evo_zap_01.ogg"
+    "/audio/sfx/spells/zap-impact.ogg",
+    "/audio/sfx/spells/zap-impact-evolved.ogg"
   ],
   "fireball-launch": ["/audio/sfx/spells/fireball-launch.ogg"],
   "fireball-explosion": ["/audio/sfx/spells/fireball-explosion.ogg"],
