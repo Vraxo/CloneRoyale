@@ -4,7 +4,7 @@ export const ARCHER: UnitDefinition = {
   identity: { type: "archer" },
   health: { hp: 285 },
   collision: { radius: 10 },
-  movement: { speed: 48, isAir: false },
+  movement: { speed: 48, isAir: false, formationSlots: [-1, 1] },
   combat: {
     damage: 48,
     range: 155,
