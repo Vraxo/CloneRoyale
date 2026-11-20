@@ -6,10 +6,11 @@ export interface SpellCardDefinition extends CardDefinitionBase {
   effect: {
     damage: number;
     radius: number;
-    projectile: {
+    projectile?: {
       style: "fireball" | "arrows";
       duration: number;
     };
+    stunDuration?: number;
   };
   audio?: {
     launch?: AudioEvent;
