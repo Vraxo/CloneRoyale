@@ -12,6 +12,7 @@ import { createArenaView } from "./arena/arenaView";
 import { WorldViewport, HUD_HEIGHT } from "./arena/worldViewport";
 import { BattleHud } from "./hud/battleHud";
 import { WORLD_HEIGHT, WORLD_WIDTH } from "./arena/arenaView";
+import { ThreeBattleScene } from "../render3d/threeBattleScene";
 
 export class ArenaRenderer {
   public readonly app = new Application();
@@ -32,19 +33,29 @@ export class ArenaRenderer {
   private readonly effectViews = new Map<number, EffectView>();
   private viewport: WorldViewport | null = null;
   private initialized = false;
+  private threeScene: ThreeBattleScene | null = null;
 
   public async initialize(host: HTMLElement): Promise<void> {
     await this.hud.loadCardArt();
+    if (new URLSearchParams(window.location.search).get("renderer") !== "2d") {
+      this.threeScene = new ThreeBattleScene(host);
+      this.arena.visible = false;
+    }
 
     await this.app.init({
       resizeTo: host,
       background: "#0b1e38",
+      backgroundAlpha: this.threeScene ? 0 : 1,
       antialias: true,
       autoDensity: true,
       resolution: Math.min(window.devicePixelRatio || 1, 2)
     });
 
-    host.replaceChildren(this.app.canvas);
+    this.app.canvas.style.position = "absolute";
+    this.app.canvas.style.inset = "0";
+    this.app.canvas.style.zIndex = "1";
+    this.app.canvas.style.background = "transparent";
+    host.replaceChildren(...(this.threeScene ? [this.threeScene.canvas, this.app.canvas] : [this.app.canvas]));
     this.entities.sortableChildren = true;
     this.world.addChild(
       this.arena,
@@ -337,7 +348,10 @@ export class ArenaRenderer {
     if (!this.initialized) return;
     this.viewport?.fit();
 
-    synchronizeViews(
+    if (this.threeScene) {
+      this.threeScene.render(state);
+    } else {
+      synchronizeViews(
       state.towers,
       this.towerViews,
       this.entities,
@@ -345,6 +359,7 @@ export class ArenaRenderer {
       (view, tower) => view.update(tower),
       (tower) => tower.y
     );
+    }
 
     synchronizeViews(
       state.units,
@@ -385,6 +400,8 @@ export class ArenaRenderer {
     this.towerViews.clear();
     this.projectileViews.clear();
     this.effectViews.clear();
+    this.threeScene?.destroy();
+    this.threeScene = null;
     this.app.destroy(true);
   }
 }
