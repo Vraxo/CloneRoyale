@@ -7,7 +7,7 @@ export function updateTowers(state: GameState, dt: number): void {
     if (tower.hp <= 0) continue;
 
     if ((tower.stunRemaining ?? 0) > 0) {
-      tower.stunRemaining = Math.max(0, tower.stunRemaining - dt);
+      tower.stunRemaining = Math.max(0, (tower.stunRemaining ?? 0) - dt);
       continue;
     }
 
