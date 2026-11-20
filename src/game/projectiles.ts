@@ -36,7 +36,7 @@ function applySplash(state: GameState, projectile: Projectile, x: number, y: num
   const spell = projectile.style === "fireball" || projectile.style === "arrows";
 
   for (const unit of state.units) {
-    if (unit.side === projectile.side || unit.hp <= 0) continue;
+    if (unit.side === projectile.side || unit.health.hp <= 0) continue;
     if ((unit.deployment.appearanceDelay) > 0) continue;
     if (Math.hypot(unit.x - x, unit.y - y) <= projectile.splashRadius + unit.radius) {
       damageTarget(state, unit.id, projectile.damage);
@@ -83,7 +83,7 @@ export function updateProjectiles(state: GameState, dt: number): void {
       const unitTarget = state.units.find((unit) => unit.id === projectile.targetId);
       const towerTarget = state.towers.find((tower) => tower.id === projectile.targetId);
 
-      if (unitTarget && unitTarget.hp > projectile.damage) {
+      if (unitTarget && unitTarget.health.hp > projectile.damage) {
         state.audioEvents.push("projectile-impact");
       } else if (towerTarget && towerTarget.hp > projectile.damage) {
         state.audioEvents.push("tower-hit");
