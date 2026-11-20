@@ -211,3 +211,20 @@ test("lane targeting returns null when neither its princess tower nor the king r
 
   assert.equal(findEnemyTower(state, unit), null);
 });
+
+test("lane targeting keeps its princess tower when the king is absent", () => {
+  const state = createGame();
+  const unit = makeTroop(203, "blue", 135, 800);
+  const kingIndex = state.towers.findIndex((tower) =>
+    tower.side === "red" && tower.kind === "king"
+  );
+  const princess = state.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+
+  assert.ok(kingIndex >= 0);
+  assert.ok(princess);
+  state.towers.splice(kingIndex, 1);
+
+  assert.equal(findEnemyTower(state, unit), princess);
+});
