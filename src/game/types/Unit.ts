@@ -78,7 +78,8 @@ export interface UnitPresentation {
 export interface Unit
   extends UnitIdentity,
     UnitTransform,
-    UnitCombat {\n  lifetime: UnitLifetime;
+    UnitCombat {
+  lifetime: UnitLifetime;
   targeting: UnitTargeting;
   collision: UnitCollision;
   movement: UnitMovement;
