@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Unit } from "../../game/types";
+import type { DeepReadonly, Unit } from "../../game/types";
 import { UnitView } from "../../battle/render/entities/unitView";
 
 export class BabyDragonView extends UnitView {
@@ -7,7 +7,7 @@ export class BabyDragonView extends UnitView {
   private readonly rightWing = new Container();
   private readonly tail = new Graphics();
 
-  public constructor(unit: Unit) {
+  public constructor(unit: DeepReadonly<Unit>) {
     super(unit);
 
     const leftWingShape = new Graphics();
@@ -37,7 +37,7 @@ export class BabyDragonView extends UnitView {
     this.body.addChild(this.tail, this.leftWing, this.rightWing, bodyShape, head);
   }
 
-  public update(unit: Unit, time: number): void {
+  public update(unit: DeepReadonly<Unit>, time: number): void {
     this.updateCommon(unit, time);
     this.body.rotation = unit.facing + Math.PI / 2;
     this.body.y = Math.sin(time * 4 + unit.animationOffset) * 2.6;

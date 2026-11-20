@@ -1,5 +1,5 @@
 import { ColorMatrixFilter, Container, Graphics } from "pixi.js";
-import type { Unit } from "../../../game/types";
+import type { DeepReadonly, Unit } from "../../../game/types";
 
 export abstract class UnitView {
   public readonly id: number;
@@ -13,7 +13,7 @@ export abstract class UnitView {
   private previousHp: number;
   private damageFlashUntil = 0;
 
-  protected constructor(unit: Unit) {
+  protected constructor(unit: DeepReadonly<Unit>) {
     this.id = unit.id;
     this.previousHp = unit.hp;
     this.damageFlash.brightness(2.1, false);
@@ -33,13 +33,13 @@ export abstract class UnitView {
     this.container.addChild(this.shadow, this.body, this.healthBar, this.ownershipMarker);
   }
 
-  public abstract update(unit: Unit, time: number): void;
+  public abstract update(unit: DeepReadonly<Unit>, time: number): void;
 
   public destroy(): void {
     this.container.destroy({ children: true });
   }
 
-  protected updateCommon(unit: Unit, time: number): void {
+  protected updateCommon(unit: DeepReadonly<Unit>, time: number): void {
     if (unit.hp < this.previousHp) {
       this.damageFlashUntil = time + 0.12;
     }

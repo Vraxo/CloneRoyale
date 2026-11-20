@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Unit } from "../../game/types";
+import type { DeepReadonly, Unit } from "../../game/types";
 import { UnitView } from "../../battle/render/entities/unitView";
 
 const ATTACK_ANIMATION_DURATION = 0.32;
@@ -9,7 +9,7 @@ export class CannonView extends UnitView {
   private readonly muzzleFlash = new Graphics();
   private readonly recoilSmoke = new Graphics();
 
-  public constructor(unit: Unit) {
+  public constructor(unit: DeepReadonly<Unit>) {
     super(unit);
 
     const base = new Graphics();
@@ -78,7 +78,7 @@ export class CannonView extends UnitView {
     this.body.addChild(base, this.barrel);
   }
 
-  public update(unit: Unit, time: number): void {
+  public update(unit: DeepReadonly<Unit>, time: number): void {
     this.updateCommon(unit, time);
 
     this.body.rotation = unit.facing + Math.PI / 2;

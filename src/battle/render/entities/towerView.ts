@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import type { Tower } from "../../../game/types";
+import type { DeepReadonly, Tower } from "../../../game/types";
 import { ARENA_TILE_SIZE } from "../../../game/state";
 
 export class TowerView {
@@ -8,7 +8,7 @@ export class TowerView {
 
   private readonly health = new Graphics();
 
-  public constructor(tower: Tower) {
+  public constructor(tower: DeepReadonly<Tower>) {
     this.id = tower.id;
 
     const teamColor = tower.side === "blue" ? 0x4b91d0 : 0xc9665d;
@@ -26,7 +26,7 @@ export class TowerView {
     this.container.addChild(body, this.health);
   }
 
-  public update(tower: Tower): void {
+  public update(tower: DeepReadonly<Tower>): void {
     const size = tower.kind === "king" ? 2 * 30 : 1.5 * 30;
     const ratio = Math.max(0, Math.min(1, tower.hp / tower.maxHp));
 

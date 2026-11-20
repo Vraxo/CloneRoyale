@@ -1,5 +1,5 @@
 import { Application, Container, Graphics } from "pixi.js";
-import type { CardId, GameState, Side, Unit } from "../../game/types";
+import type { CardId, ReadonlyGameState, Side, Unit } from "../../game/types";
 import { cardById } from "../../game/cards";
 import { getGroundDeploymentZones } from "../../game/placement";
 import { EffectView } from "./entities/effectView";
@@ -77,7 +77,7 @@ export class ArenaRenderer {
   }
 
   public setDeploymentArea(
-    state: GameState,
+    state: ReadonlyGameState,
     side: Side,
     cardId: CardId | null
   ): void {
@@ -141,7 +141,7 @@ export class ArenaRenderer {
   }
 
   public updateBattleHud(
-    state: GameState,
+    state: ReadonlyGameState,
     selectedCard: CardId | null,
     message: string,
     side: Side = "blue"
@@ -331,7 +331,7 @@ export class ArenaRenderer {
     );
   }
 
-  public render(state: GameState): void {
+  public render(state: ReadonlyGameState): void {
     if (!this.initialized) return;
     this.viewport?.fit();
 

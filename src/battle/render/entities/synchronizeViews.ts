@@ -8,7 +8,7 @@ export interface EntityView<T> {
 }
 
 export function synchronizeViews<T extends { id: number }, V extends EntityView<T>>(
-  entities: T[],
+  entities: readonly T[],
   views: Map<number, V>,
   layer: Container,
   create: (entity: T) => V,
