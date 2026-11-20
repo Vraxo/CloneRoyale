@@ -57,3 +57,24 @@ test("nonlethal unit damage does not trigger death audio", () => {
   assert.equal(game.effects.length, 1);
   assert.equal(unit.presentation.attackAnim, 0.09);
 });
+
+
+test("destroying a princess tower awards a crown and activates its king tower", () => {
+  const game = createGame();
+  const princess = game.towers.find((tower) =>
+    tower.side === "red" && tower.kind === "princess" && tower.lane === "left"
+  );
+  const king = game.towers.find((tower) => tower.side === "red" && tower.kind === "king");
+  assert.ok(princess);
+  assert.ok(king);
+  princess.hp = 50;
+
+  damageTarget(game, princess.id, 50);
+
+  assert.equal(princess.hp, 0);
+  assert.equal(king.activated, true);
+  assert.ok(game.events.some((event) => event.includes("Red princess tower destroyed")));
+  assert.ok(game.audioEvents.includes("tower-destroyed"));
+  assert.ok(game.audioEvents.includes("crown-earned"));
+  assert.ok(game.audioEvents.includes("king-activation"));
+});
